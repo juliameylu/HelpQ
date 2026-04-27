@@ -1,266 +1,328 @@
-# Software Requirements Document (SRD)
-## CacheMeOutside
+# CacheMeOutside
 
-**Document Version:** 1.0  
-**Date Created:** April 15, 2026  
-**Last Updated:** April 15, 2026  
+## Software Requirements Specification (SRS)
+
+**Instructor:** Lara Nichols-Brown  
+**Term:** Spring 2026  
+**Section:** [Section Number]  
 **Status:** Draft  
-**Author(s):** [Your Name]
+**Last Updated:** April 27, 2026
+
+## The Engineering Team
+
+- Student A: [Name] - [Role, e.g., App Architect]
+- Student B: [Name] - [Role, e.g., API Developer]
+- Student C: [Name] - [Role, e.g., Scrum Master]
+
+## Project Assets
+
+- GitHub: <https://github.com/juliameylu/CacheMeOutside>
+- Deployment: [Link to Live Site]
+
+## Document History
+
+| Last Date Changed | Who    | What Was Changed                                           |
+| ----------------- | ------ | ---------------------------------------------------------- |
+| April 27, 2026    | [Name] | Converted SRD into SRS template format for CacheMeOutside. |
+
+---
+
+## Table of Contents
+
+- 1. Introduction
+- 2. User Stories
+- 3. Functional Requirements
+- 4. Non-Functional Requirements
+- 5. System Architecture
+- 6. User Interface (UI)
+- 7. Data Requirements
+- 8. Traceability Matrix
+- 9. Appendices
+- 10. AI Usage & Disclosure
 
 ---
 
 ## 1. Introduction
 
-### 1.1 Purpose
-[Describe the purpose of this SRD document and what problem CacheMeOutside solves]
+### 1.1 Project Purpose
 
-### 1.2 Scope
-[Define what is included and excluded from the scope of this project]
+CacheMeOutside is a live office hours help queue platform. It helps instructors,
+teaching assistants, tutors, or other session hosts manage student help requests
+in an organized realtime queue.
 
-### 1.3 Intended Audience
-[Identify who will use this document - e.g., developers, stakeholders, instructors]
+The project solves the problem of chaotic office hours where students do not
+know who is next, hosts lose track of questions, and similar questions are
+handled separately even when they could be grouped.
 
-### 1.4 Document Organization
-This document is organized into the following sections:
-- Introduction and Overview
-- Functional Requirements
-- Non-Functional Requirements
-- Use Cases
-- System Constraints
-- Acceptance Criteria
-- Glossary
+### 1.2 Intended Audience
+
+The intended users and stakeholders are:
+
+- Students who need help during office hours or study sessions.
+- Hosts such as professors, teaching assistants, tutors, or peer mentors.
+- Course staff who want a clearer view of common question topics.
+- Developers on the CacheMeOutside team.
+- The course instructor evaluating the project.
+
+### 1.3 Project Scope
+
+The scope of this project is to build a web-based office hours queue system
+where:
+
+- A host can create a live help session.
+- Students can join a session with a code or QR link.
+- Students can submit their name and question.
+- The system stores sessions and queue entries persistently.
+- The queue updates live for hosts and students.
+- Hosts can view and manage queue entries.
+- The system may suggest duplicate or similar questions for host review.
+
+Out of scope for the first version:
+
+- Full video conferencing.
+- Deep integrations with Zoom, Canvas, Slack, Discord, or Spotify.
+- Automatic AI merging without host approval.
+- Production-grade institutional authentication unless added later.
 
 ---
 
-## 2. Overall Description
+## 2. User Stories
 
-### 2.1 Product Overview
-[Provide a high-level description of the CacheMeOutside system]
+User stories follow the format: "As a [Type of User], I want to [Action] so that
+[Value/Benefit]."
 
-### 2.2 Product Perspective
-[Describe how this system fits into a larger context, if applicable]
-
-### 2.3 Product Features (Summary)
-- Feature 1: [Description]
-- Feature 2: [Description]
-- Feature 3: [Description]
-
-### 2.4 User Classes and Characteristics
-[Describe the different types of users and their characteristics]
-
-| User Class | Characteristics | Primary Goals |
-|-----------|-----------------|---------------|
-| [User Type 1] | [Description] | [Goals] |
-| [User Type 2] | [Description] | [Goals] |
-
-### 2.5 Operating Environment
-[Describe the hardware and software environment in which the system will operate]
-
-**Hardware Requirements:** [e.g., minimum CPU, RAM, storage]  
-**Software Requirements:** [e.g., OS, runtime, frameworks]  
-**Network Requirements:** [If applicable]
-
-### 2.6 Design and Implementation Constraints
-[List any constraints that affect how the system must be designed or implemented]
+| ID    | Requirement                                                                                                             | Priority |
+| ----- | ----------------------------------------------------------------------------------------------------------------------- | -------- |
+| US-01 | As a host, I want to create a session so that students can join my office hours queue.                                  | 1        |
+| US-02 | As a student, I want to join a session with a code or QR link so that I can enter the correct help queue.               | 1        |
+| US-03 | As a student, I want to submit my name and question so that the host knows what I need help with.                       | 1        |
+| US-04 | As a student, I want to view the live queue so that I know my place in line.                                            | 1        |
+| US-05 | As a host, I want to view and manage the live queue so that I can help students in an organized order.                  | 1        |
+| US-06 | As a host, I want to mark a queue entry as active, complete, or skipped so that the queue status stays accurate.        | 2        |
+| US-07 | As a host, I want to see similar or duplicate questions grouped so that I can answer repeated questions efficiently.    | 3        |
+| US-08 | As a developer, I want clear frontend and backend setup instructions so that the team can run the project consistently. | 1        |
 
 ---
 
 ## 3. Functional Requirements
 
-### 3.1 Core Features
+The system shall:
 
-#### FR-1: [Feature Name]
-- **Description:** [What the feature does]
-- **Actor(s):** [Who interacts with this feature]
-- **Preconditions:** [What must be true before this feature executes]
-- **Steps:**
-  1. [Step 1]
-  2. [Step 2]
-  3. [Step 3]
-- **Postconditions:** [What will be true after execution]
-- **Alternate Flows:** [Any alternative paths]
-
-#### FR-2: [Feature Name]
-- **Description:** [What the feature does]
-- **Actor(s):** [Who interacts with this feature]
-- **Preconditions:** [What must be true before this feature executes]
-- **Steps:**
-  1. [Step 1]
-  2. [Step 2]
-- **Postconditions:** [What will be true after execution]
-
-#### FR-3: [Additional Features]
-[Follow the same format above]
-
-### 3.2 User Interface Requirements
-[Describe UI mockups or wireframe requirements, if applicable]
-
-### 3.3 Data Requirements
-[Describe what data the system must manage, store, or manipulate]
+| ID    | Requirement                                                                                    | Priority |
+| ----- | ---------------------------------------------------------------------------------------------- | -------- |
+| FR-01 | Allow a host to create a session with a unique join code.                                      | 1        |
+| FR-02 | Allow a student to join an active session by entering a valid session code.                    | 1        |
+| FR-03 | Allow a student to submit a queue request containing at least a name and question.             | 1        |
+| FR-04 | Store sessions and queue requests in PostgreSQL.                                               | 1        |
+| FR-05 | Return the current ordered queue for a session.                                                | 1        |
+| FR-06 | Display the student's current position in the queue.                                           | 1        |
+| FR-07 | Allow the host to update queue entry status, including waiting, active, complete, and skipped. | 2        |
+| FR-08 | Send live queue updates to connected clients using Socket.IO.                                  | 2        |
+| FR-09 | Validate required form fields before creating a queue entry.                                   | 1        |
+| FR-10 | Show useful success and error messages after queue actions.                                    | 2        |
+| FR-11 | Suggest similar or duplicate questions for host review.                                        | 3        |
+| FR-12 | Provide local development documentation for running the frontend and backend.                  | 1        |
 
 ---
 
 ## 4. Non-Functional Requirements
 
-### 4.1 Performance Requirements
-- **Response Time:** [e.g., API responses within 200ms]
-- **Throughput:** [e.g., handle 1000 concurrent users]
-- **Load Handling:** [e.g., system behavior under peak load]
+### 4.1 Data Integrity & Security
 
-### 4.2 Security Requirements
-- **Authentication:** [Required authentication mechanism]
-- **Authorization:** [Access control requirements]
-- **Data Protection:** [Encryption, privacy requirements]
+- The system shall validate session codes before allowing students to join a
+  queue.
+- The system shall validate required fields before saving queue entries.
+- The system shall store database credentials in environment variables, not in
+  source code.
+- The system shall prevent students from modifying host-only queue actions.
+- The system shall handle invalid input and failed database operations without
+  crashing.
 
-### 4.3 Reliability Requirements
-- **Availability:** [e.g., 99.9% uptime]
-- **Recovery Time Objective (RTO):** [How quickly system must recover]
-- **Recovery Point Objective (RPO):** [Maximum acceptable data loss]
+### 4.2 Performance & Usability
 
-### 4.4 Usability Requirements
-- **User Training:** [Training needs, if any]
-- **Accessibility:** [WCAG compliance, language support]
-- **Documentation:** [Help systems, user manuals]
+- The system shall provide realtime queue updates quickly enough for users to
+  understand queue changes without manually refreshing.
+- The system shall support multiple students connected to the same session at
+  once.
+- The student join form shall be simple and usable on desktop and mobile.
+- The host queue view shall make active, waiting, complete, and skipped entries
+  easy to distinguish.
+- The application shall use clear labels and readable layouts.
 
-### 4.5 Portability and Compatibility
-- **Supported Browsers:** [If web-based - Chrome, Firefox, Safari, Edge]
-- **Mobile Support:** [iOS, Android, responsive design]
-- **Operating Systems:** [Windows, macOS, Linux]
+### 4.3 Maintainability
 
-### 4.6 Maintainability and Supportability
-- **Code Quality Standards:** [e.g., follows style guide X]
-- **Documentation Standards:** [Required documentation level]
-- **Support Requirements:** [SLA, support channels]
-
----
-
-## 5. Use Cases
-
-### Use Case 1: [Use Case Name]
-
-| Element | Description |
-|---------|-------------|
-| **Use Case ID** | UC-001 |
-| **Actor(s)** | [Primary actor] |
-| **Preconditions** | [Initial conditions] |
-| **Main Flow** | 1. Actor does X<br/>2. System responds with Y<br/>3. Actor does Z |
-| **Alternate Flow** | [If applicable] |
-| **Postconditions** | [End state] |
-| **Business Rules** | [Any rules that apply] |
-
-### Use Case 2: [Use Case Name]
-[Follow the format above]
-
-### Use Case Diagram
-[Add a visual representation of use cases and actors, if applicable]
+- The project shall use a monorepo structure with separate frontend and backend
+  packages.
+- The project shall use Prettier for consistent formatting.
+- The frontend and backend packages shall use ESLint for JavaScript code
+  quality.
+- The repository shall include contribution instructions for team members.
 
 ---
 
-## 6. System Constraints
+## 5. System Architecture
 
-### 6.1 Technical Constraints
-[e.g., Must use specific technology stack, database, API standards]
+### 5.1 Planned Tech Stack
 
-### 6.2 Business Constraints
-[e.g., Budget, timeline, regulatory compliance]
+- Frontend: React
+- Backend: Node.js and Express
+- Database: PostgreSQL
+- Database access: `pg`
+- Realtime updates: Socket.IO
+- Styling: CSS or Tailwind
 
-### 6.3 Legal/Compliance Constraints
-[e.g., GDPR, CCPA, industry standards]
+### 5.2 REST API Endpoints
 
-### 6.4 Development Constraints
-[e.g., Team size, development methodology, course requirements]
+Planned endpoints may include:
 
----
+| Method | URL                         | Description                                     |
+| ------ | --------------------------- | ----------------------------------------------- |
+| GET    | `/api/health`               | Checks whether the backend server is running.   |
+| POST   | `/api/sessions`             | Creates a new office hours session.             |
+| GET    | `/api/sessions/:code`       | Fetches session details by join code.           |
+| GET    | `/api/sessions/:code/queue` | Fetches the current queue for a session.        |
+| POST   | `/api/sessions/:code/queue` | Adds a student help request to the queue.       |
+| PATCH  | `/api/queue/:entryId`       | Updates the status or details of a queue entry. |
+| DELETE | `/api/queue/:entryId`       | Removes or cancels a queue entry.               |
 
-## 7. Acceptance Criteria
+### 5.3 Realtime Events
 
-### 7.1 Functional Acceptance
-- [ ] All functional requirements (FR-1 through FR-N) are implemented and tested
-- [ ] All use cases complete successfully
-- [ ] System handles normal workflows without errors
-- [ ] Error handling is implemented for edge cases
+Planned Socket.IO events may include:
 
-### 7.2 Non-Functional Acceptance
-- [ ] Performance benchmarks are met
-- [ ] Security requirements are verified through testing
-- [ ] Accessibility standards are met
-- [ ] Documentation is complete and accurate
+| Event                 | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| `session:join`        | Client joins a realtime room for a session.           |
+| `queue:updated`       | Server broadcasts the latest queue state.             |
+| `queue:entry-created` | Server notifies clients that a new request was added. |
+| `queue:entry-updated` | Server notifies clients that an entry status changed. |
 
-### 7.3 Quality Acceptance
-- [ ] Code passes linting and style checks
-- [ ] Unit test coverage > [specify %]
-- [ ] Integration tests pass
-- [ ] No critical bugs remain
+### 5.4 Database Schema (PostgreSQL)
 
-### 7.4 User Acceptance
-- [ ] Users can complete key tasks without assistance
-- [ ] System behavior matches documented requirements
-- [ ] Feedback from test users is positive
+Planned tables may include:
 
----
+#### `sessions`
 
-## 8. Assumptions and Dependencies
+| Field        | Type                       | Description                              |
+| ------------ | -------------------------- | ---------------------------------------- |
+| `id`         | UUID or serial primary key | Unique session identifier.               |
+| `code`       | Text, unique               | Join code used by students.              |
+| `title`      | Text                       | Session title or course label.           |
+| `host_name`  | Text                       | Name of the session host.                |
+| `status`     | Text                       | Session status such as active or closed. |
+| `created_at` | Timestamp                  | Time the session was created.            |
 
-### 8.1 Assumptions
-- [Assumption 1: e.g., Users will have stable internet connection]
-- [Assumption 2: e.g., Database will be hosted on AWS]
-- [Assumption 3]
+#### `queue_entries`
 
-### 8.2 Dependencies
-- [Dependency on external service/system X]
-- [Dependency on framework/library Y]
-- [Dependency on team/resource Z]
+| Field          | Type                       | Description                            |
+| -------------- | -------------------------- | -------------------------------------- |
+| `id`           | UUID or serial primary key | Unique queue entry identifier.         |
+| `session_id`   | Foreign key                | Associated session.                    |
+| `student_name` | Text                       | Name entered by the student.           |
+| `question`     | Text                       | Student question or topic.             |
+| `details`      | Text, nullable             | Optional additional explanation.       |
+| `status`       | Text                       | waiting, active, complete, or skipped. |
+| `position`     | Integer                    | Queue order for the session.           |
+| `created_at`   | Timestamp                  | Time the request was submitted.        |
+| `updated_at`   | Timestamp                  | Time the request was last updated.     |
 
----
+### 5.5 UML
 
-## 9. Glossary
-
-| Term | Definition |
-|------|-----------|
-| [Term 1] | [Definition] |
-| [Term 2] | [Definition] |
-| API | Application Programming Interface |
-| SLA | Service Level Agreement |
-| RTO | Recovery Time Objective |
-| RPO | Recovery Point Objective |
-
----
-
-## 10. Appendices
-
-### 10.1 References
-- [Reference Document 1]
-- [Reference Document 2]
-- [Course Materials: CSC 307]
-
-### 10.2 Revision History
-
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | April 15, 2026 | [Your Name] | Initial document creation |
-| [Next] | [Date] | [Author] | [Changes] |
-
-### 10.3 Sign-Off
-
-**Project Manager:** _________________ Date: _________
-
-**Product Owner:** _________________ Date: _________
-
-**Technical Lead:** _________________ Date: _________
+UML diagram: [Attach diagram or link here]
 
 ---
 
-## Notes for Completion
+## 6. User Interface (UI)
 
-When filling in this template, consider:
+### 6.1 Wireframes / Mockups
 
-1. **Be Specific:** Replace all placeholder text with concrete details about your project
-2. **Use Clear Language:** Avoid jargon or explain technical terms in the glossary
-3. **Be Measurable:** Requirements should be testable and verifiable
-4. **Prioritize:** Consider marking requirements as Must-Have, Should-Have, or Nice-to-Have
-5. **Review:** Have stakeholders review and approve the SRD before development begins
-6. **Maintain:** Update this document as requirements change during development
+Planned screens:
+
+- Host landing/session creation screen.
+- Student join screen with session code input.
+- Student question submission form.
+- Student queue status screen showing position and current active request.
+- Host queue dashboard showing all entries and queue management controls.
+
+Wireframes/mockups: [Attach images or links here]
 
 ---
 
-*This is a living document and should be reviewed and updated regularly throughout the project lifecycle.*
+## 7. Data Requirements
+
+### 7.1 Persistent Data
+
+The system shall persist:
+
+- Session IDs.
+- Session join codes.
+- Session titles or labels.
+- Host names or identifiers.
+- Session status.
+- Student names.
+- Student questions.
+- Optional question details.
+- Queue entry statuses.
+- Queue order or position.
+- Creation and update timestamps.
+
+---
+
+## 8. Traceability Matrix
+
+| ID    | Requirement                                        | Line of Code |
+| ----- | -------------------------------------------------- | ------------ |
+| US-01 | Host can create a session.                         | TBD          |
+| US-02 | Student can join a session with a code or QR link. | TBD          |
+| US-03 | Student can submit name and question.              | TBD          |
+| US-04 | Student can view live queue position.              | TBD          |
+| US-05 | Host can view and manage queue entries.            | TBD          |
+| US-06 | Host can update queue entry status.                | TBD          |
+| US-07 | System can suggest similar or duplicate questions. | TBD          |
+| US-08 | Developers have local setup instructions.          | TBD          |
+
+---
+
+## 9. Appendices
+
+### 9.1 References
+
+- CSC 307 course materials.
+- GitHub repository: <https://github.com/juliameylu/CacheMeOutside>
+- React documentation.
+- Express documentation.
+- PostgreSQL documentation.
+- Socket.IO documentation.
+
+### 9.2 Glossary
+
+| Term         | Definition                                                               |
+| ------------ | ------------------------------------------------------------------------ |
+| API          | Application Programming Interface.                                       |
+| Host         | The instructor, teaching assistant, tutor, or leader managing a session. |
+| Queue Entry  | A student's submitted help request.                                      |
+| Session Code | A unique code students use to join a live office hours queue.            |
+| Socket.IO    | Library used for realtime client-server communication.                   |
+| SRS          | Software Requirements Specification.                                     |
+
+---
+
+## 10. AI Usage & Disclosure
+
+### 10.1 Model(s) Used
+
+- OpenAI Codex / ChatGPT
+
+### 10.2 Prompts Used During Coding or Documentation
+
+- "give me a step by step of what i need to do"
+- "do it all for me in cache me outside but dont commit"
+- "can u read the issues too for more context on our project"
+- "read the srs template"
+- "change the srd.md to follow this format"
+
+### 10.3 AI Usage Summary
+
+AI assistance was used to help interpret assignment instructions, set up project
+tooling, read the SRS template, and draft this SRS document. Team members are
+responsible for reviewing, editing, and confirming that all requirements match
+the final project scope.
