@@ -47,8 +47,8 @@ npm run lint
 Run one package linter:
 
 ```bash
-npm run lint --workspace @cachemeoutside/react-frontend
-npm run lint --workspace @cachemeoutside/express-backend
+npm run lint --workspace @helpq/react-frontend
+npm run lint --workspace @helpq/express-backend
 ```
 
 ## Git Workflow
