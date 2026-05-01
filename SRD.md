@@ -1,24 +1,38 @@
 # Software Requirements Document (SRD)
-## CacheMeOutside
+## HelpQ
 
-**Document Version:** 1.0  
+**Document Version:** 1.1  
 **Date Created:** April 15, 2026  
-**Last Updated:** April 15, 2026  
-**Status:** Draft  
-**Author(s):** [Your Name]
+**Last Updated:** May 1, 2026  
+**Status:** In Progress  
+**Author(s):** Jerry, Sofia, Julia, Ceya
 
 ---
 
 ## 1. Introduction
 
 ### 1.1 Purpose
-[Describe the purpose of this SRD document and what problem CacheMeOutside solves]
+This Software Requirements Document (SRD) defines the current requirements for HelpQ, a real-time office-hours queue management web application. The system helps instructors and TAs manage high-volume help sessions while giving students clear visibility into wait position and queue progress.
 
 ### 1.2 Scope
-[Define what is included and excluded from the scope of this project]
+Included in scope:
+- Session creation and management for hosts (instructors/TAs)
+- Real-time student queue join and status tracking
+- Student queue entries with name and question details
+- Queue moderation controls to reduce spam/misuse
+- Basic queue metrics (active queue size and average wait estimate)
+
+Out of scope for the current class project:
+- University SSO integration and LMS integration
+- Video call or chat tutoring features
+- Native mobile app stores (web-first responsive app only)
+- Advanced analytics dashboards beyond core sprint goals
 
 ### 1.3 Intended Audience
-[Identify who will use this document - e.g., developers, stakeholders, instructors]
+This document is intended for:
+- CSC 307 instructors and graders
+- Student development team members
+- Project stakeholders and peer reviewers
 
 ### 1.4 Document Organization
 This document is organized into the following sections:
@@ -35,33 +49,46 @@ This document is organized into the following sections:
 ## 2. Overall Description
 
 ### 2.1 Product Overview
-[Provide a high-level description of the CacheMeOutside system]
+HelpQ is a collaborative office-hours queue tool for courses with many students seeking help at once. Students join a session queue with their question, and hosts process requests in an organized, real-time workflow.
 
 ### 2.2 Product Perspective
-[Describe how this system fits into a larger context, if applicable]
+The product is a standalone web application designed as a practical alternative to informal office-hours management methods (paper sign-ups, verbal lines, or ad hoc chat messages). In this iteration, it focuses on fast queue operations and visibility for both student and host roles.
 
 ### 2.3 Product Features (Summary)
-- Feature 1: [Description]
-- Feature 2: [Description]
-- Feature 3: [Description]
+- Feature 1: Host-created office-hours sessions with join code/link
+- Feature 2: Real-time queue with live position updates
+- Feature 3: Student question submission for each queue entry
+- Feature 4: Queue controls for hosts (serve, remove, complete)
 
 ### 2.4 User Classes and Characteristics
-[Describe the different types of users and their characteristics]
+HelpQ supports two primary role types plus first-time users:
+- Students who need predictable and transparent help access
+- Hosts (TAs/Professors) who coordinate high-volume queue traffic
+- First-Time Users who need low-friction onboarding and clear UI cues
 
 | User Class | Characteristics | Primary Goals |
 |-----------|-----------------|---------------|
-| [User Type 1] | [Description] | [Goals] |
-| [User Type 2] | [Description] | [Goals] |
+| Student | Joins sessions quickly, wants visibility and fairness | Enter queue fast, track position, know when their turn is near |
+| Host (TA/Professor) | Runs office hours under time pressure | Create/manage sessions, process queue efficiently, reduce duplicate overhead |
+| First-Time User | New to the queue workflow | Understand how to join/create sessions and submit clear help requests |
 
 ### 2.5 Operating Environment
-[Describe the hardware and software environment in which the system will operate]
+HelpQ is delivered as a browser-based application.
 
-**Hardware Requirements:** [e.g., minimum CPU, RAM, storage]  
-**Software Requirements:** [e.g., OS, runtime, frameworks]  
-**Network Requirements:** [If applicable]
+**Hardware Requirements:** Any modern laptop or smartphone with internet access  
+**Software Requirements:** Modern web browser (Chrome, Firefox, Safari, Edge)  
+**Network Requirements:** Stable internet connection for real-time queue synchronization
 
 ### 2.6 Design and Implementation Constraints
-[List any constraints that affect how the system must be designed or implemented]
+- Must be feasible for a student team to implement within one academic term
+- Must use technologies approved in CSC 307 project guidelines
+- Must support concurrent queue updates from multiple users
+- Must prevent queue misuse/spam entries with practical safeguards
+- Must prioritize clear and accessible UI over advanced but risky integrations
+- Planned stack: React, Node.js + Express, PostgreSQL, Socket.IO, Tailwind CSS
+
+### 2.7 Product Vision (TE2)
+For professors, TAs, and students who struggle with chaotic high-volume office-hours sessions, **HelpQ** is a **real-time office-hours queue management web application** which **structures help requests, gives students live position visibility, and lets hosts process queues efficiently**. Unlike **informal sign-up sheets or ad hoc chat-based Q&A**, our product **provides a synchronized, role-based queue workflow with real-time updates and basic anti-spam controls**.
 
 ---
 
@@ -69,33 +96,83 @@ This document is organized into the following sections:
 
 ### 3.1 Core Features
 
-#### FR-1: [Feature Name]
-- **Description:** [What the feature does]
-- **Actor(s):** [Who interacts with this feature]
-- **Preconditions:** [What must be true before this feature executes]
+#### FR-1: Session Creation and Join
+- **Description:** Hosts create an office-hours session; students join with a session identifier.
+- **Actor(s):** Host, Student
+- **Preconditions:** Host is authenticated; session does not already exist with the same active identifier.
 - **Steps:**
-  1. [Step 1]
-  2. [Step 2]
-  3. [Step 3]
-- **Postconditions:** [What will be true after execution]
-- **Alternate Flows:** [Any alternative paths]
+  1. Host creates a session and receives a shareable join code/link.
+  2. Student enters the join code/link.
+  3. System validates session availability and admits student.
+  4. Student sees queue entry form and current queue state.
+- **Postconditions:** Active session exists and joined students are associated with it.
+- **Alternate Flows:** If session code is invalid/closed, system shows a clear error and recovery actions.
 
-#### FR-2: [Feature Name]
-- **Description:** [What the feature does]
-- **Actor(s):** [Who interacts with this feature]
-- **Preconditions:** [What must be true before this feature executes]
+#### FR-2: Queue Entry and Live Position Updates
+- **Description:** Students submit a queue entry with name and question and receive real-time position updates.
+- **Actor(s):** Student
+- **Preconditions:** Student has joined an active session.
 - **Steps:**
-  1. [Step 1]
-  2. [Step 2]
-- **Postconditions:** [What will be true after execution]
+  1. Student submits queue entry data (name + question summary).
+  2. System validates entry and inserts it at queue tail.
+  3. System broadcasts updated queue state via Socket.IO.
+  4. Student dashboard updates with current position and estimated wait.
+- **Postconditions:** Student queue entry is persisted and visible to all relevant users.
 
-#### FR-3: [Additional Features]
-[Follow the same format above]
+#### FR-3: Host Queue Moderation and Completion
+- **Description:** Hosts manage queue flow by serving, removing, or resolving entries.
+- **Actor(s):** Host
+- **Preconditions:** Host is in an active session with at least one queue entry.
+- **Steps:**
+  1. Host views ordered queue with student names and question summaries.
+  2. Host selects next student and marks entry as "in progress."
+  3. Host marks entry as complete or removes invalid/spam entries.
+  4. System broadcasts queue changes to all connected clients.
+- **Postconditions:** Queue remains consistent, up to date, and manageable during office hours.
 
-### 3.2 User Interface Requirements
+### 3.2 User Stories (TE2)
+
+Each story follows the required format and includes a designated main author.
+
+1. **Main Author: Jerry**  
+   As a host, I want to create an office-hours session so that students have a structured place to join for help.
+
+2. **Main Author: Jerry**  
+   As a host, I want to view all waiting students in order so that I can help people fairly and efficiently.
+
+3. **Main Author: Jerry**  
+   As a host, I want to mark students as in-progress or complete so that the queue always reflects the current state of office hours.
+
+4. **Main Author: Sofia**  
+   As a student, I want to join a session with a code or link so that I can enter the correct office-hours queue quickly.
+
+5. **Main Author: Sofia**  
+   As a student, I want to submit my name and question when joining the queue so that the host understands what help I need.
+
+6. **Main Author: Sofia**  
+   As a student, I want to view my current queue position in real time so that I can plan my waiting time.
+
+7. **Main Author: Julia**  
+   As a student, I want to see whether my request is waiting, in progress, or completed so that I know when to be ready.
+
+8. **Main Author: Julia**  
+   As a host, I want to remove duplicate or spam queue entries so that misuse does not disrupt office hours.
+
+9. **Main Author: Julia**  
+   As a host, I want a quick summary of active queue size so that I can estimate pace and communicate wait expectations.
+
+10. **Main Author: Ceya**  
+    As a first-time student user, I want a simple queue-entry form with clear field validation so that I can submit a valid request on the first try.
+
+11. **Main Author: Ceya**  
+    As a first-time host user, I want guided session setup prompts so that I can start office hours without confusion.
+
+12. **Main Author: Ceya**  
+    As a student, I want to receive a notification when my turn is near so that I can return to the queue view in time.
+### 3.3 User Interface Requirements
 [Describe UI mockups or wireframe requirements, if applicable]
 
-### 3.3 Data Requirements
+### 3.4 Data Requirements
 [Describe what data the system must manage, store, or manipulate]
 
 ---
@@ -103,34 +180,34 @@ This document is organized into the following sections:
 ## 4. Non-Functional Requirements
 
 ### 4.1 Performance Requirements
-- **Response Time:** [e.g., API responses within 200ms]
-- **Throughput:** [e.g., handle 1000 concurrent users]
-- **Load Handling:** [e.g., system behavior under peak load]
+- **Response Time:** 95% of API requests should respond within 500 ms under normal class-project load.
+- **Throughput:** Support at least 50 concurrent active users across all project teams/testers.
+- **Load Handling:** Graceful degradation with informative error messaging under peak testing periods.
 
 ### 4.2 Security Requirements
-- **Authentication:** [Required authentication mechanism]
-- **Authorization:** [Access control requirements]
-- **Data Protection:** [Encryption, privacy requirements]
+- **Authentication:** Users must log in before accessing session and queue management features.
+- **Authorization:** Users may only view and modify queue data for sessions they are permitted to join or host.
+- **Data Protection:** Use HTTPS in deployment and avoid storing plaintext credentials.
 
 ### 4.3 Reliability Requirements
-- **Availability:** [e.g., 99.9% uptime]
-- **Recovery Time Objective (RTO):** [How quickly system must recover]
-- **Recovery Point Objective (RPO):** [Maximum acceptable data loss]
+- **Availability:** Target 99% uptime during demo and grading windows.
+- **Recovery Time Objective (RTO):** Service restored within 2 hours after major outage.
+- **Recovery Point Objective (RPO):** Maximum 24 hours of data loss in worst-case failure.
 
 ### 4.4 Usability Requirements
-- **User Training:** [Training needs, if any]
-- **Accessibility:** [WCAG compliance, language support]
-- **Documentation:** [Help systems, user manuals]
+- **User Training:** New users should complete core onboarding within 5 minutes.
+- **Accessibility:** Follow basic WCAG-friendly practices (contrast, labels, keyboard navigation).
+- **Documentation:** Provide concise usage steps and troubleshooting notes in project README.
 
 ### 4.5 Portability and Compatibility
-- **Supported Browsers:** [If web-based - Chrome, Firefox, Safari, Edge]
-- **Mobile Support:** [iOS, Android, responsive design]
-- **Operating Systems:** [Windows, macOS, Linux]
+- **Supported Browsers:** Latest two major versions of Chrome, Firefox, Safari, and Edge.
+- **Mobile Support:** Responsive web layout for modern iOS and Android browsers.
+- **Operating Systems:** macOS, Windows, and Linux for development/testing.
 
 ### 4.6 Maintainability and Supportability
-- **Code Quality Standards:** [e.g., follows style guide X]
-- **Documentation Standards:** [Required documentation level]
-- **Support Requirements:** [SLA, support channels]
+- **Code Quality Standards:** Enforce linting, formatting, and PR review before merge.
+- **Documentation Standards:** Keep SRD and README updated with major requirement changes.
+- **Support Requirements:** Team responds to critical demo-blocking issues within 24 hours.
 
 ---
 
@@ -237,8 +314,8 @@ This document is organized into the following sections:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0 | April 15, 2026 | [Your Name] | Initial document creation |
-| [Next] | [Date] | [Author] | [Changes] |
+| 1.0 | April 15, 2026 | Team | Initial document creation |
+| 1.1 | May 1, 2026 | Jerry, Sofia, Julia, Ceya | Added TE2 product vision, 12 user stories with authors, and current functional/non-functional requirements |
 
 ### 10.3 Sign-Off
 
