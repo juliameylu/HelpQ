@@ -1,0 +1,15 @@
+{
+  "name": "cache-me-outside",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Office hours live help queue platform.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}
