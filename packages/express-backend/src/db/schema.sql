@@ -1,32 +1,33 @@
--- Sessions Table
-CREATE TABLE sessions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  host_id TEXT NOT NULL,
-  join_code VARCHAR(10) UNIQUE NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  status VARCHAR(50) DEFAULT 'active', -- active, paused, closed
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- Canonical schema now lives in supabase/migrations/20260509130149_initial_schema.sql.
+-- Keep this file aligned if you still use it for ad hoc SQL editor imports.
+
+create extension if not exists pgcrypto;
+
+create table if not exists public.sessions (
+  id uuid primary key default gen_random_uuid(),
+  host_id text not null,
+  join_code varchar(10) unique not null,
+  title varchar(255) not null,
+  description text,
+  status varchar(50) default 'active',
+  created_at timestamp default current_timestamp,
+  updated_at timestamp default current_timestamp
 );
 
--- Queue Entries Table
-CREATE TABLE queue_entries (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  session_id UUID NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  student_name VARCHAR(255) NOT NULL,
-  question TEXT NOT NULL,
-  status VARCHAR(50) DEFAULT 'waiting', -- waiting, in_progress, completed, removed
-  position INTEGER,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+create table if not exists public.queue_entries (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references public.sessions(id) on delete cascade,
+  student_name varchar(255) not null,
+  question text not null,
+  status varchar(50) default 'waiting',
+  position integer,
+  created_at timestamp default current_timestamp,
+  updated_at timestamp default current_timestamp
 );
 
--- Indexes for better query performance
-CREATE INDEX idx_sessions_host_id ON sessions(host_id);
-CREATE INDEX idx_sessions_join_code ON sessions(join_code);
-CREATE INDEX idx_queue_entries_session_id ON queue_entries(session_id);
-CREATE INDEX idx_queue_entries_status ON queue_entries(status);
+create index if not exists idx_sessions_host_id on public.sessions(host_id);
+create index if not exists idx_sessions_join_code on public.sessions(join_code);
+create index if not exists idx_queue_entries_session_id on public.queue_entries(session_id);
+create index if not exists idx_queue_entries_status on public.queue_entries(status);
 
--- Enable Real-time Replication (for Socket.IO integration)
-ALTER PUBLICATION supabase_realtime ADD TABLE sessions, queue_entries;
+alter publication supabase_realtime add table public.sessions, public.queue_entries;

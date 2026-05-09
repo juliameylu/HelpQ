@@ -46,7 +46,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
 
 1. In Supabase dashboard, go to **SQL Editor**
 2. Create a new query
-3. Copy the contents of `src/db/schema.sql`
+3. Copy the contents of `supabase/migrations/20260509130149_initial_schema.sql`
 4. Paste into the SQL Editor
 5. Click "Run"
 
@@ -63,7 +63,25 @@ For Socket.IO integration later:
 2. Enable realtime for `sessions` and `queue_entries` tables
 3. Check that `schema: public` is selected
 
-### 5. Test the Connection
+### 5. Local Supabase Development with Docker
+
+From the repo root:
+
+```bash
+npx supabase start
+```
+
+This starts the local Supabase stack from `supabase/config.toml` and applies migrations from `supabase/migrations/`.
+
+Useful commands:
+
+```bash
+npx supabase status
+npx supabase db reset
+npx supabase stop
+```
+
+### 6. Test the Backend Connection
 
 ```bash
 cd packages/express-backend
@@ -72,6 +90,11 @@ npm start
 ```
 
 Server should start without errors on port 3001.
+
+For local Supabase testing during backend development, keep hosted values in `.env` and put local overrides in `.env.local`.
+
+- `npm run dev` loads `.env` and then `.env.local`, so it targets the local Supabase stack.
+- `npm start` loads only `.env`, so it targets your hosted or shared Supabase project.
 
 ## Available API Endpoints
 
@@ -107,22 +130,27 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 ## Project Structure
 
 ```
+supabase/
+├── config.toml              # Local Supabase CLI config
+├── migrations/              # Versioned database schema
+└── seed.sql                 # Local seed data
+
 src/
 ├── config/
 │   └── supabase.js          # Supabase client initialization
 ├── services/
-│   └── db.js                 # Database service layer
+│   └── db.js               # Database service layer
 ├── routes/
-│   └── api.js               # API endpoints
+│   └── api.js              # API endpoints
 ├── db/
-│   └── schema.sql           # Database schema
-└── index.js                 # Main server file
+│   └── schema.sql          # Reference schema copy
+└── index.js                # Main server file
 ```
 
 ## Next Steps
 
 1. Add authentication middleware for API endpoints
-2. Set up Socket.IO for real-time updates
+2. Choose between Supabase Realtime and Socket.IO before adding live updates
 3. Add input validation and error handling
 4. Connect React frontend to these API endpoints
 
@@ -142,5 +170,5 @@ src/
 **Database tables not created**
 
 - Go to Supabase SQL Editor
-- Run the schema.sql script again
+- Run the migration from `supabase/migrations/20260509130149_initial_schema.sql`
 - Check for error messages in the editor
