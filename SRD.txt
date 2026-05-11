@@ -1,6 +1,6 @@
-# Software Requirements Document (SRD)
+Software Requirements Document (SRD)
 
-## HelpQ
+HelpQ
 
 | Field            | Value                     |
 | ---------------- | ------------------------- |
@@ -10,9 +10,9 @@
 | Status           | Ready for TE2 Submission  |
 | Author(s)        | Jerry, Sofia, Julia, Ceya |
 
----
+----------------------------------------
 
-## Document History
+Document History
 
 | Version | Date           | Author                    | Changes                                                                                                    |
 | ------- | -------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -20,18 +20,18 @@
 | 1.1     | May 1, 2026    | Jerry, Sofia, Julia, Ceya | Added TE2 product vision, 12 user stories with authors, and current functional/non-functional requirements |
 | 1.2     | May 1, 2026    | Jerry, Sofia, Julia, Ceya | Cleaned SRD for TE2 rubric, removed placeholders, added INVEST notes, and added team sign-off              |
 
----
+----------------------------------------
 
-## 1. Introduction
+1. Introduction
 
-### 1.1 Purpose
+1.1 Purpose
 
 This Software Requirements Document (SRD) defines the current requirements for
 HelpQ, a real-time office-hours queue management web application. The system
 helps instructors and TAs manage high-volume help sessions while giving students
 clear visibility into their wait position and queue progress.
 
-### 1.2 Scope
+1.2 Scope
 
 Included in scope:
 
@@ -49,7 +49,7 @@ Out of scope for the current class project:
 - Native mobile apps
 - Advanced analytics dashboards beyond core sprint goals
 
-### 1.3 Intended Audience
+1.3 Intended Audience
 
 This document is intended for:
 
@@ -57,11 +57,11 @@ This document is intended for:
 - Student development team members
 - Project stakeholders and peer reviewers
 
----
+----------------------------------------
 
-## 2. Product Vision
+2. Product Vision
 
-### 2.1 Vision Statement
+2.1 Vision Statement
 
 For professors, TAs, and students who struggle with chaotic high-volume
 office-hours sessions, HelpQ is a real-time office-hours queue management web
@@ -70,7 +70,7 @@ visibility, and lets hosts process queues efficiently. Unlike informal sign-up
 sheets or ad hoc chat-based Q&A, our product provides a synchronized, role-based
 queue workflow with real-time updates and basic anti-spam controls.
 
-### 2.2 Vision Template Check
+2.2 Vision Template Check
 
 | Rubric Element                   | HelpQ Response                                                                                  |
 | -------------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -82,24 +82,24 @@ queue workflow with real-time updates and basic anti-spam controls.
 | Primary competitive alternative  | Informal sign-up sheets or ad hoc chat-based Q&A                                                |
 | Primary differentiation          | Synchronized, role-based queue workflow with real-time updates and basic anti-spam controls     |
 
----
+----------------------------------------
 
-## 3. Overall Description
+3. Overall Description
 
-### 3.1 Product Overview
+3.1 Product Overview
 
 HelpQ is a collaborative office-hours queue tool for courses with many students
 seeking help at once. Students join a session queue with their question, and
 hosts process requests in an organized real-time workflow.
 
-### 3.2 Product Perspective
+3.2 Product Perspective
 
 The product is a standalone web application designed as a practical alternative
 to informal office-hours management methods such as paper sign-ups, verbal
 lines, or scattered messages. In this iteration, it focuses on fast queue
 operations and visibility for both student and host roles.
 
-### 3.3 Product Features
+3.3 Product Features
 
 - Host-created office-hours sessions with a join code or link
 - Real-time queue with live position updates
@@ -107,7 +107,7 @@ operations and visibility for both student and host roles.
 - Host queue controls to serve, complete, or remove entries
 - Basic queue status and wait information
 
-### 3.4 User Classes and Characteristics
+3.4 User Classes and Characteristics
 
 | User Class          | Characteristics                                          | Primary Goals                                                            |
 | ------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -115,7 +115,7 @@ operations and visibility for both student and host roles.
 | Host (TA/Professor) | Runs office hours under time pressure                    | Create/manage sessions, process queue efficiently, and reduce disruption |
 | First-Time User     | New to the queue workflow                                | Understand how to join/create sessions and submit clear help requests    |
 
-### 3.5 Operating Environment
+3.5 Operating Environment
 
 | Environment Area | Requirement                                                      |
 | ---------------- | ---------------------------------------------------------------- |
@@ -124,11 +124,11 @@ operations and visibility for both student and host roles.
 | Network          | Stable internet connection for real-time queue synchronization   |
 | Planned stack    | React, Node.js, Express, PostgreSQL, Socket.IO, and Tailwind CSS |
 
----
+----------------------------------------
 
-## 4. User Stories
+4. User Stories
 
-### 4.1 Story Quality and INVEST Notes
+4.1 Story Quality and INVEST Notes
 
 Each story follows the required format: "As a (type of user), I want (desired
 behavior/action) so that (benefit/justification/value)." The stories are written
@@ -144,80 +144,80 @@ to follow INVEST:
 - Testable: each story can be verified through UI behavior, API behavior, or
   acceptance checks.
 
-### 4.2 Team-Authored Stories
+4.2 Team-Authored Stories
 
-1. **Main Author: Jerry**
+1. Main Author: Jerry
 
    As a host, I want to create an office-hours session so that students have a
    structured place to join for help.
 
-2. **Main Author: Jerry**
+2. Main Author: Jerry
 
    As a host, I want to view all waiting students in order so that I can help
    people fairly and efficiently.
 
-3. **Main Author: Jerry**
+3. Main Author: Jerry
 
    As a host, I want to mark students as in-progress or complete so that the
    queue always reflects the current state of office hours.
 
-4. **Main Author: Sofia**
+4. Main Author: Sofia
 
    As a student, I want to join a session with a code or link so that I can
    enter the correct office-hours queue quickly.
 
-5. **Main Author: Sofia**
+5. Main Author: Sofia
 
    As a student, I want to submit my name and question when joining the queue so
    that the host understands what help I need.
 
-6. **Main Author: Sofia**
+6. Main Author: Sofia
 
    As a student, I want to view my current queue position in real time so that I
    can plan my waiting time.
 
-7. **Main Author: Julia**
+7. Main Author: Julia
 
    As a student, I want to see whether my request is waiting, in-progress, or
    completed so that I know when to be ready.
 
-8. **Main Author: Julia**
+8. Main Author: Julia
 
    As a host, I want to remove duplicate or spam queue entries so that misuse
    does not disrupt office hours.
 
-9. **Main Author: Julia**
+9. Main Author: Julia
 
    As a host, I want a quick summary of active queue size so that I can estimate
    pace and communicate wait expectations.
 
-10. **Main Author: Ceya**
+10. Main Author: Ceya
 
     As a first-time student user, I want a simple queue-entry form with clear
     field validation so that I can submit a valid request on the first try.
 
-11. **Main Author: Ceya**
+11. Main Author: Ceya
 
     As a first-time host user, I want guided session setup prompts so that I can
     start office hours without confusion.
 
-12. **Main Author: Ceya**
+12. Main Author: Ceya
 
     As a student, I want to receive a notification when my turn is near so that
     I can return to the queue view in time.
 
-### 4.3 Story Diversity
+4.3 Story Diversity
 
 The stories are intentionally non-overlapping. Jerry's stories focus on host
 queue management, Sofia's stories focus on the core student queue workflow,
 Julia's stories focus on queue status, moderation, and queue awareness, and
 Ceya's stories focus on first-time user usability and readiness notifications.
 
----
+----------------------------------------
 
-## 5. Functional Requirements
+5. Functional Requirements
 
-### 5.1 Session Creation and Join
+5.1 Session Creation and Join
 
 - The system shall allow a host to create an office-hours session.
 - The system shall generate a shareable join code or link for each active
@@ -227,7 +227,7 @@ Ceya's stories focus on first-time user usability and readiness notifications.
 - The system shall reject invalid or closed session codes with a clear error
   message.
 
-### 5.2 Queue Entry and Live Position Updates
+5.2 Queue Entry and Live Position Updates
 
 - The system shall allow a student to submit a queue entry with name and
   question summary.
@@ -239,7 +239,7 @@ Ceya's stories focus on first-time user usability and readiness notifications.
   status.
 - The system shall broadcast queue updates to connected clients using Socket.IO.
 
-### 5.3 Host Queue Moderation and Completion
+5.3 Host Queue Moderation and Completion
 
 - The system shall show the host an ordered queue with student names and
   question summaries.
@@ -248,7 +248,7 @@ Ceya's stories focus on first-time user usability and readiness notifications.
 - The system shall allow the host to remove duplicate, invalid, or spam entries.
 - The system shall update all connected clients after host queue changes.
 
-### 5.4 User Interface Requirements
+5.4 User Interface Requirements
 
 - The student interface shall include a join/session entry screen.
 - The student interface shall include a queue-entry form with clear validation
@@ -260,7 +260,7 @@ Ceya's stories focus on first-time user usability and readiness notifications.
   status and removal.
 - The application shall be usable on desktop and mobile browsers.
 
-### 5.5 Data Requirements
+5.5 Data Requirements
 
 The system shall store:
 
@@ -274,11 +274,11 @@ The system shall store:
 - Queue order/position
 - Created and updated timestamps
 
----
+----------------------------------------
 
-## 6. Non-Functional Requirements
+6. Non-Functional Requirements
 
-### 6.1 Performance Requirements
+6.1 Performance Requirements
 
 - 95% of API requests should respond within 500 ms under normal class-project
   load.
@@ -286,7 +286,7 @@ The system shall store:
 - The system should show informative errors if a temporary performance or
   network issue occurs.
 
-### 6.2 Security Requirements
+6.2 Security Requirements
 
 - Users must log in before accessing host session and queue management features.
 - Users may only view and modify queue data for sessions they are permitted to
@@ -294,14 +294,14 @@ The system shall store:
 - The deployment should use HTTPS.
 - The system shall not store plaintext credentials in the repository.
 
-### 6.3 Reliability Requirements
+6.3 Reliability Requirements
 
 - The system should remain available during demo and grading windows.
 - The team should restore a demo-blocking outage within 2 hours when reasonably
   possible.
 - The system should avoid data loss during normal queue operations.
 
-### 6.4 Usability Requirements
+6.4 Usability Requirements
 
 - New users should understand the core join or create-session workflow within 5
   minutes.
@@ -309,7 +309,7 @@ The system shall store:
   keyboard-accessible controls.
 - The README should provide concise usage steps and troubleshooting notes.
 
-### 6.5 Portability and Compatibility
+6.5 Portability and Compatibility
 
 - The application should support the latest two major versions of Chrome,
   Firefox, Safari, and Edge.
@@ -318,7 +318,7 @@ The system shall store:
 - Development should work on macOS, Windows, and Linux when dependencies are
   installed.
 
-### 6.6 Maintainability and Supportability
+6.6 Maintainability and Supportability
 
 - The codebase shall use linting, formatting, and pull request review before
   merge when practical.
@@ -326,11 +326,11 @@ The system shall store:
   change.
 - The team should respond to critical demo-blocking issues within 24 hours.
 
----
+----------------------------------------
 
-## 7. Use Cases
+7. Use Cases
 
-### 7.1 Use Case 1: Host Creates a Session
+7.1 Use Case 1: Host Creates a Session
 
 | Element        | Description                                                                                                         |
 | -------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -341,7 +341,7 @@ The system shall store:
 | Alternate Flow | If required details are missing, the system asks the host to complete the missing fields                            |
 | Postconditions | A new active session exists and students can join it                                                                |
 
-### 7.2 Use Case 2: Student Joins the Queue
+7.2 Use Case 2: Student Joins the Queue
 
 | Element        | Description                                                                               |
 | -------------- | ----------------------------------------------------------------------------------------- |
@@ -352,7 +352,7 @@ The system shall store:
 | Alternate Flow | If the session code is invalid or the form is incomplete, the system shows a clear error  |
 | Postconditions | A valid queue entry is saved and visible to the host                                      |
 
-### 7.3 Use Case 3: Host Processes Queue Entries
+7.3 Use Case 3: Host Processes Queue Entries
 
 | Element        | Description                                                                                            |
 | -------------- | ------------------------------------------------------------------------------------------------------ |
@@ -363,11 +363,11 @@ The system shall store:
 | Alternate Flow | If the entry is duplicate or spam, the host removes it from the queue                                  |
 | Postconditions | The queue order/status updates for the host and students                                               |
 
----
+----------------------------------------
 
-## 8. System Constraints, Assumptions, and Dependencies
+8. System Constraints, Assumptions, and Dependencies
 
-### 8.1 Technical Constraints
+8.1 Technical Constraints
 
 - The project must be feasible for a student team to implement within one
   academic term.
@@ -376,20 +376,20 @@ The system shall store:
   Tailwind CSS.
 - Real-time features depend on stable client-server connectivity.
 
-### 8.2 Business and Course Constraints
+8.2 Business and Course Constraints
 
 - The team must follow CSC 307 project expectations and deadlines.
 - Scope should stay small enough to build and demonstrate during the term.
 - Requirements may be adjusted after instructor feedback.
 
-### 8.3 Assumptions
+8.3 Assumptions
 
 - Users will usually have a stable internet connection during office hours.
 - Hosts will share the correct session code or link with students.
 - Students will provide enough information in their question summary for hosts
   to prepare.
 
-### 8.4 Dependencies
+8.4 Dependencies
 
 - React and browser APIs for the frontend user experience
 - Express and Node.js for backend APIs
@@ -397,11 +397,11 @@ The system shall store:
 - Socket.IO for real-time updates
 - Team availability for implementation, review, and testing
 
----
+----------------------------------------
 
-## 9. Acceptance Criteria
+9. Acceptance Criteria
 
-### 9.1 Functional Acceptance
+9.1 Functional Acceptance
 
 - All core session creation, queue entry, queue status, and host management
   requirements are implemented and tested.
@@ -409,7 +409,7 @@ The system shall store:
 - Hosts can view, advance, complete, and remove queue entries.
 - Users receive clear feedback for invalid session codes or incomplete forms.
 
-### 9.2 Non-Functional Acceptance
+9.2 Non-Functional Acceptance
 
 - The application remains usable during normal class-project testing.
 - Basic security expectations are met for host-only actions and credential
@@ -418,15 +418,15 @@ The system shall store:
   mobile browsers.
 - Documentation explains how to run and test the project locally.
 
-### 9.3 Quality Acceptance
+9.3 Quality Acceptance
 
 - Code passes formatting and linting checks where configured.
 - No critical bugs remain before demo submission.
 - The SRD, README, and issue board reflect the current project scope.
 
----
+----------------------------------------
 
-## 10. Glossary
+10. Glossary
 
 | Term         | Definition                                                       |
 | ------------ | ---------------------------------------------------------------- |
@@ -438,9 +438,9 @@ The system shall store:
 | Socket.IO    | Library used for real-time client-server updates                 |
 | SRD          | Software Requirements Document                                   |
 
----
+----------------------------------------
 
-## 11. TE2 Rubric Checklist
+11. TE2 Rubric Checklist
 
 | Rubric Area            | Where Addressed                                                                                |
 | ---------------------- | ---------------------------------------------------------------------------------------------- |
@@ -452,9 +452,9 @@ The system shall store:
 | Team coordination      | Section 4.2 gives each team member three stories and clearly names the main author             |
 | Overall clarity        | Placeholders were removed and sections were organized around the rubric                        |
 
----
+----------------------------------------
 
-## 12. References
+12. References
 
 - CSC 307 course materials
 - HelpQ GitHub repository
@@ -463,9 +463,9 @@ The system shall store:
 - PostgreSQL documentation
 - Socket.IO documentation
 
----
+----------------------------------------
 
-## 13. Team Sign-Off
+13. Team Sign-Off
 
 By typed sign-off, the team confirms that this SRD represents the current shared
 project vision and user stories for TE2.
@@ -477,7 +477,7 @@ project vision and user stories for TE2.
 | Julia       | Status, moderation, and queue-awareness stories | Signed electronically on May 1, 2026 |
 | Ceya        | First-time user and notification stories        | Signed electronically on May 1, 2026 |
 
----
+----------------------------------------
 
 This is a living document and should be reviewed and updated regularly
 throughout the project lifecycle.
