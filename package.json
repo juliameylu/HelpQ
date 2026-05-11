@@ -7,6 +7,10 @@
     "packages/*"
   ],
   "scripts": {
+    "dev:frontend": "npm --prefix front-end run dev",
+    "build:frontend": "npm --prefix front-end run build",
+    "lint:frontend": "npm --prefix front-end run lint",
+    "preview:frontend": "npm --prefix front-end run preview",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "devDependencies": {
