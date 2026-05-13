@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import {
+  AlertCircle,
   ArrowRight,
   CheckCircle2,
   Clock3,
@@ -8,8 +9,12 @@ import {
   HelpCircle,
   Link2,
   Loader2,
+  LockKeyhole,
+  LogIn,
+  LogOut,
+  Mail,
   MessageSquareText,
-  Radio,
+  UserPlus,
   UserRound,
   UsersRound
 } from "lucide-react";
@@ -44,15 +49,221 @@ const queueEntries = [
   }
 ];
 
-const initialForm = {
-  studentName: "",
-  sessionCode: getInitialSessionCode(),
-  question: "",
-  details: ""
+const initialLoginForm = {
+  email: "",
+  password: ""
 };
 
 function App() {
-  const [form, setForm] = useState(initialForm);
+  const [student, setStudent] = useState(null);
+
+  function handleLogin(nextStudent) {
+    setStudent(nextStudent);
+  }
+
+  function handleLogout() {
+    setStudent(null);
+  }
+
+  return student ? (
+    <SessionPage student={student} onLogout={handleLogout} />
+  ) : (
+    <LoginPage onLogin={handleLogin} />
+  );
+}
+
+function LoginPage({ onLogin }) {
+  const [form, setForm] = useState(initialLoginForm);
+  const [errors, setErrors] = useState({});
+  const [authError, setAuthError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function updateField(field, value) {
+    setForm((currentForm) => ({ ...currentForm, [field]: value }));
+    setErrors((currentErrors) => ({ ...currentErrors, [field]: "" }));
+    setAuthError("");
+  }
+
+  function validateLogin() {
+    const nextErrors = {};
+
+    if (!form.email.trim()) {
+      nextErrors.email = "Enter your student email address.";
+    }
+
+    if (!form.password) {
+      nextErrors.password = "Enter your password.";
+    }
+
+    return nextErrors;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const nextErrors = validateLogin();
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const nextStudent = await signInStudent(form);
+      onLogin(nextStudent);
+    } catch {
+      setAuthError("We could not sign you in. Check your email and password.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function fillDemoStudent() {
+    setForm({
+      email: "julia.lu@calpoly.edu",
+      password: "helpq2026"
+    });
+    setErrors({});
+    setAuthError("");
+  }
+
+  return (
+    <main className="app-shell login-shell">
+      <section className="login-page" aria-labelledby="login-title">
+        <header className="topbar login-topbar">
+          <div className="brand-lockup">
+            <span className="brand-mark">
+              <GraduationCap aria-hidden="true" size={24} />
+            </span>
+            <div>
+              <p className="brand-name">HelpQ</p>
+              <h1 id="login-title">Student login</h1>
+            </div>
+          </div>
+          <div className="live-badge" aria-label="Login is protected">
+            <LockKeyhole aria-hidden="true" size={17} />
+            Secure access
+          </div>
+        </header>
+
+        <div className="login-grid">
+          <section className="login-panel" aria-labelledby="form-title">
+            <div className="join-heading">
+              <p className="eyebrow">Welcome back</p>
+              <h2 id="form-title">Sign in to HelpQ</h2>
+            </div>
+
+            {authError ? (
+              <div className="auth-alert" role="alert">
+                <AlertCircle aria-hidden="true" size={20} />
+                <p>{authError}</p>
+              </div>
+            ) : null}
+
+            <form className="join-form" noValidate onSubmit={handleSubmit}>
+              <Field
+                error={errors.email}
+                icon={<Mail aria-hidden="true" size={18} />}
+                id="email"
+                label="Student email">
+                <input
+                  aria-describedby={errors.email ? "email-message" : undefined}
+                  aria-invalid={Boolean(errors.email)}
+                  autoComplete="email"
+                  id="email"
+                  name="email"
+                  onChange={(event) => updateField("email", event.target.value)}
+                  placeholder="julia.lu@calpoly.edu"
+                  type="email"
+                  value={form.email}
+                />
+              </Field>
+
+              <Field
+                error={errors.password}
+                icon={<LockKeyhole aria-hidden="true" size={18} />}
+                id="password"
+                label="Password">
+                <input
+                  aria-describedby={
+                    errors.password ? "password-message" : undefined
+                  }
+                  aria-invalid={Boolean(errors.password)}
+                  autoComplete="current-password"
+                  id="password"
+                  name="password"
+                  onChange={(event) =>
+                    updateField("password", event.target.value)
+                  }
+                  placeholder="Enter your password"
+                  type="password"
+                  value={form.password}
+                />
+              </Field>
+
+              <button
+                className="primary-action"
+                disabled={isSubmitting}
+                type="submit">
+                {isSubmitting ? (
+                  <>
+                    <Loader2
+                      aria-hidden="true"
+                      className="spin-icon"
+                      size={19}
+                    />
+                    Signing in
+                  </>
+                ) : (
+                  <>
+                    Sign in
+                    <LogIn aria-hidden="true" size={19} />
+                  </>
+                )}
+              </button>
+
+              <div className="login-actions">
+                <button
+                  className="text-action"
+                  onClick={fillDemoStudent}
+                  type="button">
+                  Use demo student
+                </button>
+                <button className="text-action" disabled type="button">
+                  <UserPlus aria-hidden="true" size={16} />
+                  Create account
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <aside className="login-context" aria-label="HelpQ session preview">
+            <p className="eyebrow">Next session</p>
+            <h2>{session.title}</h2>
+            <dl className="login-summary">
+              <div>
+                <dt>Time</dt>
+                <dd>{session.time}</dd>
+              </div>
+              <div>
+                <dt>Queue</dt>
+                <dd>{queueEntries.length} active requests</dd>
+              </div>
+              <div>
+                <dt>Session code</dt>
+                <dd>{session.code}</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function SessionPage({ onLogout, student }) {
+  const [form, setForm] = useState(() => createInitialJoinForm(student));
   const [errors, setErrors] = useState({});
   const [submittedEntry, setSubmittedEntry] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -141,10 +352,7 @@ function App() {
   }
 
   function resetEntry() {
-    setForm({
-      ...initialForm,
-      sessionCode: form.sessionCode.trim().toUpperCase()
-    });
+    setForm(createInitialJoinForm(student, form.sessionCode));
     setErrors({});
     setSubmittedEntry(null);
   }
@@ -162,9 +370,15 @@ function App() {
               <h1 id="page-title">Join a live help session</h1>
             </div>
           </div>
-          <div className="live-badge" aria-label="Session is open">
-            <Radio aria-hidden="true" size={17} />
-            Open now
+          <div className="session-actions">
+            <div className="student-chip">
+              <UserRound aria-hidden="true" size={17} />
+              {student.email}
+            </div>
+            <button className="icon-action" onClick={onLogout} type="button">
+              <LogOut aria-hidden="true" size={18} />
+              <span>Sign out</span>
+            </button>
           </div>
         </header>
 
@@ -443,6 +657,15 @@ function StatusPill({ status }) {
   return <span className={`status-pill ${status}`}>{label}</span>;
 }
 
+function createInitialJoinForm(student, sessionCode = getInitialSessionCode()) {
+  return {
+    studentName: student?.name || "",
+    sessionCode,
+    question: "",
+    details: ""
+  };
+}
+
 function createEntryId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -454,6 +677,30 @@ function createEntryId() {
 function getInitialSessionCode() {
   const params = new URLSearchParams(window.location.search);
   return (params.get("code") || session.code).toUpperCase();
+}
+
+function getStudentName(email) {
+  const namePart = email.trim().split("@")[0] || "Student";
+  const namePieces = namePart
+    .replace(/[._-]+/g, " ")
+    .split(" ")
+    .filter(Boolean);
+
+  return namePieces
+    .map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1))
+    .join(" ");
+}
+
+async function signInStudent(form) {
+  // TODO: replace this mock with Ceya's Supabase-backed auth flow.
+  await new Promise((resolve) => {
+    window.setTimeout(resolve, 350);
+  });
+
+  return {
+    email: form.email.trim().toLowerCase(),
+    name: getStudentName(form.email)
+  };
 }
 
 export default App;
