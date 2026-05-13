@@ -263,7 +263,7 @@ function LoginPage({ onLogin }) {
 }
 
 function SessionPage({ onLogout, student }) {
-  const [form, setForm] = useState(() => createInitialJoinForm(student));
+  const [form, setForm] = useState(() => createInitialJoinForm());
   const [errors, setErrors] = useState({});
   const [submittedEntry, setSubmittedEntry] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -307,10 +307,6 @@ function SessionPage({ onLogout, student }) {
     const nextErrors = {};
     const sessionCode = form.sessionCode.trim().toUpperCase();
 
-    if (form.studentName.trim().length < 2) {
-      nextErrors.studentName = "Enter your name before joining the queue.";
-    }
-
     if (!sessionCode) {
       nextErrors.sessionCode = "Enter the session code from your host.";
     } else if (sessionCode !== session.code) {
@@ -338,8 +334,10 @@ function SessionPage({ onLogout, student }) {
     window.setTimeout(() => {
       setSubmittedEntry({
         id: createEntryId(),
-        ...form,
+        details: form.details.trim(),
+        question: form.question.trim(),
         sessionCode: form.sessionCode.trim().toUpperCase(),
+        studentName: student.name,
         position: waitingAhead + 1,
         status: "waiting",
         submittedAt: new Intl.DateTimeFormat("en", {
@@ -352,7 +350,7 @@ function SessionPage({ onLogout, student }) {
   }
 
   function resetEntry() {
-    setForm(createInitialJoinForm(student, form.sessionCode));
+    setForm(createInitialJoinForm(form.sessionCode));
     setErrors({});
     setSubmittedEntry(null);
   }
@@ -367,13 +365,13 @@ function SessionPage({ onLogout, student }) {
             </span>
             <div>
               <p className="brand-name">HelpQ</p>
-              <h1 id="page-title">Join a live help session</h1>
+              <h1 id="page-title">{session.title}</h1>
             </div>
           </div>
           <div className="session-actions">
             <div className="student-chip">
               <UserRound aria-hidden="true" size={17} />
-              {student.email}
+              {student.name}
             </div>
             <button className="icon-action" onClick={onLogout} type="button">
               <LogOut aria-hidden="true" size={18} />
@@ -436,8 +434,16 @@ function SessionPage({ onLogout, student }) {
             ) : (
               <>
                 <div className="join-heading">
-                  <p className="eyebrow">Student entry</p>
-                  <h2 id="join-title">Enter the queue</h2>
+                  <p className="eyebrow">Queue request</p>
+                  <h2 id="join-title">Ask for help</h2>
+                </div>
+
+                <div className="identity-note" aria-label="Signed in student">
+                  <UserRound aria-hidden="true" size={18} />
+                  <div>
+                    <span>Signed in as</span>
+                    <strong>{student.name}</strong>
+                  </div>
                 </div>
 
                 <form className="join-form" noValidate onSubmit={handleSubmit}>
@@ -463,28 +469,6 @@ function SessionPage({ onLogout, student }) {
                       placeholder="CS307"
                       type="text"
                       value={form.sessionCode}
-                    />
-                  </Field>
-
-                  <Field
-                    error={errors.studentName}
-                    icon={<UserRound aria-hidden="true" size={18} />}
-                    id="studentName"
-                    label="Your name">
-                    <input
-                      aria-describedby={
-                        errors.studentName ? "studentName-message" : undefined
-                      }
-                      aria-invalid={Boolean(errors.studentName)}
-                      autoComplete="name"
-                      id="studentName"
-                      name="studentName"
-                      onChange={(event) =>
-                        updateField("studentName", event.target.value)
-                      }
-                      placeholder="Julia Lu"
-                      type="text"
-                      value={form.studentName}
                     />
                   </Field>
 
@@ -657,9 +641,8 @@ function StatusPill({ status }) {
   return <span className={`status-pill ${status}`}>{label}</span>;
 }
 
-function createInitialJoinForm(student, sessionCode = getInitialSessionCode()) {
+function createInitialJoinForm(sessionCode = getInitialSessionCode()) {
   return {
-    studentName: student?.name || "",
     sessionCode,
     question: "",
     details: ""

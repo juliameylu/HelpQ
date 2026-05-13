@@ -458,6 +458,37 @@ ol {
   margin-bottom: 22px;
 }
 
+.identity-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #c8d8cf;
+  border-radius: 8px;
+  background: #eef5ef;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.identity-note svg {
+  flex: 0 0 auto;
+  color: #154734;
+}
+
+.identity-note span,
+.identity-note strong {
+  display: block;
+}
+
+.identity-note span {
+  color: #55605d;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.identity-note strong {
+  margin-top: 2px;
+}
+
 .join-form {
   display: grid;
   gap: 16px;
