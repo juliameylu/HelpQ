@@ -1,7 +1,4 @@
--- Canonical schema now lives in supabase/migrations/20260509130149_initial_schema.sql.
--- Keep this file aligned if you still use it for ad hoc SQL editor imports.
-
-create extension if not exists pgcrypto;
+-- Add authenticated user profiles and role-based access groundwork.
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -12,33 +9,6 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
-create table if not exists public.sessions (
-  id uuid primary key default gen_random_uuid(),
-  host_id text not null,
-  join_code varchar(10) unique not null,
-  title varchar(255) not null,
-  description text,
-  status varchar(50) default 'active',
-  created_at timestamp default current_timestamp,
-  updated_at timestamp default current_timestamp
-);
-
-create table if not exists public.queue_entries (
-  id uuid primary key default gen_random_uuid(),
-  session_id uuid not null references public.sessions(id) on delete cascade,
-  student_name varchar(255) not null,
-  question text not null,
-  status varchar(50) default 'waiting',
-  position integer,
-  created_at timestamp default current_timestamp,
-  updated_at timestamp default current_timestamp
-);
-
-create index if not exists idx_sessions_host_id on public.sessions(host_id);
-create index if not exists idx_sessions_join_code on public.sessions(join_code);
-create index if not exists idx_queue_entries_session_id on public.queue_entries(session_id);
-create index if not exists idx_queue_entries_status on public.queue_entries(status);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -109,5 +79,3 @@ for update
 to authenticated
 using (auth.uid() = id)
 with check (auth.uid() = id);
-
-alter publication supabase_realtime add table public.sessions, public.queue_entries;
