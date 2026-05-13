@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -14,10 +14,10 @@ import {
   LogOut,
   Mail,
   MessageSquareText,
-  UserPlus,
   UserRound,
   UsersRound
 } from "lucide-react";
+import { isSupabaseConfigured, supabase } from "./lib/supabaseClient";
 
 const session = {
   code: "CS307",
@@ -49,83 +49,167 @@ const queueEntries = [
   }
 ];
 
-const initialLoginForm = {
-  email: "",
-  password: ""
+const initialDemoForm = {
+  demoEmail: "julia.lu@calpoly.edu"
 };
 
 function App() {
   const [student, setStudent] = useState(null);
+  const [authStatus, setAuthStatus] = useState(
+    isSupabaseConfigured ? "checking" : "signed-out"
+  );
+  const [authError, setAuthError] = useState("");
+  const [isOAuthSubmitting, setIsOAuthSubmitting] = useState(false);
 
-  function handleLogin(nextStudent) {
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    async function loadCurrentSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error) {
+        setAuthError("We could not check your current login session.");
+        setAuthStatus("signed-out");
+        return;
+      }
+
+      if (!data.session?.user) {
+        setAuthStatus("signed-out");
+        return;
+      }
+
+      await syncSupabaseStudent(data.session.user, {
+        onError: setAuthError,
+        onStatus: setAuthStatus,
+        onStudent: setStudent
+      });
+    }
+
+    loadCurrentSession();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, sessionData) => {
+      if (!sessionData?.user) {
+        setStudent(null);
+        setAuthStatus("signed-out");
+        return;
+      }
+
+      syncSupabaseStudent(sessionData.user, {
+        onError: setAuthError,
+        onStatus: setAuthStatus,
+        onStudent: setStudent
+      });
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  function handleDemoLogin(nextStudent) {
+    setAuthError("");
+    setAuthStatus("signed-in");
     setStudent(nextStudent);
   }
 
-  function handleLogout() {
+  async function handleOAuthLogin() {
+    setAuthError("");
+
+    if (!isSupabaseConfigured) {
+      setAuthError(
+        "Supabase is not configured locally yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, or use demo access."
+      );
+      return;
+    }
+
+    setIsOAuthSubmitting(true);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.href
+      }
+    });
+
+    if (error) {
+      setAuthError("We could not start Supabase login. Try again.");
+      setIsOAuthSubmitting(false);
+    }
+  }
+
+  async function handleLogout() {
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut();
+    }
+
     setStudent(null);
+    setAuthStatus("signed-out");
   }
 
   return student ? (
     <SessionPage student={student} onLogout={handleLogout} />
   ) : (
-    <LoginPage onLogin={handleLogin} />
+    <LoginPage
+      authError={authError}
+      authStatus={authStatus}
+      isOAuthSubmitting={isOAuthSubmitting}
+      onDemoLogin={handleDemoLogin}
+      onOAuthLogin={handleOAuthLogin}
+    />
   );
 }
 
-function LoginPage({ onLogin }) {
-  const [form, setForm] = useState(initialLoginForm);
+function LoginPage({
+  authError,
+  authStatus,
+  isOAuthSubmitting,
+  onDemoLogin,
+  onOAuthLogin
+}) {
+  const [form, setForm] = useState(initialDemoForm);
   const [errors, setErrors] = useState({});
-  const [authError, setAuthError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   function updateField(field, value) {
     setForm((currentForm) => ({ ...currentForm, [field]: value }));
     setErrors((currentErrors) => ({ ...currentErrors, [field]: "" }));
-    setAuthError("");
   }
 
-  function validateLogin() {
+  function validateDemoAccess() {
     const nextErrors = {};
 
-    if (!form.email.trim()) {
-      nextErrors.email = "Enter your student email address.";
-    }
-
-    if (!form.password) {
-      nextErrors.password = "Enter your password.";
+    if (!form.demoEmail.trim()) {
+      nextErrors.demoEmail = "Enter a demo student email.";
     }
 
     return nextErrors;
   }
 
-  async function handleSubmit(event) {
+  function handleDemoSubmit(event) {
     event.preventDefault();
-    const nextErrors = validateLogin();
+    const nextErrors = validateDemoAccess();
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
       return;
     }
 
-    setIsSubmitting(true);
-
-    try {
-      const nextStudent = await signInStudent(form);
-      onLogin(nextStudent);
-    } catch {
-      setAuthError("We could not sign you in. Check your email and password.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  function fillDemoStudent() {
-    setForm({
-      email: "julia.lu@calpoly.edu",
-      password: "helpq2026"
+    onDemoLogin({
+      email: form.demoEmail.trim().toLowerCase(),
+      id: "demo-student",
+      name: getStudentName(form.demoEmail),
+      role: "student"
     });
-    setErrors({});
-    setAuthError("");
   }
 
   return (
@@ -151,7 +235,7 @@ function LoginPage({ onLogin }) {
           <section className="login-panel" aria-labelledby="form-title">
             <div className="join-heading">
               <p className="eyebrow">Welcome back</p>
-              <h2 id="form-title">Sign in to HelpQ</h2>
+              <h2 id="form-title">Sign in with Supabase</h2>
             </div>
 
             {authError ? (
@@ -161,80 +245,68 @@ function LoginPage({ onLogin }) {
               </div>
             ) : null}
 
-            <form className="join-form" noValidate onSubmit={handleSubmit}>
-              <Field
-                error={errors.email}
-                icon={<Mail aria-hidden="true" size={18} />}
-                id="email"
-                label="Student email">
-                <input
-                  aria-describedby={errors.email ? "email-message" : undefined}
-                  aria-invalid={Boolean(errors.email)}
-                  autoComplete="email"
-                  id="email"
-                  name="email"
-                  onChange={(event) => updateField("email", event.target.value)}
-                  placeholder="julia.lu@calpoly.edu"
-                  type="email"
-                  value={form.email}
-                />
-              </Field>
+            {!isSupabaseConfigured ? (
+              <div className="config-note">
+                <AlertCircle aria-hidden="true" size={20} />
+                <p>
+                  Add Supabase frontend env vars to use OAuth. Demo access is
+                  available for local UI work.
+                </p>
+              </div>
+            ) : null}
 
+            <button
+              className="primary-action"
+              disabled={authStatus === "checking" || isOAuthSubmitting}
+              onClick={onOAuthLogin}
+              type="button">
+              {authStatus === "checking" || isOAuthSubmitting ? (
+                <>
+                  <Loader2 aria-hidden="true" className="spin-icon" size={19} />
+                  Checking session
+                </>
+              ) : (
+                <>
+                  Continue with Google
+                  <LogIn aria-hidden="true" size={19} />
+                </>
+              )}
+            </button>
+
+            <div className="login-divider">
+              <span>Local demo</span>
+            </div>
+
+            <form
+              className="join-form demo-login-form"
+              noValidate
+              onSubmit={handleDemoSubmit}>
               <Field
-                error={errors.password}
-                icon={<LockKeyhole aria-hidden="true" size={18} />}
-                id="password"
-                label="Password">
+                error={errors.demoEmail}
+                icon={<Mail aria-hidden="true" size={18} />}
+                id="demoEmail"
+                label="Demo student email">
                 <input
                   aria-describedby={
-                    errors.password ? "password-message" : undefined
+                    errors.demoEmail ? "demoEmail-message" : undefined
                   }
-                  aria-invalid={Boolean(errors.password)}
-                  autoComplete="current-password"
-                  id="password"
-                  name="password"
+                  aria-invalid={Boolean(errors.demoEmail)}
+                  autoComplete="email"
+                  id="demoEmail"
+                  name="demoEmail"
                   onChange={(event) =>
-                    updateField("password", event.target.value)
+                    updateField("demoEmail", event.target.value)
                   }
-                  placeholder="Enter your password"
-                  type="password"
-                  value={form.password}
+                  placeholder="julia.lu@calpoly.edu"
+                  type="email"
+                  value={form.demoEmail}
                 />
               </Field>
 
-              <button
-                className="primary-action"
-                disabled={isSubmitting}
-                type="submit">
-                {isSubmitting ? (
-                  <>
-                    <Loader2
-                      aria-hidden="true"
-                      className="spin-icon"
-                      size={19}
-                    />
-                    Signing in
-                  </>
-                ) : (
-                  <>
-                    Sign in
-                    <LogIn aria-hidden="true" size={19} />
-                  </>
-                )}
+              <button className="secondary-action" type="submit">
+                Use demo student
+                <ArrowRight aria-hidden="true" size={18} />
               </button>
-
-              <div className="login-actions">
-                <button
-                  className="text-action"
-                  onClick={fillDemoStudent}
-                  type="button">
-                  Use demo student
-                </button>
-                <button className="text-action" disabled type="button">
-                  <UserPlus aria-hidden="true" size={16} />
-                  Create account
-                </button>
-              </div>
             </form>
           </section>
 
@@ -674,15 +746,50 @@ function getStudentName(email) {
     .join(" ");
 }
 
-async function signInStudent(form) {
-  // TODO: replace this mock with Ceya's Supabase-backed auth flow.
-  await new Promise((resolve) => {
-    window.setTimeout(resolve, 350);
-  });
+async function syncSupabaseStudent(user, handlers) {
+  handlers.onStatus("checking");
+
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, email, full_name, role, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    const student = createStudentFromSupabaseUser(user, data);
+
+    if (student.role !== "student") {
+      throw new Error("Only student accounts can use the student login page.");
+    }
+
+    handlers.onStudent(student);
+    handlers.onError("");
+    handlers.onStatus("signed-in");
+  } catch {
+    handlers.onStudent(null);
+    handlers.onError("Your account profile is not ready for student access.");
+    handlers.onStatus("signed-out");
+  }
+}
+
+function createStudentFromSupabaseUser(user, profile) {
+  const metadata = user.user_metadata || {};
+  const email = profile?.email || user.email || "";
 
   return {
-    email: form.email.trim().toLowerCase(),
-    name: getStudentName(form.email)
+    avatarUrl: profile?.avatar_url || metadata.avatar_url || "",
+    email,
+    id: user.id,
+    name:
+      profile?.full_name ||
+      metadata.full_name ||
+      metadata.name ||
+      getStudentName(email),
+    role: profile?.role || metadata.role || "student"
   };
 }
 

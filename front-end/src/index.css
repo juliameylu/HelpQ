@@ -242,19 +242,30 @@ h3 {
   color: #ffffff;
 }
 
-.auth-alert {
+.auth-alert,
+.config-note {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  border: 1px solid #e2b3ad;
   border-radius: 8px;
-  background: #fff3f1;
   padding: 12px;
-  color: #9a251d;
   margin-bottom: 16px;
 }
 
-.auth-alert p {
+.auth-alert {
+  border: 1px solid #e2b3ad;
+  background: #fff3f1;
+  color: #9a251d;
+}
+
+.config-note {
+  border: 1px solid #b7cfe7;
+  background: #eef6ff;
+  color: #15599c;
+}
+
+.auth-alert p,
+.config-note p {
   margin: 0;
   line-height: 1.45;
 }
@@ -494,6 +505,10 @@ ol {
   gap: 16px;
 }
 
+.demo-login-form {
+  gap: 14px;
+}
+
 .field-group {
   display: grid;
   gap: 7px;
@@ -599,6 +614,29 @@ textarea:focus {
 
 .secondary-action:hover {
   background: #eef5ef;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #55605d;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: #d7e2dc;
+}
+
+.demo-login-form .secondary-action {
+  width: 100%;
 }
 
 .login-actions {
