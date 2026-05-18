@@ -1,7 +1,7 @@
 import {
   isValidQueueEntry,
   hasValidStudentName,
-  hasValidQuestion,
+  hasValidQuestion
 } from "./queueValidator.js";
 
 test("student name and question are valid", () => {
