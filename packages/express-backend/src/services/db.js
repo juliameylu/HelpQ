@@ -36,6 +36,18 @@ export const getSessionById = async (sessionId) => {
   return data;
 };
 
+export const getSessionByIdForHost = async (sessionId, hostId) => {
+  const { data, error } = await supabaseAdmin
+    .from("sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .eq("host_id", hostId)
+    .single();
+
+  if (error && error.code !== "PGRST116") throw error;
+  return data;
+};
+
 export const getSessionsByHostId = async (hostId) => {
   const { data, error } = await supabaseAdmin
     .from("sessions")
@@ -52,10 +64,11 @@ export const updateSessionStatus = async (sessionId, status) => {
     .from("sessions")
     .update({ status, updated_at: new Date() })
     .eq("id", sessionId)
-    .select();
+    .select()
+    .maybeSingle();
 
   if (error) throw error;
-  return data[0];
+  return data;
 };
 
 // QUEUE ENTRIES
@@ -86,20 +99,34 @@ export const updateQueueEntryStatus = async (entryId, status) => {
     .from("queue_entries")
     .update({ status, updated_at: new Date() })
     .eq("id", entryId)
-    .select();
+    .select()
+    .maybeSingle();
 
   if (error) throw error;
-  return data[0];
+  return data;
 };
 
 export const removeQueueEntry = async (entryId) => {
-  const { error } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from("queue_entries")
     .delete()
-    .eq("id", entryId);
+    .eq("id", entryId)
+    .select()
+    .maybeSingle();
 
   if (error) throw error;
-  return true;
+  return data;
+};
+
+export const getQueueEntryById = async (entryId) => {
+  const { data, error } = await supabaseAdmin
+    .from("queue_entries")
+    .select("id, session_id, status")
+    .eq("id", entryId)
+    .single();
+
+  if (error && error.code !== "PGRST116") throw error;
+  return data;
 };
 
 export const getQueuePosition = async (sessionId, entryId) => {

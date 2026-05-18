@@ -1,20 +1,27 @@
 import express from "express";
 import * as db from "../services/db.js";
+import { requireAuth } from "../middleware/auth.js";
+import {
+  QUEUE_ENTRY_STATUSES,
+  SESSION_STATUSES
+} from "../constants/statuses.js";
 
 const router = express.Router();
+
+const ownsHostId = (req) => req.params.hostId === req.user.id;
 
 // SESSIONS
 
 // Create a new session
-router.post("/sessions", async (req, res) => {
+router.post("/sessions", requireAuth, async (req, res) => {
   try {
-    const { hostId, title, description } = req.body;
+    const { title, description } = req.body;
 
-    if (!hostId || !title) {
-      return res.status(400).json({ error: "hostId and title are required" });
+    if (!title) {
+      return res.status(400).json({ error: "title is required" });
     }
 
-    const session = await db.createSession(hostId, title, description);
+    const session = await db.createSession(req.user.id, title, description);
     res.status(201).json(session);
   } catch (error) {
     console.error("Error creating session:", error);
@@ -39,12 +46,18 @@ router.get("/sessions/join/:joinCode", async (req, res) => {
 });
 
 // Get session by ID
-router.get("/sessions/:id", async (req, res) => {
+router.get("/sessions/:id", requireAuth, async (req, res) => {
   try {
-    const session = await db.getSessionById(req.params.id);
+    const session = await db.getSessionByIdForHost(req.params.id, req.user.id);
 
     if (!session) {
-      return res.status(404).json({ error: "Session not found" });
+      const existingSession = await db.getSessionById(req.params.id);
+
+      if (!existingSession) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      return res.status(403).json({ error: "Forbidden" });
     }
 
     res.json(session);
@@ -55,9 +68,13 @@ router.get("/sessions/:id", async (req, res) => {
 });
 
 // Get all sessions for a host
-router.get("/hosts/:hostId/sessions", async (req, res) => {
+router.get("/hosts/:hostId/sessions", requireAuth, async (req, res) => {
   try {
-    const sessions = await db.getSessionsByHostId(req.params.hostId);
+    if (!ownsHostId(req)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const sessions = await db.getSessionsByHostId(req.user.id);
     res.json(sessions);
   } catch (error) {
     console.error("Error fetching sessions:", error);
@@ -66,7 +83,7 @@ router.get("/hosts/:hostId/sessions", async (req, res) => {
 });
 
 // Update session status
-router.patch("/sessions/:id/status", async (req, res) => {
+router.patch("/sessions/:id/status", requireAuth, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -74,7 +91,31 @@ router.patch("/sessions/:id/status", async (req, res) => {
       return res.status(400).json({ error: "status is required" });
     }
 
+    if (!SESSION_STATUSES.includes(status)) {
+      return res.status(400).json({ error: "Invalid session status" });
+    }
+
+    const ownedSession = await db.getSessionByIdForHost(
+      req.params.id,
+      req.user.id
+    );
+
+    if (!ownedSession) {
+      const existingSession = await db.getSessionById(req.params.id);
+
+      if (!existingSession) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     const session = await db.updateSessionStatus(req.params.id, status);
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+
     res.json(session);
   } catch (error) {
     console.error("Error updating session:", error);
@@ -119,7 +160,7 @@ router.get("/sessions/:sessionId/queue", async (req, res) => {
 });
 
 // Update queue entry status
-router.patch("/queue/:entryId/status", async (req, res) => {
+router.patch("/queue/:entryId/status", requireAuth, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -127,8 +168,30 @@ router.patch("/queue/:entryId/status", async (req, res) => {
       return res.status(400).json({ error: "status is required" });
     }
 
-    const entry = await db.updateQueueEntryStatus(req.params.entryId, status);
-    res.json(entry);
+    if (!QUEUE_ENTRY_STATUSES.includes(status)) {
+      return res.status(400).json({ error: "Invalid queue entry status" });
+    }
+
+    const entry = await db.getQueueEntryById(req.params.entryId);
+
+    if (!entry) {
+      return res.status(404).json({ error: "Queue entry not found" });
+    }
+
+    const ownedSession = await db.getSessionByIdForHost(
+      entry.session_id,
+      req.user.id
+    );
+
+    if (!ownedSession) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    const updatedEntry = await db.updateQueueEntryStatus(
+      req.params.entryId,
+      status
+    );
+    res.json(updatedEntry);
   } catch (error) {
     console.error("Error updating queue entry:", error);
     res.status(500).json({ error: error.message });
@@ -136,8 +199,23 @@ router.patch("/queue/:entryId/status", async (req, res) => {
 });
 
 // Remove queue entry
-router.delete("/queue/:entryId", async (req, res) => {
+router.delete("/queue/:entryId", requireAuth, async (req, res) => {
   try {
+    const entry = await db.getQueueEntryById(req.params.entryId);
+
+    if (!entry) {
+      return res.status(404).json({ error: "Queue entry not found" });
+    }
+
+    const ownedSession = await db.getSessionByIdForHost(
+      entry.session_id,
+      req.user.id
+    );
+
+    if (!ownedSession) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     await db.removeQueueEntry(req.params.entryId);
     res.json({ success: true });
   } catch (error) {

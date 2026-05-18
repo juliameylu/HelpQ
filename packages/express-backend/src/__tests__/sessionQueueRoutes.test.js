@@ -16,7 +16,6 @@ async function createTestSession() {
 // ------------------------------------------------------------------------------
 
 describe("Session routes", () => {
-
   // POST ------------------------------------------------------------------------------
 
   test("POST /sessions creates a new session", async () => {
@@ -51,17 +50,10 @@ describe("Session routes", () => {
   });
 });
 
-
-
-
 // ------------------------------------------------------------------------------
 
-
-
-
 describe("Queue routes", () => {
-
- // POST ------------------------------------------------------------------------------ 
+  // POST ------------------------------------------------------------------------------
 
   test("POST /sessions/:sessionCode/queue adds a student to the queue", async () => {
     const session = await createTestSession();
@@ -70,7 +62,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "Student Name",
-        question: "Help",
+        question: "Help"
       });
 
     expect(response.status).toBe(201);
@@ -78,9 +70,7 @@ describe("Queue routes", () => {
     expect(response.body.queueEntry.id).toBe(1);
     expect(response.body.queueEntry.sessionId).toBe(session.id);
     expect(response.body.queueEntry.studentName).toBe("Student Name");
-    expect(response.body.queueEntry.question).toBe(
-      "Help"
-    );
+    expect(response.body.queueEntry.question).toBe("Help");
     expect(response.body.queueEntry.status).toBe("waiting");
     expect(response.body.queueEntry.joinedAt).toBeDefined();
     expect(response.body.position).toBe(1);
@@ -93,7 +83,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "  Student  ",
-        question: "  I need help.  ",
+        question: "  I need help.  "
       });
 
     expect(response.status).toBe(201);
@@ -108,7 +98,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "",
-        question: "I need help.",
+        question: "I need help."
       });
 
     expect(response.status).toBe(400);
@@ -122,7 +112,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "   ",
-        question: "I need help.",
+        question: "I need help."
       });
 
     expect(response.status).toBe(400);
@@ -136,7 +126,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "Student",
-        question: "",
+        question: ""
       });
 
     expect(response.status).toBe(400);
@@ -150,7 +140,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "Student",
-        question: "   ",
+        question: "   "
       });
 
     expect(response.status).toBe(400);
@@ -158,30 +148,28 @@ describe("Queue routes", () => {
   });
 
   test("POST /sessions/:sessionCode/queue rejects an invalid session code", async () => {
-    const response = await request(app)
-      .post("/sessions/FAKE123/queue")
-      .send({
-        studentName: "Student",
-        question: "I need help.",
-      });
+    const response = await request(app).post("/sessions/FAKE123/queue").send({
+      studentName: "Student",
+      question: "I need help."
+    });
 
     expect(response.status).toBe(404);
     expect(response.body.error).toBe("Session not found");
   });
 
-// GET ------------------------------------------------------------------------------
+  // GET ------------------------------------------------------------------------------
 
   test("GET /sessions/:sessionCode/queue returns queue entries in order", async () => {
     const session = await createTestSession();
 
     await request(app).post(`/sessions/${session.sessionCode}/queue`).send({
       studentName: "Student One",
-      question: "First question.",
+      question: "First question."
     });
 
     await request(app).post(`/sessions/${session.sessionCode}/queue`).send({
       studentName: "Student Two",
-      question: "Second question.",
+      question: "Second question."
     });
 
     const response = await request(app).get(
@@ -205,8 +193,7 @@ describe("Queue routes", () => {
     expect(response.body.error).toBe("Session not found");
   });
 
-
-// PATCH ------------------------------------------------------------------------------
+  // PATCH ------------------------------------------------------------------------------
 
   test("PATCH /queue-entries/:entryId updates a queue entry status", async () => {
     const session = await createTestSession();
@@ -215,7 +202,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "Student One",
-        question: "I need help.",
+        question: "I need help."
       });
 
     const entryId = createResponse.body.queueEntry.id;
@@ -223,7 +210,7 @@ describe("Queue routes", () => {
     const response = await request(app)
       .patch(`/queue-entries/${entryId}`)
       .send({
-        status: "helping",
+        status: "helping"
       });
 
     expect(response.status).toBe(200);
@@ -238,7 +225,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "Student Two",
-        question: "I need help.",
+        question: "I need help."
       });
 
     const entryId = createResponse.body.queueEntry.id;
@@ -246,7 +233,7 @@ describe("Queue routes", () => {
     const response = await request(app)
       .patch(`/queue-entries/${entryId}`)
       .send({
-        status: "random",
+        status: "random"
       });
 
     expect(response.status).toBe(400);
@@ -254,17 +241,15 @@ describe("Queue routes", () => {
   });
 
   test("PATCH /queue-entries/:entryId returns 404 for a missing entry", async () => {
-    const response = await request(app)
-      .patch("/queue-entries/999999")
-      .send({
-        status: "helping",
-      });
+    const response = await request(app).patch("/queue-entries/999999").send({
+      status: "helping"
+    });
 
     expect(response.status).toBe(404);
     expect(response.body.error).toBe("Queue entry not found");
   });
 
-// DELETE ------------------------------------------------------------------------------
+  // DELETE ------------------------------------------------------------------------------
 
   test("DELETE /queue-entries/:entryId removes a queue entry", async () => {
     const session = await createTestSession();
@@ -273,7 +258,7 @@ describe("Queue routes", () => {
       .post(`/sessions/${session.sessionCode}/queue`)
       .send({
         studentName: "Student Three",
-        question: "Please help!",
+        question: "Please help!"
       });
 
     const entryId = createResponse.body.queueEntry.id;
@@ -290,6 +275,4 @@ describe("Queue routes", () => {
     expect(response.status).toBe(404);
     expect(response.body.error).toBe("Queue entry not found");
   });
-
-
 });
