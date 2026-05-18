@@ -11,6 +11,11 @@ import {
   validateUuid,
   validationError
 } from "../utils/validation.js";
+import {
+  forbiddenError,
+  internalServerError,
+  notFoundError
+} from "../utils/errors.js";
 
 const router = express.Router();
 
@@ -47,7 +52,7 @@ router.post("/sessions", requireAuth, async (req, res) => {
     res.status(201).json(session);
   } catch (error) {
     console.error("Error creating session:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to create session");
   }
 });
 
@@ -65,13 +70,13 @@ router.get("/sessions/join/:joinCode", async (req, res) => {
     const session = await db.getSessionByJoinCode(joinCode);
 
     if (!session) {
-      return res.status(404).json({ error: "Session not found" });
+      return notFoundError(res, "Session");
     }
 
     res.json(session);
   } catch (error) {
     console.error("Error fetching session:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to fetch session");
   }
 });
 
@@ -90,16 +95,16 @@ router.get("/sessions/:id", requireAuth, async (req, res) => {
       const existingSession = await db.getSessionById(req.params.id);
 
       if (!existingSession) {
-        return res.status(404).json({ error: "Session not found" });
+        return notFoundError(res, "Session");
       }
 
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenError(res);
     }
 
     res.json(session);
   } catch (error) {
     console.error("Error fetching session:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to fetch session");
   }
 });
 
@@ -113,14 +118,14 @@ router.get("/hosts/:hostId/sessions", requireAuth, async (req, res) => {
     }
 
     if (!ownsHostId(req)) {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenError(res);
     }
 
     const sessions = await db.getSessionsByHostId(req.user.id);
     res.json(sessions);
   } catch (error) {
     console.error("Error fetching sessions:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to fetch sessions");
   }
 });
 
@@ -155,22 +160,22 @@ router.patch("/sessions/:id/status", requireAuth, async (req, res) => {
       const existingSession = await db.getSessionById(req.params.id);
 
       if (!existingSession) {
-        return res.status(404).json({ error: "Session not found" });
+        return notFoundError(res, "Session");
       }
 
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenError(res);
     }
 
     const session = await db.updateSessionStatus(req.params.id, normalizedStatus);
 
     if (!session) {
-      return res.status(404).json({ error: "Session not found" });
+      return notFoundError(res, "Session");
     }
 
     res.json(session);
   } catch (error) {
     console.error("Error updating session:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to update session");
   }
 });
 
@@ -215,7 +220,7 @@ router.post("/sessions/:sessionId/queue", async (req, res) => {
     res.status(201).json(entry);
   } catch (error) {
     console.error("Error adding queue entry:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to add queue entry");
   }
 });
 
@@ -232,7 +237,7 @@ router.get("/sessions/:sessionId/queue", async (req, res) => {
     res.json(queue);
   } catch (error) {
     console.error("Error fetching queue:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to fetch queue");
   }
 });
 
@@ -264,13 +269,13 @@ router.patch("/queue/:entryId/status", requireAuth, async (req, res) => {
     const entry = await db.getQueueEntryById(req.params.entryId);
 
     if (!entry) {
-      return res.status(404).json({ error: "Queue entry not found" });
+      return notFoundError(res, "Queue entry");
     }
 
     const ownedSession = await db.getSessionByIdForHost(entry.session_id, req.user.id);
 
     if (!ownedSession) {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenError(res);
     }
 
     const updatedEntry = await db.updateQueueEntryStatus(
@@ -280,7 +285,7 @@ router.patch("/queue/:entryId/status", requireAuth, async (req, res) => {
     res.json(updatedEntry);
   } catch (error) {
     console.error("Error updating queue entry:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to update queue entry");
   }
 });
 
@@ -296,20 +301,20 @@ router.delete("/queue/:entryId", requireAuth, async (req, res) => {
     const entry = await db.getQueueEntryById(req.params.entryId);
 
     if (!entry) {
-      return res.status(404).json({ error: "Queue entry not found" });
+      return notFoundError(res, "Queue entry");
     }
 
     const ownedSession = await db.getSessionByIdForHost(entry.session_id, req.user.id);
 
     if (!ownedSession) {
-      return res.status(403).json({ error: "Forbidden" });
+      return forbiddenError(res);
     }
 
     await db.removeQueueEntry(req.params.entryId);
     res.json({ success: true });
   } catch (error) {
     console.error("Error removing queue entry:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to remove queue entry");
   }
 });
 
@@ -326,7 +331,7 @@ router.get("/sessions/:sessionId/stats", async (req, res) => {
     res.json(stats);
   } catch (error) {
     console.error("Error fetching queue stats:", error);
-    res.status(500).json({ error: error.message });
+    return internalServerError(res, "Failed to fetch queue stats");
   }
 });
 

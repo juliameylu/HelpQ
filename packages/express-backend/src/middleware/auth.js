@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabase.js";
+import { internalServerError, unauthorizedError } from "../utils/errors.js";
 
 export const requireAuth = async (req, res, next) => {
   try {
@@ -6,20 +7,20 @@ export const requireAuth = async (req, res, next) => {
     const match = authorization.match(/^Bearer\s+(.+)$/i);
 
     if (!match) {
-      return res.status(401).json({ error: "Missing bearer token" });
+      return unauthorizedError(res, "Missing bearer token");
     }
 
     const token = match[1];
     const { data, error } = await supabase.auth.getUser(token);
 
     if (error || !data?.user) {
-      return res.status(401).json({ error: "Invalid token" });
+      return unauthorizedError(res, "Invalid token");
     }
 
     req.user = data.user;
     next();
   } catch (error) {
     console.error("Error verifying auth token:", error);
-    res.status(500).json({ error: "Failed to verify auth token" });
+    return internalServerError(res, "Failed to verify auth token");
   }
 };
