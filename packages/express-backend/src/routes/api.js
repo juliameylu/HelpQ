@@ -95,7 +95,10 @@ router.patch("/sessions/:id/status", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Invalid session status" });
     }
 
-    const ownedSession = await db.getSessionByIdForHost(req.params.id, req.user.id);
+    const ownedSession = await db.getSessionByIdForHost(
+      req.params.id,
+      req.user.id
+    );
 
     if (!ownedSession) {
       const existingSession = await db.getSessionById(req.params.id);
@@ -175,13 +178,19 @@ router.patch("/queue/:entryId/status", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Queue entry not found" });
     }
 
-    const ownedSession = await db.getSessionByIdForHost(entry.session_id, req.user.id);
+    const ownedSession = await db.getSessionByIdForHost(
+      entry.session_id,
+      req.user.id
+    );
 
     if (!ownedSession) {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const updatedEntry = await db.updateQueueEntryStatus(req.params.entryId, status);
+    const updatedEntry = await db.updateQueueEntryStatus(
+      req.params.entryId,
+      status
+    );
     res.json(updatedEntry);
   } catch (error) {
     console.error("Error updating queue entry:", error);
@@ -198,7 +207,10 @@ router.delete("/queue/:entryId", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Queue entry not found" });
     }
 
-    const ownedSession = await db.getSessionByIdForHost(entry.session_id, req.user.id);
+    const ownedSession = await db.getSessionByIdForHost(
+      entry.session_id,
+      req.user.id
+    );
 
     if (!ownedSession) {
       return res.status(403).json({ error: "Forbidden" });
