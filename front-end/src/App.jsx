@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  AlertCircle,
   ArrowRight,
   CheckCircle2,
   Clock3,
@@ -8,11 +9,15 @@ import {
   HelpCircle,
   Link2,
   Loader2,
+  LockKeyhole,
+  LogIn,
+  LogOut,
+  Mail,
   MessageSquareText,
-  Radio,
   UserRound,
   UsersRound
 } from "lucide-react";
+import { isSupabaseConfigured, supabase } from "./lib/supabaseClient";
 
 const session = {
   code: "CS307",
@@ -44,15 +49,293 @@ const queueEntries = [
   }
 ];
 
-const initialForm = {
-  studentName: "",
-  sessionCode: getInitialSessionCode(),
-  question: "",
-  details: ""
+const initialDemoForm = {
+  demoEmail: "julia.lu@calpoly.edu"
 };
 
 function App() {
-  const [form, setForm] = useState(initialForm);
+  const [student, setStudent] = useState(null);
+  const [authStatus, setAuthStatus] = useState(
+    isSupabaseConfigured ? "checking" : "signed-out"
+  );
+  const [authError, setAuthError] = useState("");
+  const [isOAuthSubmitting, setIsOAuthSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    async function loadCurrentSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error) {
+        setAuthError("We could not check your current login session.");
+        setAuthStatus("signed-out");
+        return;
+      }
+
+      if (!data.session?.user) {
+        setAuthStatus("signed-out");
+        return;
+      }
+
+      await syncSupabaseStudent(data.session.user, {
+        onError: setAuthError,
+        onStatus: setAuthStatus,
+        onStudent: setStudent
+      });
+    }
+
+    loadCurrentSession();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, sessionData) => {
+      if (!sessionData?.user) {
+        setStudent(null);
+        setAuthStatus("signed-out");
+        return;
+      }
+
+      syncSupabaseStudent(sessionData.user, {
+        onError: setAuthError,
+        onStatus: setAuthStatus,
+        onStudent: setStudent
+      });
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  function handleDemoLogin(nextStudent) {
+    setAuthError("");
+    setAuthStatus("signed-in");
+    setStudent(nextStudent);
+  }
+
+  async function handleOAuthLogin() {
+    setAuthError("");
+
+    if (!isSupabaseConfigured) {
+      setAuthError(
+        "Supabase is not configured locally yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, or use demo access."
+      );
+      return;
+    }
+
+    setIsOAuthSubmitting(true);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.href
+      }
+    });
+
+    if (error) {
+      setAuthError("We could not start Supabase login. Try again.");
+      setIsOAuthSubmitting(false);
+    }
+  }
+
+  async function handleLogout() {
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut();
+    }
+
+    setStudent(null);
+    setAuthStatus("signed-out");
+  }
+
+  return student ? (
+    <SessionPage student={student} onLogout={handleLogout} />
+  ) : (
+    <LoginPage
+      authError={authError}
+      authStatus={authStatus}
+      isOAuthSubmitting={isOAuthSubmitting}
+      onDemoLogin={handleDemoLogin}
+      onOAuthLogin={handleOAuthLogin}
+    />
+  );
+}
+
+function LoginPage({
+  authError,
+  authStatus,
+  isOAuthSubmitting,
+  onDemoLogin,
+  onOAuthLogin
+}) {
+  const [form, setForm] = useState(initialDemoForm);
+  const [errors, setErrors] = useState({});
+
+  function updateField(field, value) {
+    setForm((currentForm) => ({ ...currentForm, [field]: value }));
+    setErrors((currentErrors) => ({ ...currentErrors, [field]: "" }));
+  }
+
+  function validateDemoAccess() {
+    const nextErrors = {};
+
+    if (!form.demoEmail.trim()) {
+      nextErrors.demoEmail = "Enter a demo student email.";
+    }
+
+    return nextErrors;
+  }
+
+  function handleDemoSubmit(event) {
+    event.preventDefault();
+    const nextErrors = validateDemoAccess();
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
+    onDemoLogin({
+      email: form.demoEmail.trim().toLowerCase(),
+      id: "demo-student",
+      name: getStudentName(form.demoEmail),
+      role: "student"
+    });
+  }
+
+  return (
+    <main className="app-shell login-shell">
+      <section className="login-page" aria-labelledby="login-title">
+        <header className="topbar login-topbar">
+          <div className="brand-lockup">
+            <span className="brand-mark">
+              <GraduationCap aria-hidden="true" size={24} />
+            </span>
+            <div>
+              <p className="brand-name">HelpQ</p>
+              <h1 id="login-title">Student login</h1>
+            </div>
+          </div>
+          <div className="live-badge" aria-label="Login is protected">
+            <LockKeyhole aria-hidden="true" size={17} />
+            Secure access
+          </div>
+        </header>
+
+        <div className="login-grid">
+          <section className="login-panel" aria-labelledby="form-title">
+            <div className="join-heading">
+              <p className="eyebrow">Welcome back</p>
+              <h2 id="form-title">Sign in with Supabase</h2>
+            </div>
+
+            {authError ? (
+              <div className="auth-alert" role="alert">
+                <AlertCircle aria-hidden="true" size={20} />
+                <p>{authError}</p>
+              </div>
+            ) : null}
+
+            {!isSupabaseConfigured ? (
+              <div className="config-note">
+                <AlertCircle aria-hidden="true" size={20} />
+                <p>
+                  Add Supabase frontend env vars to use OAuth. Demo access is
+                  available for local UI work.
+                </p>
+              </div>
+            ) : null}
+
+            <button
+              className="primary-action"
+              disabled={authStatus === "checking" || isOAuthSubmitting}
+              onClick={onOAuthLogin}
+              type="button">
+              {authStatus === "checking" || isOAuthSubmitting ? (
+                <>
+                  <Loader2 aria-hidden="true" className="spin-icon" size={19} />
+                  Checking session
+                </>
+              ) : (
+                <>
+                  Continue with Google
+                  <LogIn aria-hidden="true" size={19} />
+                </>
+              )}
+            </button>
+
+            <div className="login-divider">
+              <span>Local demo</span>
+            </div>
+
+            <form
+              className="join-form demo-login-form"
+              noValidate
+              onSubmit={handleDemoSubmit}>
+              <Field
+                error={errors.demoEmail}
+                icon={<Mail aria-hidden="true" size={18} />}
+                id="demoEmail"
+                label="Demo student email">
+                <input
+                  aria-describedby={
+                    errors.demoEmail ? "demoEmail-message" : undefined
+                  }
+                  aria-invalid={Boolean(errors.demoEmail)}
+                  autoComplete="email"
+                  id="demoEmail"
+                  name="demoEmail"
+                  onChange={(event) =>
+                    updateField("demoEmail", event.target.value)
+                  }
+                  placeholder="julia.lu@calpoly.edu"
+                  type="email"
+                  value={form.demoEmail}
+                />
+              </Field>
+
+              <button className="secondary-action" type="submit">
+                Use demo student
+                <ArrowRight aria-hidden="true" size={18} />
+              </button>
+            </form>
+          </section>
+
+          <aside className="login-context" aria-label="HelpQ session preview">
+            <p className="eyebrow">Next session</p>
+            <h2>{session.title}</h2>
+            <dl className="login-summary">
+              <div>
+                <dt>Time</dt>
+                <dd>{session.time}</dd>
+              </div>
+              <div>
+                <dt>Queue</dt>
+                <dd>{queueEntries.length} active requests</dd>
+              </div>
+              <div>
+                <dt>Session code</dt>
+                <dd>{session.code}</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function SessionPage({ onLogout, student }) {
+  const [form, setForm] = useState(() => createInitialJoinForm());
   const [errors, setErrors] = useState({});
   const [submittedEntry, setSubmittedEntry] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,10 +379,6 @@ function App() {
     const nextErrors = {};
     const sessionCode = form.sessionCode.trim().toUpperCase();
 
-    if (form.studentName.trim().length < 2) {
-      nextErrors.studentName = "Enter your name before joining the queue.";
-    }
-
     if (!sessionCode) {
       nextErrors.sessionCode = "Enter the session code from your host.";
     } else if (sessionCode !== session.code) {
@@ -127,8 +406,10 @@ function App() {
     window.setTimeout(() => {
       setSubmittedEntry({
         id: createEntryId(),
-        ...form,
+        details: form.details.trim(),
+        question: form.question.trim(),
         sessionCode: form.sessionCode.trim().toUpperCase(),
+        studentName: student.name,
         position: waitingAhead + 1,
         status: "waiting",
         submittedAt: new Intl.DateTimeFormat("en", {
@@ -141,10 +422,7 @@ function App() {
   }
 
   function resetEntry() {
-    setForm({
-      ...initialForm,
-      sessionCode: form.sessionCode.trim().toUpperCase()
-    });
+    setForm(createInitialJoinForm(form.sessionCode));
     setErrors({});
     setSubmittedEntry(null);
   }
@@ -159,12 +437,18 @@ function App() {
             </span>
             <div>
               <p className="brand-name">HelpQ</p>
-              <h1 id="page-title">Join a live help session</h1>
+              <h1 id="page-title">{session.title}</h1>
             </div>
           </div>
-          <div className="live-badge" aria-label="Session is open">
-            <Radio aria-hidden="true" size={17} />
-            Open now
+          <div className="session-actions">
+            <div className="student-chip">
+              <UserRound aria-hidden="true" size={17} />
+              {student.name}
+            </div>
+            <button className="icon-action" onClick={onLogout} type="button">
+              <LogOut aria-hidden="true" size={18} />
+              <span>Sign out</span>
+            </button>
           </div>
         </header>
 
@@ -222,8 +506,16 @@ function App() {
             ) : (
               <>
                 <div className="join-heading">
-                  <p className="eyebrow">Student entry</p>
-                  <h2 id="join-title">Enter the queue</h2>
+                  <p className="eyebrow">Queue request</p>
+                  <h2 id="join-title">Ask for help</h2>
+                </div>
+
+                <div className="identity-note" aria-label="Signed in student">
+                  <UserRound aria-hidden="true" size={18} />
+                  <div>
+                    <span>Signed in as</span>
+                    <strong>{student.name}</strong>
+                  </div>
                 </div>
 
                 <form className="join-form" noValidate onSubmit={handleSubmit}>
@@ -249,28 +541,6 @@ function App() {
                       placeholder="CS307"
                       type="text"
                       value={form.sessionCode}
-                    />
-                  </Field>
-
-                  <Field
-                    error={errors.studentName}
-                    icon={<UserRound aria-hidden="true" size={18} />}
-                    id="studentName"
-                    label="Your name">
-                    <input
-                      aria-describedby={
-                        errors.studentName ? "studentName-message" : undefined
-                      }
-                      aria-invalid={Boolean(errors.studentName)}
-                      autoComplete="name"
-                      id="studentName"
-                      name="studentName"
-                      onChange={(event) =>
-                        updateField("studentName", event.target.value)
-                      }
-                      placeholder="Julia Lu"
-                      type="text"
-                      value={form.studentName}
                     />
                   </Field>
 
@@ -443,6 +713,14 @@ function StatusPill({ status }) {
   return <span className={`status-pill ${status}`}>{label}</span>;
 }
 
+function createInitialJoinForm(sessionCode = getInitialSessionCode()) {
+  return {
+    sessionCode,
+    question: "",
+    details: ""
+  };
+}
+
 function createEntryId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -454,6 +732,65 @@ function createEntryId() {
 function getInitialSessionCode() {
   const params = new URLSearchParams(window.location.search);
   return (params.get("code") || session.code).toUpperCase();
+}
+
+function getStudentName(email) {
+  const namePart = email.trim().split("@")[0] || "Student";
+  const namePieces = namePart
+    .replace(/[._-]+/g, " ")
+    .split(" ")
+    .filter(Boolean);
+
+  return namePieces
+    .map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1))
+    .join(" ");
+}
+
+async function syncSupabaseStudent(user, handlers) {
+  handlers.onStatus("checking");
+
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, email, full_name, role, avatar_url")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    const student = createStudentFromSupabaseUser(user, data);
+
+    if (student.role !== "student") {
+      throw new Error("Only student accounts can use the student login page.");
+    }
+
+    handlers.onStudent(student);
+    handlers.onError("");
+    handlers.onStatus("signed-in");
+  } catch {
+    handlers.onStudent(null);
+    handlers.onError("Your account profile is not ready for student access.");
+    handlers.onStatus("signed-out");
+  }
+}
+
+function createStudentFromSupabaseUser(user, profile) {
+  const metadata = user.user_metadata || {};
+  const email = profile?.email || user.email || "";
+
+  return {
+    avatarUrl: profile?.avatar_url || metadata.avatar_url || "",
+    email,
+    id: user.id,
+    name:
+      profile?.full_name ||
+      metadata.full_name ||
+      metadata.name ||
+      getStudentName(email),
+    role: profile?.role || metadata.role || "student"
+  };
 }
 
 export default App;
