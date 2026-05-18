@@ -59,6 +59,13 @@ textarea:focus-visible {
   padding: 24px 0;
 }
 
+.login-page {
+  width: min(1060px, calc(100% - 32px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -136,6 +143,131 @@ h3 {
   padding: 0 14px;
   color: #12505b;
   font-weight: 700;
+}
+
+.session-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.student-chip,
+.icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.student-chip {
+  max-width: 280px;
+  overflow: hidden;
+  border: 1px solid #c8d8cf;
+  background: #ffffff;
+  padding: 0 12px;
+  color: #55605d;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon-action {
+  border: 1px solid #154734;
+  background: #154734;
+  color: #ffffff;
+  padding: 0 12px;
+}
+
+.icon-action:hover {
+  background: #0f3527;
+}
+
+.login-grid {
+  display: grid;
+  grid-template-columns: minmax(330px, 0.85fr) minmax(280px, 0.65fr);
+  align-items: stretch;
+  gap: 22px;
+  padding: 24px 0;
+}
+
+.login-panel,
+.login-context {
+  border: 1px solid #c8d8cf;
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(21, 71, 52, 0.1);
+}
+
+.login-panel {
+  background: #fffefa;
+  padding: 24px;
+}
+
+.login-context {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #154734;
+  color: #ffffff;
+  padding: 24px;
+}
+
+.login-context .eyebrow {
+  color: #f5ce58;
+}
+
+.login-context h2 {
+  margin-bottom: 28px;
+}
+
+.login-summary {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+}
+
+.login-summary div {
+  border-left: 3px solid #f5ce58;
+  padding-left: 12px;
+}
+
+.login-summary dt {
+  color: #c8d8cf;
+}
+
+.login-summary dd {
+  color: #ffffff;
+}
+
+.auth-alert,
+.config-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.auth-alert {
+  border: 1px solid #e2b3ad;
+  background: #fff3f1;
+  color: #9a251d;
+}
+
+.config-note {
+  border: 1px solid #b7cfe7;
+  background: #eef6ff;
+  color: #15599c;
+}
+
+.auth-alert p,
+.config-note p {
+  margin: 0;
+  line-height: 1.45;
 }
 
 .page-grid {
@@ -337,9 +469,44 @@ ol {
   margin-bottom: 22px;
 }
 
+.identity-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #c8d8cf;
+  border-radius: 8px;
+  background: #eef5ef;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.identity-note svg {
+  flex: 0 0 auto;
+  color: #154734;
+}
+
+.identity-note span,
+.identity-note strong {
+  display: block;
+}
+
+.identity-note span {
+  color: #55605d;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.identity-note strong {
+  margin-top: 2px;
+}
+
 .join-form {
   display: grid;
   gap: 16px;
+}
+
+.demo-login-form {
+  gap: 14px;
 }
 
 .field-group {
@@ -449,6 +616,57 @@ textarea:focus {
   background: #eef5ef;
 }
 
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #55605d;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: #d7e2dc;
+}
+
+.demo-login-form .secondary-action {
+  width: 100%;
+}
+
+.login-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: #15599c;
+  padding: 0;
+  font-weight: 800;
+}
+
+.text-action:hover:not(:disabled) {
+  color: #0f3f70;
+  text-decoration: underline;
+}
+
+.text-action:disabled {
+  color: #7a8581;
+}
+
 .status-view {
   display: grid;
   gap: 16px;
@@ -485,7 +703,8 @@ textarea:focus {
 }
 
 @media (max-width: 900px) {
-  .page-grid {
+  .page-grid,
+  .login-grid {
     grid-template-columns: 1fr;
   }
 
@@ -495,7 +714,8 @@ textarea:focus {
 }
 
 @media (max-width: 680px) {
-  .session-page {
+  .session-page,
+  .login-page {
     width: min(100% - 24px, 1180px);
     padding: 16px 0;
   }
@@ -511,8 +731,26 @@ textarea:focus {
     width: fit-content;
   }
 
+  .session-actions,
+  .login-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .student-chip,
+  .icon-action {
+    width: 100%;
+  }
+
+  .student-chip {
+    max-width: none;
+    justify-content: flex-start;
+  }
+
   .session-panel,
-  .join-panel {
+  .join-panel,
+  .login-panel,
+  .login-context {
     padding: 18px;
   }
 
