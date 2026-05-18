@@ -10,7 +10,8 @@
     "start": "node src/index.js",
     "start:queue": "node src/server.js",
     "lint": "eslint .",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --testPathIgnorePatterns=supabaseApiIntegration.integration.js",
+    "test:integration": "cross-env LOAD_ENV_LOCAL=true NODE_OPTIONS=--experimental-vm-modules jest src/__tests__/supabaseApiIntegration.integration.js --runInBand",
     "tdd": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
   "dependencies": {
