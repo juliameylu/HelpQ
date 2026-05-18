@@ -1,14 +1,12 @@
+import { validationError } from "./errors.js";
+
+export { validationError };
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const normalizeString = (value) =>
   typeof value === "string" ? value.trim() : value;
-
-export const validationError = (res, details) =>
-  res.status(400).json({
-    error: "Validation failed",
-    details
-  });
 
 export const validateUuid = (value, fieldName) => {
   if (typeof value !== "string" || !UUID_PATTERN.test(value)) {
