@@ -3,10 +3,13 @@
 ## Project Overview
 
 ### Project Name
+
 **HelpQ**
 
 ### Description
-HelpQ is a simple office hours queue system. A host can create a session, and students can join the session by submitting their name and question.
+
+HelpQ is a simple office hours queue system. A host can create a session, and
+students can join the session by submitting their name and question.
 
 Sprint 1 focuses on the core backend queue functionality only.
 
@@ -31,12 +34,12 @@ A session represents a single office hours queue.
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| id | number | Unique internal session id |
-| sessionCode | string | Short code students use to join |
-| active | boolean | Whether the session is currently open |
-| createdAt | string (ISO date) | When the session was created |
+| Field       | Type              | Description                           |
+| ----------- | ----------------- | ------------------------------------- |
+| id          | number            | Unique internal session id            |
+| sessionCode | string            | Short code students use to join       |
+| active      | boolean           | Whether the session is currently open |
+| createdAt   | string (ISO date) | When the session was created          |
 
 ---
 
@@ -59,14 +62,14 @@ A queue entry represents one student waiting for help.
 
 ### Fields
 
-| Field | Type | Description |
-|---|---|---|
-| id | number | Unique queue entry id |
-| sessionId | number | Session this student belongs to |
-| studentName | string | Student's name |
-| question | string | What the student needs help with |
-| status | string | Current queue status |
-| joinedAt | string (ISO date) | When the student joined the queue |
+| Field       | Type              | Description                       |
+| ----------- | ----------------- | --------------------------------- |
+| id          | number            | Unique queue entry id             |
+| sessionId   | number            | Session this student belongs to   |
+| studentName | string            | Student's name                    |
+| question    | string            | What the student needs help with  |
+| status      | string            | Current queue status              |
+| joinedAt    | string (ISO date) | When the student joined the queue |
 
 ### Allowed Status Values
 

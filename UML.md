@@ -1,14 +1,16 @@
 # HelpQ — UML Diagrams
 
-Architecture and domain models for the HelpQ office-hours queue system. Render Mermaid blocks in [Mermaid Live](https://mermaid.live), GitHub, or VS Code with a Mermaid preview extension.
+Architecture and domain models for the HelpQ office-hours queue system. Render
+Mermaid blocks in [Mermaid Live](https://mermaid.live), GitHub, or VS Code with
+a Mermaid preview extension.
 
-| Need | Diagram |
-|------|---------|
-| Architecture / tech stack | [Component](#1-component-diagram-system-architecture) |
-| OOP / domain model | [Class](#2-class-diagram-domain-model) |
-| Database design | [ER](#3-entity-relationship-diagram-database) |
-| Key workflow | [Sequence — join queue](#4-sequence-diagram--student-joins-queue) |
-| Requirements / actors | [Use case](#5-use-case-diagram-actors) |
+| Need                      | Diagram                                                           |
+| ------------------------- | ----------------------------------------------------------------- |
+| Architecture / tech stack | [Component](#1-component-diagram-system-architecture)             |
+| OOP / domain model        | [Class](#2-class-diagram-domain-model)                            |
+| Database design           | [ER](#3-entity-relationship-diagram-database)                     |
+| Key workflow              | [Sequence — join queue](#4-sequence-diagram--student-joins-queue) |
+| Requirements / actors     | [Use case](#5-use-case-diagram-actors)                            |
 
 ---
 
@@ -47,7 +49,8 @@ flowchart TB
 
 ## 2. Class diagram (domain model)
 
-**Persisted in Supabase:** `Session`, `QueueEntry`. **Frontend / local only (for now):** `User`, `Course`, `Notification`.
+**Persisted in Supabase:** `Session`, `QueueEntry`. **Frontend / local only (for
+now):** `User`, `Course`, `Notification`.
 
 ```mermaid
 classDiagram
@@ -111,7 +114,8 @@ classDiagram
   note for Notification "localStorage only"
 ```
 
-**Queue entry statuses (API):** `waiting` → `in_progress` → `completed`. The UI maps `in_progress` to “helping” where needed.
+**Queue entry statuses (API):** `waiting` → `in_progress` → `completed`. The UI
+maps `in_progress` to “helping” where needed.
 
 ---
 

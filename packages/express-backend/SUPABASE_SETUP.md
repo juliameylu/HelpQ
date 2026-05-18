@@ -71,7 +71,8 @@ From the repo root:
 npx supabase start
 ```
 
-This starts the local Supabase stack from `supabase/config.toml` and applies migrations from `supabase/migrations/`.
+This starts the local Supabase stack from `supabase/config.toml` and applies
+migrations from `supabase/migrations/`.
 
 Useful commands:
 
@@ -91,10 +92,13 @@ npm start
 
 Server should start without errors on port 3001.
 
-For local Supabase testing during backend development, keep hosted values in `.env` and put local overrides in `.env.local`.
+For local Supabase testing during backend development, keep hosted values in
+`.env` and put local overrides in `.env.local`.
 
-- `npm run dev` loads `.env` and then `.env.local`, so it targets the local Supabase stack.
-- `npm start` loads only `.env`, so it targets your hosted or shared Supabase project.
+- `npm run dev` loads `.env` and then `.env.local`, so it targets the local
+  Supabase stack.
+- `npm start` loads only `.env`, so it targets your hosted or shared Supabase
+  project.
 
 ## Available API Endpoints
 
