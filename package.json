@@ -4,13 +4,17 @@
   "private": true,
   "description": "Office hours live help queue platform.",
   "workspaces": [
+    "front-end",
     "packages/*"
   ],
   "scripts": {
+    "build": "npm run build:frontend",
     "dev:frontend": "npm --prefix front-end run dev",
     "build:frontend": "npm --prefix front-end run build",
     "lint:frontend": "npm --prefix front-end run lint",
     "preview:frontend": "npm --prefix front-end run preview",
+    "lint": "npm run lint:frontend && npm -w @helpq/express-backend run lint && prettier --check './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
+    "test": "npm -w @helpq/express-backend test",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "devDependencies": {
