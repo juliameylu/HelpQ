@@ -1,6 +1,6 @@
 import express from "express";
 import * as db from "../services/db.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, requireStudent } from "../middleware/auth.js";
 import {
   QUEUE_ENTRY_STATUSES,
   SESSION_STATUSES
@@ -182,16 +182,11 @@ router.patch("/sessions/:id/status", requireAuth, async (req, res) => {
 // QUEUE ENTRIES
 
 // Add entry to queue
-router.post("/sessions/:sessionId/queue", async (req, res) => {
+router.post("/sessions/:sessionId/queue", requireAuth, requireStudent, async (req, res) => {
   try {
     const { studentName, question } = req.body;
     const details = {};
     const sessionIdError = validateUuid(req.params.sessionId, "sessionId");
-    const studentNameError = validateRequiredTrimmedString(
-      studentName,
-      "studentName",
-      { maxLength: 255 }
-    );
     const questionError = validateRequiredTrimmedString(question, "question", {
       maxLength: 2000
     });
@@ -200,12 +195,23 @@ router.post("/sessions/:sessionId/queue", async (req, res) => {
       details.sessionId = sessionIdError;
     }
 
-    if (studentNameError) {
-      details.studentName = studentNameError;
-    }
-
     if (questionError) {
       details.question = questionError;
+    }
+
+    const resolvedStudentName =
+      getTrimmedString(req.profile.full_name) ||
+      getTrimmedString(studentName) ||
+      getTrimmedString(req.profile.email);
+
+    const studentNameError = validateRequiredTrimmedString(
+      resolvedStudentName,
+      "studentName",
+      { maxLength: 255 }
+    );
+
+    if (studentNameError) {
+      details.studentName = studentNameError;
     }
 
     if (Object.keys(details).length > 0) {
@@ -214,7 +220,7 @@ router.post("/sessions/:sessionId/queue", async (req, res) => {
 
     const entry = await db.addQueueEntry(
       req.params.sessionId,
-      getTrimmedString(studentName),
+      resolvedStudentName,
       getTrimmedString(question)
     );
     res.status(201).json(entry);
