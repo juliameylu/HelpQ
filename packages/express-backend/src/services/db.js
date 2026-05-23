@@ -1,5 +1,16 @@
 import { supabaseAdmin } from "../config/supabase.js";
 
+export const getProfileById = async (userId) => {
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("id, email, full_name, role, avatar_url")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+};
+
 // SESSIONS
 export const createSession = async (hostId, title, description = "") => {
   // Generate a random join code

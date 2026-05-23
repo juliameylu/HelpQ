@@ -1,5 +1,10 @@
 import { supabase } from "../config/supabase.js";
-import { internalServerError, unauthorizedError } from "../utils/errors.js";
+import * as db from "../services/db.js";
+import {
+  forbiddenError,
+  internalServerError,
+  unauthorizedError
+} from "../utils/errors.js";
 
 export const requireAuth = async (req, res, next) => {
   try {
@@ -22,5 +27,25 @@ export const requireAuth = async (req, res, next) => {
   } catch (error) {
     console.error("Error verifying auth token:", error);
     return internalServerError(res, "Failed to verify auth token");
+  }
+};
+
+export const requireStudent = async (req, res, next) => {
+  try {
+    const profile = await db.getProfileById(req.user.id);
+
+    if (!profile) {
+      return unauthorizedError(res, "User profile not found");
+    }
+
+    if (profile.role !== "student") {
+      return forbiddenError(res, "Student access required");
+    }
+
+    req.profile = profile;
+    next();
+  } catch (error) {
+    console.error("Error loading student profile:", error);
+    return internalServerError(res, "Failed to load user profile");
   }
 };
