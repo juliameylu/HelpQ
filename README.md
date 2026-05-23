@@ -15,3 +15,5 @@ npm run dev:frontend
 
 The queue page currently uses local browser state and demo session data while
 the backend queue API is still being built.
+
+CI trigger for assignment makeup
