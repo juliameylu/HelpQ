@@ -186,7 +186,88 @@ sequenceDiagram
 
 ---
 
-## 5. Use case diagram (actors)
+## 5. Sequence diagrams — access control
+
+Access-control flows for Supabase Auth, profiles, and protected API routes.
+
+### First-time Supabase login / profile creation
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant UI as React Frontend
+  participant Auth as Supabase Auth
+  participant DB as Supabase Database
+  participant Profile as public.profiles
+
+  User->>UI: Click Continue with Google
+  UI->>Auth: signInWithOAuth(provider: google)
+  Auth-->>User: Redirect to Google login
+  User-->>Auth: Complete login
+  Auth->>DB: Create auth.users row if new user
+  DB->>Profile: Trigger handle_new_user()
+  Profile-->>DB: Insert profile row
+  Auth-->>UI: Return session with access token
+  UI->>Profile: SELECT own profile
+  Profile-->>UI: Return profile if RLS allows access
+  UI-->>User: Show authorized app view
+```
+
+### Returning user session check
+
+```mermaid
+sequenceDiagram
+  actor User
+  participant UI as React Frontend
+  participant Auth as Supabase Auth
+  participant Profile as public.profiles
+
+  User->>UI: Open HelpQ
+  UI->>Auth: getSession()
+  Auth-->>UI: Current session or no session
+
+  alt Session exists
+    UI->>Profile: SELECT own profile
+    Profile-->>UI: Return profile
+    UI-->>User: Show app page
+  else No session
+    UI-->>User: Show login page
+  end
+```
+
+### Protected backend request
+
+```mermaid
+sequenceDiagram
+  actor Host
+  participant UI as React Frontend
+  participant API as Express API
+  participant Auth as requireAuth middleware
+  participant SBAuth as Supabase Auth
+  participant DB as Supabase Database
+
+  Host->>UI: Create or manage session
+  UI->>API: Request with Authorization: Bearer token
+  API->>Auth: Run requireAuth
+  Auth->>SBAuth: getUser(token)
+
+  alt Missing or invalid token
+    Auth-->>API: Reject request
+    API-->>UI: 401 Unauthorized
+    UI-->>Host: Show error state
+  else Valid token
+    SBAuth-->>Auth: Return authenticated user
+    Auth->>API: Attach req.user and continue
+    API->>DB: Read or update host-owned data
+    DB-->>API: Return result
+    API-->>UI: Return success response
+    UI-->>Host: Show updated session or queue
+  end
+```
+
+---
+
+## 6. Use case diagram (actors)
 
 High-level capabilities by role.
 
@@ -211,3 +292,4 @@ flowchart LR
   Instructor --> UC5
   Instructor --> UC6
 ```
+---
