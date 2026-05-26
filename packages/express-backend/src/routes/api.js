@@ -169,7 +169,10 @@ router.patch("/sessions/:id/status", requireAuth, async (req, res) => {
       return forbiddenError(res);
     }
 
-    const session = await db.updateSessionStatus(req.params.id, normalizedStatus);
+    const session = await db.updateSessionStatus(
+      req.params.id,
+      normalizedStatus
+    );
 
     if (!session) {
       return notFoundError(res, "Session");
@@ -185,53 +188,62 @@ router.patch("/sessions/:id/status", requireAuth, async (req, res) => {
 // QUEUE ENTRIES
 
 // Add entry to queue
-router.post("/sessions/:sessionId/queue", requireAuth, requireStudent, async (req, res) => {
-  try {
-    const { studentName, question } = req.body;
-    const details = {};
-    const sessionIdError = validateUuid(req.params.sessionId, "sessionId");
-    const questionError = validateRequiredTrimmedString(question, "question", {
-      maxLength: 2000
-    });
+router.post(
+  "/sessions/:sessionId/queue",
+  requireAuth,
+  requireStudent,
+  async (req, res) => {
+    try {
+      const { studentName, question } = req.body;
+      const details = {};
+      const sessionIdError = validateUuid(req.params.sessionId, "sessionId");
+      const questionError = validateRequiredTrimmedString(
+        question,
+        "question",
+        {
+          maxLength: 2000
+        }
+      );
 
-    if (sessionIdError) {
-      details.sessionId = sessionIdError;
+      if (sessionIdError) {
+        details.sessionId = sessionIdError;
+      }
+
+      if (questionError) {
+        details.question = questionError;
+      }
+
+      const resolvedStudentName =
+        getTrimmedString(req.profile.full_name) ||
+        getTrimmedString(studentName) ||
+        getTrimmedString(req.profile.email);
+
+      const studentNameError = validateRequiredTrimmedString(
+        resolvedStudentName,
+        "studentName",
+        { maxLength: 255 }
+      );
+
+      if (studentNameError) {
+        details.studentName = studentNameError;
+      }
+
+      if (Object.keys(details).length > 0) {
+        return validationError(res, details);
+      }
+
+      const entry = await db.addQueueEntry(
+        req.params.sessionId,
+        resolvedStudentName,
+        getTrimmedString(question)
+      );
+      res.status(201).json(entry);
+    } catch (error) {
+      console.error("Error adding queue entry:", error);
+      return internalServerError(res, "Failed to add queue entry");
     }
-
-    if (questionError) {
-      details.question = questionError;
-    }
-
-    const resolvedStudentName =
-      getTrimmedString(req.profile.full_name) ||
-      getTrimmedString(studentName) ||
-      getTrimmedString(req.profile.email);
-
-    const studentNameError = validateRequiredTrimmedString(
-      resolvedStudentName,
-      "studentName",
-      { maxLength: 255 }
-    );
-
-    if (studentNameError) {
-      details.studentName = studentNameError;
-    }
-
-    if (Object.keys(details).length > 0) {
-      return validationError(res, details);
-    }
-
-    const entry = await db.addQueueEntry(
-      req.params.sessionId,
-      resolvedStudentName,
-      getTrimmedString(question)
-    );
-    res.status(201).json(entry);
-  } catch (error) {
-    console.error("Error adding queue entry:", error);
-    return internalServerError(res, "Failed to add queue entry");
   }
-});
+);
 
 // Get queue for a session
 router.get("/sessions/:sessionId/queue", async (req, res) => {
