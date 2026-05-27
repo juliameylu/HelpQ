@@ -15,7 +15,8 @@
     "@supabase/supabase-js": "^2.38.4",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",

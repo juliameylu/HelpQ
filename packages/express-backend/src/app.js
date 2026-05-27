@@ -12,7 +12,11 @@ app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
     timestamp: new Date().toISOString(),
-    message: "Server is running"
+    message: "Server is running",
+    features: {
+      scheduleAutoSync: true,
+      scheduleSyncStatus: true
+    }
   });
 });
 

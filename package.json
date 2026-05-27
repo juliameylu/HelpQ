@@ -10,6 +10,7 @@
   "scripts": {
     "build": "npm run build:frontend",
     "dev:frontend": "npm --prefix front-end run dev",
+    "dev:backend": "npm run start --workspace=@helpq/express-backend",
     "build:frontend": "npm --prefix front-end run build",
     "lint:frontend": "npm --prefix front-end run lint",
     "preview:frontend": "npm --prefix front-end run preview",

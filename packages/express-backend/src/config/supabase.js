@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import ws from "ws";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -12,10 +13,17 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // Create client with anon key (for client-side operations)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  // Node.js < 22 needs explicit websocket transport for realtime-js.
+  // This prevents: "Node.js 20 detected without native WebSocket support."
+  realtime: { transport: ws }
+});
 
 // Create admin client with service role key (for server-side operations)
 export const supabaseAdmin = createClient(
   supabaseUrl,
-  supabaseServiceRoleKey || supabaseAnonKey
+  supabaseServiceRoleKey || supabaseAnonKey,
+  {
+    realtime: { transport: ws }
+  }
 );
