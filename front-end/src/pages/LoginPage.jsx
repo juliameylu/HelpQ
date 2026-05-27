@@ -28,9 +28,7 @@ export default function LoginPage() {
   const [form, setForm] = useState(initialForm);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(
-    () => location.state?.message ?? ""
-  );
+  const [success, setSuccess] = useState(() => location.state?.message ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmingEmail, setConfirmingEmail] = useState(false);
 
@@ -283,9 +281,7 @@ export default function LoginPage() {
                 className="form-input"
                 id="confirmPassword"
                 minLength={6}
-                onChange={(e) =>
-                  updateField("confirmPassword", e.target.value)
-                }
+                onChange={(e) => updateField("confirmPassword", e.target.value)}
                 placeholder="Re-enter your password"
                 required
                 type="password"

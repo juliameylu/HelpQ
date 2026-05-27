@@ -48,9 +48,7 @@ async function jsonFetch(url, options = {}) {
   }
   if (!res.ok) {
     const apiMessage =
-      typeof body.error === "string"
-        ? body.error
-        : body.error?.message;
+      typeof body.error === "string" ? body.error : body.error?.message;
     const err = new Error(apiMessage || res.statusText || "Request failed");
     err.status = res.status;
     err.body = body;
@@ -200,9 +198,7 @@ function normalizeScheduleSlot(row) {
 
 export function normalizeOfficeHoursSchedule(row) {
   if (!row) return null;
-  const slots = (row.slots || [])
-    .map(normalizeScheduleSlot)
-    .filter(Boolean);
+  const slots = (row.slots || []).map(normalizeScheduleSlot).filter(Boolean);
   return {
     id: row.id,
     classId: row.classId ?? row.class_id,

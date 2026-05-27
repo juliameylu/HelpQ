@@ -143,51 +143,54 @@ export function AppProvider({ children }) {
     return () => window.clearTimeout(id);
   }, [refreshClasses]);
 
-  const refreshSessions = useCallback(async ({ silent = false } = {}) => {
-    if (!user) {
-      setSessions([]);
-      return;
-    }
-
-    if (!silent) {
-      setSessionsLoading(true);
-    }
-    setSessionsError(null);
-
-    try {
-      let rows = [];
-      if (user.role === "professor") {
-        const hosted = await getSessionsByHost(user.id);
-        rows = hosted.filter((session) => session.status === "live");
-      } else if (classes.length > 0) {
-        const lists = await Promise.all(
-          classes.map((course) => getSessionsByClass(course.id))
-        );
-        const seen = new Set();
-        rows = lists.flat().filter((session) => {
-          if (seen.has(session.id)) return false;
-          seen.add(session.id);
-          return true;
-        });
-      }
-      const enriched = await enrichSessionsWithQueueCounts(rows);
-      const endedIds = recentlyEndedSessionIdsRef.current;
-      setSessions(
-        enriched.filter((session) => !endedIds.has(String(session.id)))
-      );
-    } catch (err) {
-      if (!silent) {
+  const refreshSessions = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!user) {
         setSessions([]);
+        return;
       }
-      setSessionsError(
-        err.message || "Could not load sessions. Is the API server running?"
-      );
-    } finally {
+
       if (!silent) {
-        setSessionsLoading(false);
+        setSessionsLoading(true);
       }
-    }
-  }, [user, classes]);
+      setSessionsError(null);
+
+      try {
+        let rows = [];
+        if (user.role === "professor") {
+          const hosted = await getSessionsByHost(user.id);
+          rows = hosted.filter((session) => session.status === "live");
+        } else if (classes.length > 0) {
+          const lists = await Promise.all(
+            classes.map((course) => getSessionsByClass(course.id))
+          );
+          const seen = new Set();
+          rows = lists.flat().filter((session) => {
+            if (seen.has(session.id)) return false;
+            seen.add(session.id);
+            return true;
+          });
+        }
+        const enriched = await enrichSessionsWithQueueCounts(rows);
+        const endedIds = recentlyEndedSessionIdsRef.current;
+        setSessions(
+          enriched.filter((session) => !endedIds.has(String(session.id)))
+        );
+      } catch (err) {
+        if (!silent) {
+          setSessions([]);
+        }
+        setSessionsError(
+          err.message || "Could not load sessions. Is the API server running?"
+        );
+      } finally {
+        if (!silent) {
+          setSessionsLoading(false);
+        }
+      }
+    },
+    [user, classes]
+  );
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -453,9 +456,7 @@ export function AppProvider({ children }) {
       }
       const endedId = String(sessionId);
       recentlyEndedSessionIdsRef.current.add(endedId);
-      setSessions((prev) =>
-        prev.filter((row) => String(row.id) !== endedId)
-      );
+      setSessions((prev) => prev.filter((row) => String(row.id) !== endedId));
       try {
         const session = await apiEndSession(sessionId);
         void refreshSessions({ silent: true });

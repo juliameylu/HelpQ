@@ -459,11 +459,11 @@ export const getSessionByIdForHost = async (sessionId, hostId) => {
   return data;
 };
 
-export const getSessionsByHostId = async (hostId, { activeOnly = false } = {}) => {
-  let query = supabaseAdmin
-    .from("sessions")
-    .select("*")
-    .eq("host_id", hostId);
+export const getSessionsByHostId = async (
+  hostId,
+  { activeOnly = false } = {}
+) => {
+  let query = supabaseAdmin.from("sessions").select("*").eq("host_id", hostId);
 
   if (activeOnly) {
     query = query.eq("status", "active");

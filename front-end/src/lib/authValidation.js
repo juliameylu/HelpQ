@@ -21,4 +21,8 @@ export function validatePasswordMatch(password, confirmPassword) {
   return null;
 }
 
-export { loginRedirectUrl, passwordResetRedirectUrl, siteUrl } from "./authRedirect.js";
+export {
+  loginRedirectUrl,
+  passwordResetRedirectUrl,
+  siteUrl
+} from "./authRedirect.js";
