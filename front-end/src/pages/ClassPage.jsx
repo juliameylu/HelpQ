@@ -66,7 +66,7 @@ export default function ClassPage() {
     return getOfficeHoursSchedules(classId)
       .then((rows) => {
         setSchedules(rows);
-        return refreshSessions();
+        return refreshSessions({ silent: true });
       })
       .catch((err) => {
         setSchedules([]);

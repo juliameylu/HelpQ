@@ -21,7 +21,7 @@ export default function HomePage() {
     enrolledClasses,
     classesLoading,
     classesError,
-    sessionsLoading,
+    sessionsHydrated,
     sessionsError,
     endLiveSession
   } = useApp();
@@ -119,7 +119,7 @@ export default function HomePage() {
               {endError}
             </p>
           ) : null}
-          {sessionsLoading ? (
+          {!sessionsHydrated ? (
             <p className="field-message">Loading sessions…</p>
           ) : liveSessions.length === 0 ? (
             <p className="field-message home-empty-message">
