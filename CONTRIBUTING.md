@@ -7,8 +7,8 @@ package.
 ## Project Structure
 
 ```text
+front-end/
 packages/
-  react-frontend/
   express-backend/
 ```
 
@@ -47,7 +47,7 @@ npm run lint
 Run one package linter:
 
 ```bash
-npm run lint --workspace @helpq/react-frontend
+npm run lint --workspace @helpq/front-end
 npm run lint --workspace @helpq/express-backend
 ```
 
