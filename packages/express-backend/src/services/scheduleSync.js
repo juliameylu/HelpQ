@@ -19,7 +19,9 @@ function wasHostEnded(session) {
   if (session.host_ended_at) return true;
   // fallback for sessions closed before the column existed:
   // a closed session that already carries an occurrence key was host-ended
-  return session.status === "closed" && Boolean(session.schedule_occurrence_key);
+  return (
+    session.status === "closed" && Boolean(session.schedule_occurrence_key)
+  );
 }
 
 export async function syncScheduledSessionsForClass(classId) {
