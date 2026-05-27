@@ -8,7 +8,7 @@
     "dev": "LOAD_ENV_LOCAL=true node --watch-path=src src/index.js",
     "start": "node src/index.js",
     "lint": "eslint .",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
     "tdd": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
   "dependencies": {

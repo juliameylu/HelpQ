@@ -43,6 +43,7 @@ For local development:
 3. Start Vite with `npm run dev:frontend`.
 
 The frontend expects:
+
 - `GET /api/sessions/join/:joinCode`
 - `GET /api/sessions/:sessionId/queue`
 - `GET /api/sessions/:sessionId/stats`
