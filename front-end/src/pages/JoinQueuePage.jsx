@@ -22,6 +22,7 @@ import {
   queueSessionPath,
   saveQueueSession
 } from "../lib/queueSessionStorage.js";
+import { useApp } from "../context/useApp.js";
 
 const DEFAULT_AVG_HELP_MINUTES = 8;
 
@@ -57,6 +58,7 @@ function buildDisplaySession(apiSession) {
 }
 
 export default function JoinQueuePage() {
+  const { user } = useApp();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const codeFromUrl = (searchParams.get("code") || "").toUpperCase();
@@ -72,6 +74,14 @@ export default function JoinQueuePage() {
       details: ""
     };
   });
+
+  // Once user loads (async), backfill name if the field is still empty
+  useEffect(() => {
+    if (!user?.name) return;
+    setForm((prev) =>
+      prev.studentName ? prev : { ...prev, studentName: user.name }
+    );
+  }, [user?.name]);
   const [errors, setErrors] = useState({});
   const [submittedEntry, setSubmittedEntry] = useState(() => {
     const saved = loadQueueSession();
@@ -649,7 +659,7 @@ function Metric({ icon, label, value }) {
   );
 }
 
-function SessionEndedStatus({ entry, onReset }) {
+function SessionEndedStatus({ entry }) {
   return (
     <div className="status-view status-view-ended">
       <CircleOff aria-hidden="true" className="status-icon muted" size={40} />
@@ -673,11 +683,14 @@ function SessionEndedStatus({ entry, onReset }) {
         </dl>
       ) : null}
 
-      <Link className="home-back-link queue-resume-home-link" to="/">
+      <button
+        className="primary-action queue-resume-home-link"
+        type="button"
+        onClick={() => {
+          clearQueueSession();
+          window.location.assign("/");
+        }}>
         Back to home
-      </Link>
-      <button className="secondary-action" onClick={onReset} type="button">
-        Clear session code
       </button>
     </div>
   );
