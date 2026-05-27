@@ -1,5 +1,4 @@
-const DEFAULT_TIMEZONE =
-  process.env.SCHEDULE_TIMEZONE || "America/Los_Angeles";
+const DEFAULT_TIMEZONE = process.env.SCHEDULE_TIMEZONE || "America/Los_Angeles";
 
 const WEEKDAY_TO_INDEX = {
   Sun: 0,

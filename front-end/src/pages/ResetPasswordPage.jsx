@@ -91,7 +91,10 @@ export default function ResetPasswordPage() {
         return;
       }
 
-      navigate("/login?reset=1", { replace: true, state: { message: result.message } });
+      navigate("/login?reset=1", {
+        replace: true,
+        state: { message: result.message }
+      });
     } finally {
       setIsSubmitting(false);
     }

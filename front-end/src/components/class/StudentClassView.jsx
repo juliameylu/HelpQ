@@ -67,7 +67,9 @@ export default function StudentClassView({
       </article>
 
       <div className="class-page-grid">
-        <section className="class-page-main" aria-labelledby="student-weekly-oh">
+        <section
+          className="class-page-main"
+          aria-labelledby="student-weekly-oh">
           <h2 id="student-weekly-oh">Weekly Office Hours</h2>
           <WeeklyCalendarView
             emptyMessage="Your instructor has not posted a weekly schedule yet."

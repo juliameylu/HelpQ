@@ -32,8 +32,11 @@ export default function ClassPage() {
     if (!classId || !isInstructor) return undefined;
 
     const controller = new AbortController();
-    setRosterLoading(true);
-    setRosterError("");
+    const loadingTimer = window.setTimeout(() => {
+      if (controller.signal.aborted) return;
+      setRosterLoading(true);
+      setRosterError("");
+    }, 0);
 
     getClassRoster(classId, { signal: controller.signal })
       .then((members) => setRoster(members))
@@ -46,14 +49,19 @@ export default function ClassPage() {
         if (!controller.signal.aborted) setRosterLoading(false);
       });
 
-    return () => controller.abort();
+    return () => {
+      window.clearTimeout(loadingTimer);
+      controller.abort();
+    };
   }, [classId, isInstructor]);
 
   const loadSchedules = useCallback(() => {
     if (!classId) return Promise.resolve();
 
-    setSchedulesLoading(true);
-    setSchedulesError("");
+    const loadingTimer = window.setTimeout(() => {
+      setSchedulesLoading(true);
+      setSchedulesError("");
+    }, 0);
 
     return getOfficeHoursSchedules(classId)
       .then((rows) => {
@@ -64,7 +72,10 @@ export default function ClassPage() {
         setSchedules([]);
         setSchedulesError(err.message || "Could not load weekly schedule.");
       })
-      .finally(() => setSchedulesLoading(false));
+      .finally(() => {
+        window.clearTimeout(loadingTimer);
+        setSchedulesLoading(false);
+      });
   }, [classId, refreshSessions]);
 
   useEffect(() => {

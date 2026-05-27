@@ -184,7 +184,7 @@ export default function JoinQueuePage() {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [apiSession?.sessionCode, sessionLoadState]);
+  }, [apiSession, sessionLoadState]);
 
   useEffect(() => {
     if (!sessionEnded) return;
@@ -222,11 +222,10 @@ export default function JoinQueuePage() {
     };
   }, [submittedEntry, liveQueueRow]);
 
-  const sessionCodeForLinks = (
+  const sessionCodeForLinks =
     submittedEntry?.sessionCode ??
     apiSession?.sessionCode ??
-    form.sessionCode.trim().toUpperCase()
-  );
+    form.sessionCode.trim().toUpperCase();
 
   useEffect(() => {
     if (!submittedEntry || studentQueuePhase === "none") return;
@@ -247,7 +246,12 @@ export default function JoinQueuePage() {
       position: submittedEntryDisplay?.position ?? submittedEntry.position,
       submittedAt: submittedEntry.submittedAt
     });
-  }, [submittedEntry, studentQueuePhase, sessionCodeForLinks, submittedEntryDisplay?.position]);
+  }, [
+    submittedEntry,
+    studentQueuePhase,
+    sessionCodeForLinks,
+    submittedEntryDisplay?.position
+  ]);
 
   const waitingAhead = useMemo(
     () => queueRaw.filter((entry) => entry.status === "waiting").length,

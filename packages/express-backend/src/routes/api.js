@@ -1,8 +1,6 @@
 import express from "express";
 import * as db from "../services/db.js";
-import {
-  syncScheduledSessionsForClass
-} from "../services/scheduleSync.js";
+import { syncScheduledSessionsForClass } from "../services/scheduleSync.js";
 import {
   buildScheduleOccurrenceKey,
   getScheduleNow,

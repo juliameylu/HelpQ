@@ -1,6 +1,7 @@
 # Email auth for HelpQ (Supabase)
 
-HelpQ uses **confirm email** on sign-up. This project uses **Supabase’s default mailer** (custom SMTP stays **off**).
+HelpQ uses **confirm email** on sign-up. This project uses **Supabase’s default
+mailer** (custom SMTP stays **off**).
 
 ---
 
@@ -11,7 +12,8 @@ HelpQ uses **confirm email** on sign-up. This project uses **Supabase’s defaul
 **Authentication** → **Emails** → **SMTP Settings**
 
 - **Enable custom SMTP** → **OFF** (do not fill the form)
-- Supabase sends auth emails from their built-in service (`@supabase.io` / `noreply@mail.app.supabase.io`)
+- Supabase sends auth emails from their built-in service (`@supabase.io` /
+  `noreply@mail.app.supabase.io`)
 
 ### 2. Confirm email — on
 
@@ -24,9 +26,9 @@ HelpQ uses **confirm email** on sign-up. This project uses **Supabase’s defaul
 
 **Authentication** → **URL configuration**
 
-| Field | Local dev |
-|--------|-----------|
-| **Site URL** | `http://127.0.0.1:5173` |
+| Field             | Local dev                       |
+| ----------------- | ------------------------------- |
+| **Site URL**      | `http://127.0.0.1:5173`         |
 | **Redirect URLs** | Add all of these (exact match): |
 
 ```
@@ -60,13 +62,13 @@ VITE_SITE_URL=http://127.0.0.1:5173
 
 ## What to expect (default mailer limits)
 
-| Topic | Notes |
-|--------|--------|
-| Delivery | Often slow; check **spam/junk** |
-| Cal Poly mail | May filter `@supabase.io` — check quarantine |
-| Rate limit | Many sign-ups in a row can silently stop sends |
-| Debugging | **Authentication** → **Logs** right after sign-up |
-| Stuck users | **Authentication** → **Users** → confirm manually |
+| Topic         | Notes                                             |
+| ------------- | ------------------------------------------------- |
+| Delivery      | Often slow; check **spam/junk**                   |
+| Cal Poly mail | May filter `@supabase.io` — check quarantine      |
+| Rate limit    | Many sign-ups in a row can silently stop sends    |
+| Debugging     | **Authentication** → **Logs** right after sign-up |
+| Stuck users   | **Authentication** → **Users** → confirm manually |
 
 ---
 
@@ -75,16 +77,19 @@ VITE_SITE_URL=http://127.0.0.1:5173
 1. User **Sign up** → message: confirmation link sent
 2. User opens email → clicks link → `/login` → app confirms → signed in
 3. **Sign in** before confirming → error + **Resend** link on login page
-4. **Forgot password** uses the same default mailer (reset link to `/reset-password`)
+4. **Forgot password** uses the same default mailer (reset link to
+   `/reset-password`)
 
 ---
 
 ## Local development (`supabase start`)
 
-No SMTP. Use **Inbucket** from `supabase status` to read fake emails. `supabase/config.toml` has `enable_confirmations = true` under `[auth.email]`.
+No SMTP. Use **Inbucket** from `supabase status` to read fake emails.
+`supabase/config.toml` has `enable_confirmations = true` under `[auth.email]`.
 
 ---
 
 ## Later: custom SMTP
 
-Only if default mail isn’t reliable enough for the whole class. See [Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
+Only if default mail isn’t reliable enough for the whole class. See
+[Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp).

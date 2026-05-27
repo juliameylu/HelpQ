@@ -69,8 +69,8 @@ Because of that design, you do not need custom Express `/signup` or `/signin`
 endpoints unless your team explicitly wants auth to go through your backend
 instead of Supabase directly.
 
-**Email on sign-up:** **confirm email ON**, **custom SMTP OFF** (Supabase default
-mailer). Configure URLs in the dashboard — see
+**Email on sign-up:** **confirm email ON**, **custom SMTP OFF** (Supabase
+default mailer). Configure URLs in the dashboard — see
 [docs/SUPABASE_EMAIL_AUTH.md](docs/SUPABASE_EMAIL_AUTH.md).
 
 ### What is still missing

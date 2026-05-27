@@ -254,33 +254,33 @@ export default function InstructorClassView({
                     when you are ready to take students.
                   </p>
                 ) : (
-                <ul className="session-list">
-                  {liveSessions.map((session) => (
-                    <li className="session-list-item" key={session.id}>
-                      <div>
-                        <div className="session-list-title">
-                          <h3>{session.title}</h3>
-                          <span className="badge badge-live">
-                            <span className="badge-dot" aria-hidden="true" />
-                            Live Now
-                          </span>
+                  <ul className="session-list">
+                    {liveSessions.map((session) => (
+                      <li className="session-list-item" key={session.id}>
+                        <div>
+                          <div className="session-list-title">
+                            <h3>{session.title}</h3>
+                            <span className="badge badge-live">
+                              <span className="badge-dot" aria-hidden="true" />
+                              Live Now
+                            </span>
+                          </div>
+                          <p className="card-description">
+                            {session.description}
+                          </p>
                         </div>
-                        <p className="card-description">
-                          {session.description}
-                        </p>
-                      </div>
-                      <div className="session-list-actions">
-                        {session.sessionCode ? (
-                          <Link
-                            className="btn btn-gold btn-compact"
-                            to={`/sessions/${session.sessionCode}/manage`}>
-                            Manage Queue
-                          </Link>
-                        ) : null}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                        <div className="session-list-actions">
+                          {session.sessionCode ? (
+                            <Link
+                              className="btn btn-gold btn-compact"
+                              to={`/sessions/${session.sessionCode}/manage`}>
+                              Manage Queue
+                            </Link>
+                          ) : null}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </section>
             </>
@@ -306,9 +306,7 @@ export default function InstructorClassView({
                       <ul className="roster-list">
                         {instructors.map((member) => (
                           <li className="roster-list-item" key={member.userId}>
-                            <span
-                              className="roster-avatar"
-                              aria-hidden="true">
+                            <span className="roster-avatar" aria-hidden="true">
                               {rosterInitials(member.fullName, member.email)}
                             </span>
                             <div className="roster-list-body">
@@ -345,9 +343,7 @@ export default function InstructorClassView({
                           </span>
                           <div className="roster-list-body">
                             <div className="roster-list-heading">
-                              <strong>
-                                {member.fullName || member.email}
-                              </strong>
+                              <strong>{member.fullName || member.email}</strong>
                               <span className="badge badge-student">
                                 Student
                               </span>
@@ -368,9 +364,7 @@ export default function InstructorClassView({
             </section>
           ) : null}
 
-          {tab !== "overview" &&
-          tab !== "sessions" &&
-          tab !== "roster" ? (
+          {tab !== "overview" && tab !== "sessions" && tab !== "roster" ? (
             <p className="field-message">
               <BookOpen aria-hidden="true" size={18} />{" "}
               {tab.charAt(0).toUpperCase() + tab.slice(1)} is coming soon in

@@ -74,7 +74,8 @@ export default function HomePage() {
               You&apos;re still in an office hours queue
             </p>
             <p className="card-description">
-              Session <strong className="mono">{activeQueue.sessionCode}</strong>
+              Session{" "}
+              <strong className="mono">{activeQueue.sessionCode}</strong>
               {activeQueue.position
                 ? ` · position ${activeQueue.position}`
                 : ""}
@@ -185,7 +186,9 @@ export default function HomePage() {
             <h2 id="my-classes-title">My Classes</h2>
             <div className="page-header-actions">
               {isInstructor ? (
-                <Link className="btn btn-secondary btn-compact" to="/classes/new">
+                <Link
+                  className="btn btn-secondary btn-compact"
+                  to="/classes/new">
                   Create class
                 </Link>
               ) : null}
