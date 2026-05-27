@@ -28,7 +28,12 @@ export default function HomePage() {
   const [endingId, setEndingId] = useState(null);
   const [endError, setEndError] = useState("");
   const [activeQueue, setActiveQueue] = useState(null);
-  const displayName = user?.name?.split(" ")[0] ?? "there";
+  const displayName =
+    user?.name
+      ?.normalize("NFKC")
+      .trim()
+      .split(/\s+/)[0]
+      ?.replace(/[^A-Za-z0-9'-]/g, "") || "there";
 
   useEffect(() => {
     function refreshActiveQueue() {
@@ -64,8 +69,10 @@ export default function HomePage() {
     <DashboardLayout>
       <div className="home-page">
         <header className="home-header">
-          <h1>Welcome back, {displayName}!</h1>
-          <p>Here&apos;s what&apos;s happening with your classes today</p>
+          <h1 className="home-title">Welcome back, {displayName}!</h1>
+          <p className="home-subtitle">
+            Here&apos;s what&apos;s happening with your classes today
+          </p>
         </header>
 
         {!isInstructor && activeQueue ? (
@@ -91,7 +98,9 @@ export default function HomePage() {
 
         <section className="home-section" aria-labelledby="live-oh-title">
           <div className="home-section-heading">
-            <h2 id="live-oh-title">Live Office Hours</h2>
+            <h2 className="home-section-title" id="live-oh-title">
+              Live Office Hours
+            </h2>
             {liveSessions.length > 0 ? (
               <span className="badge badge-active-pill">
                 <span className="badge-dot" aria-hidden="true" />
@@ -113,7 +122,9 @@ export default function HomePage() {
           {sessionsLoading ? (
             <p className="field-message">Loading sessions…</p>
           ) : liveSessions.length === 0 ? (
-            <p className="field-message">No live office hours right now.</p>
+            <p className="field-message home-empty-message">
+              No live office hours right now.
+            </p>
           ) : (
             <div className="live-oh-grid">
               {liveSessions.map((session) => {
@@ -183,7 +194,9 @@ export default function HomePage() {
 
         <section className="home-section" aria-labelledby="my-classes-title">
           <div className="home-section-heading">
-            <h2 id="my-classes-title">My Classes</h2>
+            <h2 className="home-section-title" id="my-classes-title">
+              My Classes
+            </h2>
             <div className="page-header-actions">
               {isInstructor ? (
                 <Link

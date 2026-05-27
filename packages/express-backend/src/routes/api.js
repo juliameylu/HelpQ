@@ -230,37 +230,42 @@ router.get("/classes/:classId/roster", requireAuth, async (req, res) => {
   }
 });
 
-router.get("/classes/:classId/schedules/sync-status", async (req, res) => {
-  try {
-    const classIdError = validateUuid(req.params.classId, "classId");
-    if (classIdError) return validationError(res, { classId: classIdError });
+router.get(
+  "/classes/:classId/schedules/sync-status",
+  requireAuth,
+  requireProfessor,
+  async (req, res) => {
+    try {
+      const classIdError = validateUuid(req.params.classId, "classId");
+      if (classIdError) return validationError(res, { classId: classIdError });
 
-    const clock = getScheduleNow();
-    const schedules = await db.getOfficeHoursSchedulesForClass(
-      req.params.classId
-    );
-    const slots = schedules.flatMap((schedule) =>
-      (schedule.slots || []).map((slot) => ({
-        slotId: slot.id,
-        dayOfWeek: slot.day_of_week,
-        start: String(slot.start_time).slice(0, 5),
-        end: String(slot.end_time).slice(0, 5),
-        activeNow: isSlotActiveNow(slot, clock)
-      }))
-    );
+      const clock = getScheduleNow();
+      const schedules = await db.getOfficeHoursSchedulesForClass(
+        req.params.classId
+      );
+      const slots = schedules.flatMap((schedule) =>
+        (schedule.slots || []).map((slot) => ({
+          slotId: slot.id,
+          dayOfWeek: slot.day_of_week,
+          start: String(slot.start_time).slice(0, 5),
+          end: String(slot.end_time).slice(0, 5),
+          activeNow: isSlotActiveNow(slot, clock)
+        }))
+      );
 
-    return res.json({
-      timeZone: clock.timeZone,
-      now: clock.timeLabel,
-      dayOfWeek: clock.dayOfWeek,
-      dateKey: clock.dateKey,
-      slots
-    });
-  } catch (error) {
-    console.error("Error reading schedule sync status:", error);
-    return internalServerError(res, "Failed to read schedule sync status");
+      return res.json({
+        timeZone: clock.timeZone,
+        now: clock.timeLabel,
+        dayOfWeek: clock.dayOfWeek,
+        dateKey: clock.dateKey,
+        slots
+      });
+    } catch (error) {
+      console.error("Error reading schedule sync status:", error);
+      return internalServerError(res, "Failed to read schedule sync status");
+    }
   }
-});
+);
 
 router.get("/classes/:classId/schedules", requireAuth, async (req, res) => {
   try {
@@ -449,11 +454,13 @@ router.post("/sessions", requireAuth, async (req, res) => {
 });
 
 // List sessions (filter by classId or hostId)
-router.get("/sessions", async (req, res) => {
+router.get("/sessions", requireAuth, async (req, res) => {
   try {
     const { classId, hostId } = req.query;
 
     if (classId) {
+      const classRow = await assertClassAccess(req, res, String(classId));
+      if (!classRow) return;
       try {
         await syncScheduledSessionsForClass(String(classId));
       } catch (syncError) {
@@ -464,6 +471,9 @@ router.get("/sessions", async (req, res) => {
     }
 
     if (hostId) {
+      const hostIdError = validateUuid(String(hostId), "hostId");
+      if (hostIdError) return validationError(res, { hostId: hostIdError });
+      if (!ownsHostId(req)) return forbiddenError(res);
       const sessions = await db.getSessionsByHostId(String(hostId), {
         activeOnly: true
       });
@@ -480,7 +490,7 @@ router.get("/sessions", async (req, res) => {
 });
 
 // Get session by join code
-router.get("/sessions/join/:joinCode", async (req, res) => {
+router.get("/sessions/join/:joinCode", requireAuth, async (req, res) => {
   try {
     const joinCode = getTrimmedString(req.params.joinCode);
 
@@ -674,12 +684,19 @@ router.post(
 );
 
 // Get queue for a session
-router.get("/sessions/:sessionId/queue", async (req, res) => {
+router.get("/sessions/:sessionId/queue", requireAuth, async (req, res) => {
   try {
     const sessionIdError = validateUuid(req.params.sessionId, "sessionId");
 
     if (sessionIdError) {
       return validationError(res, { sessionId: sessionIdError });
+    }
+
+    const session = await db.getSessionById(req.params.sessionId);
+    if (!session) return notFoundError(res, "Session");
+    if (session.class_id_uuid) {
+      const classRow = await assertClassAccess(req, res, session.class_id_uuid);
+      if (!classRow) return;
     }
 
     const queue = await db.getQueueBySessionId(req.params.sessionId);
@@ -774,12 +791,19 @@ router.delete("/queue/:entryId", requireAuth, async (req, res) => {
 });
 
 // Get queue stats for a session
-router.get("/sessions/:sessionId/stats", async (req, res) => {
+router.get("/sessions/:sessionId/stats", requireAuth, async (req, res) => {
   try {
     const sessionIdError = validateUuid(req.params.sessionId, "sessionId");
 
     if (sessionIdError) {
       return validationError(res, { sessionId: sessionIdError });
+    }
+
+    const session = await db.getSessionById(req.params.sessionId);
+    if (!session) return notFoundError(res, "Session");
+    if (session.class_id_uuid) {
+      const classRow = await assertClassAccess(req, res, session.class_id_uuid);
+      if (!classRow) return;
     }
 
     const stats = await db.getQueueStats(req.params.sessionId);
