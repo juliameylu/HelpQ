@@ -98,7 +98,7 @@ test("POST /api/sessions creates a session with a valid bearer token", async () 
     .set("Authorization", "Bearer real-token")
     .send({
       title: "Office Hours",
-      description: "React testing help"
+      description: "Help"
     });
 
   expect(response.status).toBe(201);
@@ -110,7 +110,7 @@ test("POST /api/sessions creates a session with a valid bearer token", async () 
   expect(mockDb.createSession).toHaveBeenCalledWith(
     ownerUser.id,
     "Office Hours",
-    "React testing help",
+    "Help",
     null
   );
 });

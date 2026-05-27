@@ -44,8 +44,8 @@ test("POST /api/sessions/:sessionId/queue returns 401 when no token is provided"
   const response = await request(app)
     .post(`/api/sessions/${sessionId}/queue`)
     .send({
-      studentName: "Sofia",
-      question: "Can I get help with testing?"
+      studentName: "Student User",
+      question: "Help"
     });
 
   expect(response.status).toBe(401);
@@ -57,17 +57,17 @@ test("POST /api/sessions/:sessionId/queue returns 403 for a professor account", 
   signInAs(professorUser);
   mockDb.getProfileById.mockResolvedValue({
     id: professorUser.id,
-    email: "professor@helpq.test",
-    full_name: "Professor HelpQ",
+    email: "host@helpq.test",
+    full_name: "Host User",
     role: "professor"
   });
 
   const response = await request(app)
     .post(`/api/sessions/${sessionId}/queue`)
-    .set("Authorization", "Bearer professor-token")
+    .set("Authorization", "Bearer host-token")
     .send({
-      studentName: "Professor HelpQ",
-      question: "Can I join as a student?"
+      studentName: "Host User",
+      question: "Help"
     });
 
   expect(response.status).toBe(403);
@@ -79,15 +79,15 @@ test("POST /api/sessions/:sessionId/queue creates an entry for a student account
   signInAs(studentUser);
   mockDb.getProfileById.mockResolvedValue({
     id: studentUser.id,
-    email: "sofia@student.test",
-    full_name: "Sofia Student",
+    email: "student@helpq.test",
+    full_name: "Student User",
     role: "student"
   });
   mockDb.addQueueEntry.mockResolvedValue({
     id: randomUUID(),
     session_id: sessionId,
-    student_name: "Sofia Student",
-    question: "Can I get help with testing?",
+    student_name: "Student User",
+    question: "Help",
     status: "waiting"
   });
 
@@ -95,15 +95,15 @@ test("POST /api/sessions/:sessionId/queue creates an entry for a student account
     .post(`/api/sessions/${sessionId}/queue`)
     .set("Authorization", "Bearer student-token")
     .send({
-      question: "Can I get help with testing?"
+      question: "Help"
     });
 
   expect(response.status).toBe(201);
-  expect(response.body.student_name).toBe("Sofia Student");
+  expect(response.body.student_name).toBe("Student User");
   expect(mockDb.addQueueEntry).toHaveBeenCalledWith(
     sessionId,
-    "Sofia Student",
-    "Can I get help with testing?"
+    "Student User",
+    "Help"
   );
 });
 
@@ -115,8 +115,8 @@ test("POST /api/sessions/:sessionId/queue returns 401 when the profile is missin
     .post(`/api/sessions/${sessionId}/queue`)
     .set("Authorization", "Bearer student-token")
     .send({
-      studentName: "Sofia",
-      question: "Can I get help with testing?"
+      studentName: "Student User",
+      question: "Help"
     });
 
   expect(response.status).toBe(401);
