@@ -159,7 +159,7 @@ sequenceDiagram
 
 ## Frontend To-Do For TE5
 
-- Handle backend `401` and `403` responses in the UI.
+- Implemented: handle backend `401` and `403` responses in the UI.
 
 ## Backend To-Do For TE5
 
