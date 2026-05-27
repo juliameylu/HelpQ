@@ -4,14 +4,23 @@ import {
   isSlotActiveNow
 } from "../utils/scheduleClock.js";
 import {
+  closeSessionByHost,
   createSession,
   getActiveSessionForScheduleSlot,
   getClassIdsWithSchedulesForHost,
   getOfficeHoursSchedulesForClass,
   getSessionByOccurrenceKey,
-  listActiveScheduledSessionsForClass,
-  updateSessionStatus
+  listActiveScheduledSessionsForClass
 } from "./db.js";
+
+function wasHostEnded(session) {
+  if (!session) return false;
+  // host_ended_at is set when the host manually closes a scheduled session
+  if (session.host_ended_at) return true;
+  // fallback for sessions closed before the column existed:
+  // a closed session that already carries an occurrence key was host-ended
+  return session.status === "closed" && Boolean(session.schedule_occurrence_key);
+}
 
 export async function syncScheduledSessionsForClass(classId) {
   const schedules = await getOfficeHoursSchedulesForClass(classId);
@@ -31,8 +40,8 @@ export async function syncScheduledSessionsForClass(classId) {
 
       if (inWindow) {
         // Auto-start only when no session exists yet for this slot/day.
-        // Never reopen or duplicate after host manual end or sync close.
-        if (!activeSession && !existingOccurrence) {
+        // If the host already ended today's occurrence, leave it closed.
+        if (!activeSession && !wasHostEnded(existingOccurrence)) {
           await createSession(
             hostId,
             schedule.title || "Office Hours",
@@ -48,7 +57,10 @@ export async function syncScheduledSessionsForClass(classId) {
       }
 
       if (activeSession) {
-        await updateSessionStatus(activeSession.id, "closed");
+        const occurrenceKey =
+          activeSession.schedule_occurrence_key ||
+          buildScheduleOccurrenceKey(slot.id, clock.dateKey);
+        await closeSessionByHost(activeSession.id, { occurrenceKey });
       }
     }
   }
@@ -62,7 +74,10 @@ export async function syncScheduledSessionsForClass(classId) {
       .find((row) => row.id === session.schedule_slot_id);
 
     if (!slot || !isSlotActiveNow(slot, clock)) {
-      await updateSessionStatus(session.id, "closed");
+      const occurrenceKey =
+        session.schedule_occurrence_key ||
+        buildScheduleOccurrenceKey(session.schedule_slot_id, clock.dateKey);
+      await closeSessionByHost(session.id, { occurrenceKey });
     }
   }
 }
