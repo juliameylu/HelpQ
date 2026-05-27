@@ -146,8 +146,9 @@ src/
 │   └── db.js               # Database service layer
 ├── routes/
 │   └── api.js              # API endpoints
-├── db/
-│   └── schema.sql          # Reference schema copy
+├── middleware/
+│   └── auth.js             # Auth and role checks
+├── app.js                  # Express app definition
 └── index.js                # Main server file
 ```
 
