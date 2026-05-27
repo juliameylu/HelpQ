@@ -16,10 +16,13 @@ app.use("/api", apiRoutes);
 
 const testRunId = Date.now();
 const testEmail = `integration-host-${testRunId}@helpq.test`;
+const otherTestEmail = `integration-other-host-${testRunId}@helpq.test`;
 const testPassword = "Password123!";
 
 let authToken;
 let hostId;
+let otherAuthToken;
+let otherHostId;
 
 // helpers ----------------------------------------------------------------------
 
@@ -58,6 +61,19 @@ beforeAll(async () => {
 
   hostId = createdUser.user.id;
 
+  const { data: otherCreatedUser, error: otherCreateUserError } =
+    await supabaseAdmin.auth.admin.createUser({
+      email: otherTestEmail,
+      password: testPassword,
+      email_confirm: true
+    });
+
+  if (otherCreateUserError) {
+    throw otherCreateUserError;
+  }
+
+  otherHostId = otherCreatedUser.user.id;
+
   const { data: signInData, error: signInError } =
     await supabase.auth.signInWithPassword({
       email: testEmail,
@@ -69,12 +85,29 @@ beforeAll(async () => {
   }
 
   authToken = signInData.session.access_token;
+
+  const { data: otherSignInData, error: otherSignInError } =
+    await supabase.auth.signInWithPassword({
+      email: otherTestEmail,
+      password: testPassword
+    });
+
+  if (otherSignInError) {
+    throw otherSignInError;
+  }
+
+  otherAuthToken = otherSignInData.session.access_token;
 });
 
 afterAll(async () => {
   if (hostId) {
     await supabaseAdmin.from("sessions").delete().eq("host_id", hostId);
     await supabaseAdmin.auth.admin.deleteUser(hostId);
+  }
+
+  if (otherHostId) {
+    await supabaseAdmin.from("sessions").delete().eq("host_id", otherHostId);
+    await supabaseAdmin.auth.admin.deleteUser(otherHostId);
   }
 });
 
@@ -127,6 +160,36 @@ test("GET /api/sessions/join/:joinCode returns a session from Supabase", async (
   expect(response.status).toBe(200);
   expect(response.body.id).toBe(session.id);
   expect(response.body.join_code).toBe(session.join_code);
+});
+
+test("DELETE /api/sessions/:id removes a session owned by the authenticated user", async () => {
+  const session = await createTestSession();
+
+  const response = await request(app)
+    .delete(`/api/sessions/${session.id}`)
+    .set("Authorization", `Bearer ${authToken}`);
+
+  expect(response.status).toBe(200);
+  expect(response.body.success).toBe(true);
+
+  const deletedSessionResponse = await request(app).get(
+    `/api/sessions/join/${session.join_code}`
+  );
+
+  expect(deletedSessionResponse.status).toBe(404);
+});
+
+test("DELETE /api/sessions/:id returns 403 when another authenticated user tries to delete it", async () => {
+  const session = await createTestSession();
+
+  const response = await request(app)
+    .delete(`/api/sessions/${session.id}`)
+    .set("Authorization", `Bearer ${otherAuthToken}`);
+
+  expect(response.status).toBe(403);
+  expect(response.body).toEqual({
+    error: "Forbidden"
+  });
 });
 
 // queue tests ------------------------------------------------------------------

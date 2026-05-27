@@ -71,6 +71,18 @@ export const updateSessionStatus = async (sessionId, status) => {
   return data;
 };
 
+export const deleteSession = async (sessionId) => {
+  const { data, error } = await supabaseAdmin
+    .from("sessions")
+    .delete()
+    .eq("id", sessionId)
+    .select()
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+};
+
 // QUEUE ENTRIES
 export const addQueueEntry = async (sessionId, studentName, question) => {
   const { data, error } = await supabaseAdmin

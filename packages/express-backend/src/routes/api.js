@@ -123,6 +123,32 @@ router.patch("/sessions/:id/status", requireAuth, async (req, res) => {
   }
 });
 
+// Delete session
+router.delete("/sessions/:id", requireAuth, async (req, res) => {
+  try {
+    const ownedSession = await db.getSessionByIdForHost(
+      req.params.id,
+      req.user.id
+    );
+
+    if (!ownedSession) {
+      const existingSession = await db.getSessionById(req.params.id);
+
+      if (!existingSession) {
+        return res.status(404).json({ error: "Session not found" });
+      }
+
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    await db.deleteSession(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting session:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // QUEUE ENTRIES
 
 // Add entry to queue
