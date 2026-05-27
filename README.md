@@ -157,12 +157,11 @@ sequenceDiagram
     end
 ```
 
-## Frontend To-Do For TE5
+## TE5 Implementation Status
 
-- Implemented: handle backend `401` and `403` responses in the UI.
-
-## Backend To-Do For TE5
-
-- Student queue submission is now protected.
-- Host-only moderation routes are already protected.
-- Add auth/access-control tests when you have time.
+- **Implemented**: Supabase email/password sign-up and sign-in, bearer token
+  forwarding from frontend to Express, and backend verification + role/ownership
+  checks on protected routes.
+- **Implemented**: frontend handles backend `401` / `403` responses with clear
+  UI messaging.
+- **Still missing**: auth/access-control automated tests.
