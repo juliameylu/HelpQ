@@ -17,6 +17,13 @@ function mapStatusForUi(status) {
   return status;
 }
 
+function authErrorText(status) {
+  if (status === 401) return "Please sign in again to view this queue.";
+  if (status === 403)
+    return "You don’t have permission to manage this session.";
+  return "Could not load queue.";
+}
+
 export default function ViewQueuePage() {
   const { endLiveSession } = useApp();
   const { sessionCode } = useParams();
@@ -43,7 +50,11 @@ export default function ViewQueuePage() {
       setSession(s);
       setQueue(rows ?? []);
     } catch (err) {
-      setError(err.message || "Could not load queue");
+      setError(
+        err?.status === 401 || err?.status === 403
+          ? authErrorText(err.status)
+          : err.message || "Could not load queue"
+      );
       setSession(null);
       setQueue([]);
     } finally {
@@ -66,7 +77,11 @@ export default function ViewQueuePage() {
       await updateQueueEntry(entryId, status);
       await load();
     } catch (err) {
-      setError(err.message || "Update failed");
+      setError(
+        err?.status === 401 || err?.status === 403
+          ? authErrorText(err.status)
+          : err.message || "Update failed"
+      );
     } finally {
       setBusyId(null);
     }
@@ -78,7 +93,11 @@ export default function ViewQueuePage() {
       await deleteQueueEntry(entryId);
       await load();
     } catch (err) {
-      setError(err.message || "Remove failed");
+      setError(
+        err?.status === 401 || err?.status === 403
+          ? authErrorText(err.status)
+          : err.message || "Remove failed"
+      );
     } finally {
       setBusyId(null);
     }

@@ -26,6 +26,12 @@ import { useApp } from "../context/useApp.js";
 
 const DEFAULT_AVG_HELP_MINUTES = 8;
 
+function authErrorText(status) {
+  if (status === 401) return "Please sign in again to continue.";
+  if (status === 403) return "You don't have access to this session.";
+  return "Something went wrong while loading the queue.";
+}
+
 function mapStatusForUi(status) {
   if (status === "helping") return "in-progress";
   if (status === "waiting") return "waiting";
@@ -159,7 +165,20 @@ export default function JoinQueuePage() {
         if (err.name === "AbortError") return;
         setApiSession(null);
         setQueueRaw([]);
-        setSessionLoadState(err.status === 404 ? "notfound" : "error");
+        setQueueLoadError(
+          err.status === 401 || err.status === 403
+            ? authErrorText(err.status)
+            : null
+        );
+        setSessionLoadState(
+          err.status === 404
+            ? "notfound"
+            : err.status === 401
+              ? "unauthorized"
+              : err.status === 403
+                ? "forbidden"
+                : "error"
+        );
       }
     }, 400);
 
@@ -170,6 +189,8 @@ export default function JoinQueuePage() {
   }, [form.sessionCode]);
 
   const sessionEnded = apiSession?.status === "ended";
+  const authDenied =
+    sessionLoadState === "unauthorized" || sessionLoadState === "forbidden";
 
   useEffect(() => {
     if (!apiSession || sessionLoadState !== "ok") return;
@@ -187,8 +208,13 @@ export default function JoinQueuePage() {
           setQueueRaw(Array.isArray(queue) ? queue : []);
           setQueueLoadError(null);
         }
-      } catch {
-        if (!cancelled) setQueueLoadError("Could not refresh the queue.");
+      } catch (err) {
+        if (!cancelled)
+          setQueueLoadError(
+            err?.status === 401 || err?.status === 403
+              ? authErrorText(err.status)
+              : "Could not refresh the queue."
+          );
       }
     }
 
@@ -373,7 +399,9 @@ export default function JoinQueuePage() {
           ? "That session is no longer available."
           : err.status === 400
             ? err.message || "Could not join the queue."
-            : "Something went wrong. Is the backend running?";
+            : err.status === 401 || err.status === 403
+              ? authErrorText(err.status)
+              : "Something went wrong. Is the backend running?";
       setErrors((prev) => ({ ...prev, sessionCode: msg }));
     } finally {
       setIsSubmitting(false);
@@ -396,7 +424,13 @@ export default function JoinQueuePage() {
     displaySession?.title ??
     (sessionLoadState === "loading"
       ? "Looking up session…"
-      : "Live help session");
+      : sessionLoadState === "unauthorized"
+        ? "Sign in required"
+        : sessionLoadState === "forbidden"
+          ? "Access denied"
+          : sessionLoadState === "notfound"
+            ? "Session not found"
+            : "Live help session");
   const sessionCodeLabel =
     (displaySession?.code ?? form.sessionCode.trim().toUpperCase()) || "—";
 
@@ -417,7 +451,12 @@ export default function JoinQueuePage() {
             <Link className="home-back-link" to="/">
               Back to home
             </Link>
-            {sessionEnded ? (
+            {authDenied ? (
+              <div className="ended-badge" aria-label="Access required">
+                <CircleOff aria-hidden="true" size={17} />
+                Access required
+              </div>
+            ) : sessionEnded ? (
               <div className="ended-badge" aria-label="Session has ended">
                 <CircleOff aria-hidden="true" size={17} />
                 Ended
@@ -497,11 +536,10 @@ export default function JoinQueuePage() {
           </section>
 
           <section className="join-panel" aria-labelledby="join-title">
-            {studentQueuePhase === "session-ended" ? (
-              <SessionEndedStatus
-                entry={submittedEntryDisplay}
-                onReset={resetEntry}
-              />
+            {authDenied ? (
+              <AuthDeniedStatus status={sessionLoadState} />
+            ) : studentQueuePhase === "session-ended" ? (
+              <SessionEndedStatus entry={submittedEntryDisplay} />
             ) : studentQueuePhase !== "none" ? (
               <QueueStatus
                 entry={submittedEntryDisplay}
@@ -696,6 +734,32 @@ function SessionEndedStatus({ entry }) {
         }}>
         Back to home
       </button>
+    </div>
+  );
+}
+
+function AuthDeniedStatus({ status }) {
+  const heading = status === "forbidden" ? "Access denied" : "Sign in required";
+  const note =
+    status === "forbidden"
+      ? "Your account doesn’t have permission to view or join this session."
+      : "Please sign in again to continue.";
+
+  return (
+    <div className="status-view status-view-ended">
+      <CircleOff aria-hidden="true" className="status-icon muted" size={40} />
+      <p className="eyebrow">Authorization</p>
+      <h2 id="join-title">{heading}</h2>
+      <p className="status-note">{note}</p>
+
+      <Link className="home-back-link queue-resume-home-link" to="/login">
+        Back to sign in
+      </Link>
+      <p className="field-message">
+        {status === "forbidden"
+          ? "If you believe this is a mistake, ask your instructor."
+          : "If you were already signed in, your session may have expired."}
+      </p>
     </div>
   );
 }
