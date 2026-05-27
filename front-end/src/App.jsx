@@ -10,47 +10,19 @@ import {
   Link2,
   Loader2,
   LockKeyhole,
-  LogIn,
   LogOut,
   Mail,
   MessageSquareText,
   UserRound,
   UsersRound
 } from "lucide-react";
+import { apiFetch } from "./lib/api";
 import { isSupabaseConfigured, supabase } from "./lib/supabaseClient";
 
-const session = {
-  code: "CS307",
-  title: "CSC 307 Office Hours",
-  host: "Professor Lin and TA team",
-  time: "Today, 2:00 PM - 4:00 PM",
-  location: "Building 14, Room 232",
-  averageHelpMinutes: 8
-};
-
-const queueEntries = [
-  {
-    id: "maya",
-    name: "Maya C.",
-    question: "Project setup keeps failing on npm install",
-    status: "in-progress"
-  },
-  {
-    id: "alex",
-    name: "Alex R.",
-    question: "React state is not updating after submit",
-    status: "waiting"
-  },
-  {
-    id: "priya",
-    name: "Priya S.",
-    question: "Need help testing an Express route",
-    status: "waiting"
-  }
-];
-
-const initialDemoForm = {
-  demoEmail: "julia.lu@calpoly.edu"
+const initialAuthForm = {
+  email: "",
+  password: "",
+  fullName: ""
 };
 
 function App() {
@@ -59,7 +31,8 @@ function App() {
     isSupabaseConfigured ? "checking" : "signed-out"
   );
   const [authError, setAuthError] = useState("");
-  const [isOAuthSubmitting, setIsOAuthSubmitting] = useState(false);
+  const [isAuthSubmitting, setIsAuthSubmitting] = useState(false);
+  const [authMode, setAuthMode] = useState("sign-in");
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -117,34 +90,53 @@ function App() {
     };
   }, []);
 
-  function handleDemoLogin(nextStudent) {
-    setAuthError("");
-    setAuthStatus("signed-in");
-    setStudent(nextStudent);
-  }
-
-  async function handleOAuthLogin() {
+  async function handleAuthSubmit(form) {
     setAuthError("");
 
     if (!isSupabaseConfigured) {
       setAuthError(
-        "Supabase is not configured locally yet. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, or use demo access."
+        "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
       );
       return;
     }
 
-    setIsOAuthSubmitting(true);
+    setIsAuthSubmitting(true);
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.href
+    try {
+      if (authMode === "sign-up") {
+        const { error } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: {
+            data: {
+              full_name: form.fullName,
+              role: "student"
+            }
+          }
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        setAuthError(
+          "Account created. If email confirmation is enabled, verify your inbox before signing in."
+        );
+        setAuthMode("sign-in");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password
+        });
+
+        if (error) {
+          throw error;
+        }
       }
-    });
-
-    if (error) {
-      setAuthError("We could not start Supabase login. Try again.");
-      setIsOAuthSubmitting(false);
+    } catch (error) {
+      setAuthError(error.message || "Authentication failed.");
+    } finally {
+      setIsAuthSubmitting(false);
     }
   }
 
@@ -162,22 +154,24 @@ function App() {
   ) : (
     <LoginPage
       authError={authError}
+      authMode={authMode}
       authStatus={authStatus}
-      isOAuthSubmitting={isOAuthSubmitting}
-      onDemoLogin={handleDemoLogin}
-      onOAuthLogin={handleOAuthLogin}
+      isAuthSubmitting={isAuthSubmitting}
+      onAuthModeChange={setAuthMode}
+      onAuthSubmit={handleAuthSubmit}
     />
   );
 }
 
 function LoginPage({
   authError,
+  authMode,
   authStatus,
-  isOAuthSubmitting,
-  onDemoLogin,
-  onOAuthLogin
+  isAuthSubmitting,
+  onAuthModeChange,
+  onAuthSubmit
 }) {
-  const [form, setForm] = useState(initialDemoForm);
+  const [form, setForm] = useState(initialAuthForm);
   const [errors, setErrors] = useState({});
 
   function updateField(field, value) {
@@ -185,32 +179,44 @@ function LoginPage({
     setErrors((currentErrors) => ({ ...currentErrors, [field]: "" }));
   }
 
-  function validateDemoAccess() {
+  function validateAuthForm() {
     const nextErrors = {};
 
-    if (!form.demoEmail.trim()) {
-      nextErrors.demoEmail = "Enter a demo student email.";
+    if (!form.email.trim()) {
+      nextErrors.email = "Enter your email.";
+    }
+
+    if (!form.password.trim()) {
+      nextErrors.password = "Enter your password.";
+    } else if (form.password.length < 6) {
+      nextErrors.password = "Password must be at least 6 characters.";
+    }
+
+    if (authMode === "sign-up" && !form.fullName.trim()) {
+      nextErrors.fullName = "Enter your name.";
     }
 
     return nextErrors;
   }
 
-  function handleDemoSubmit(event) {
+  function handleSubmit(event) {
     event.preventDefault();
-    const nextErrors = validateDemoAccess();
+    const nextErrors = validateAuthForm();
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
       return;
     }
 
-    onDemoLogin({
-      email: form.demoEmail.trim().toLowerCase(),
-      id: "demo-student",
-      name: getStudentName(form.demoEmail),
-      role: "student"
+    onAuthSubmit({
+      email: form.email.trim().toLowerCase(),
+      password: form.password,
+      fullName: form.fullName.trim()
     });
   }
+
+  const submitLabel =
+    authMode === "sign-up" ? "Create student account" : "Sign in";
 
   return (
     <main className="app-shell login-shell">
@@ -222,7 +228,7 @@ function LoginPage({
             </span>
             <div>
               <p className="brand-name">HelpQ</p>
-              <h1 id="login-title">Student login</h1>
+              <h1 id="login-title">Student access</h1>
             </div>
           </div>
           <div className="live-badge" aria-label="Login is protected">
@@ -234,8 +240,10 @@ function LoginPage({
         <div className="login-grid">
           <section className="login-panel" aria-labelledby="form-title">
             <div className="join-heading">
-              <p className="eyebrow">Welcome back</p>
-              <h2 id="form-title">Sign in with Supabase</h2>
+              <p className="eyebrow">Welcome</p>
+              <h2 id="form-title">
+                {authMode === "sign-up" ? "Create an account" : "Sign in"}
+              </h2>
             </div>
 
             {authError ? (
@@ -249,82 +257,128 @@ function LoginPage({
               <div className="config-note">
                 <AlertCircle aria-hidden="true" size={20} />
                 <p>
-                  Add Supabase frontend env vars to use OAuth. Demo access is
-                  available for local UI work.
+                  Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` to enable
+                  login.
                 </p>
               </div>
             ) : null}
 
-            <button
-              className="primary-action"
-              disabled={authStatus === "checking" || isOAuthSubmitting}
-              onClick={onOAuthLogin}
-              type="button">
-              {authStatus === "checking" || isOAuthSubmitting ? (
-                <>
-                  <Loader2 aria-hidden="true" className="spin-icon" size={19} />
-                  Checking session
-                </>
-              ) : (
-                <>
-                  Continue with Google
-                  <LogIn aria-hidden="true" size={19} />
-                </>
-              )}
-            </button>
+            <form className="join-form demo-login-form" noValidate onSubmit={handleSubmit}>
+              {authMode === "sign-up" ? (
+                <Field
+                  error={errors.fullName}
+                  icon={<UserRound aria-hidden="true" size={18} />}
+                  id="fullName"
+                  label="Full name">
+                  <input
+                    aria-describedby={
+                      errors.fullName ? "fullName-message" : undefined
+                    }
+                    aria-invalid={Boolean(errors.fullName)}
+                    autoComplete="name"
+                    id="fullName"
+                    name="fullName"
+                    onChange={(event) =>
+                      updateField("fullName", event.target.value)
+                    }
+                    placeholder="Julia Lu"
+                    type="text"
+                    value={form.fullName}
+                  />
+                </Field>
+              ) : null}
 
-            <div className="login-divider">
-              <span>Local demo</span>
-            </div>
-
-            <form
-              className="join-form demo-login-form"
-              noValidate
-              onSubmit={handleDemoSubmit}>
               <Field
-                error={errors.demoEmail}
+                error={errors.email}
                 icon={<Mail aria-hidden="true" size={18} />}
-                id="demoEmail"
-                label="Demo student email">
+                id="email"
+                label="Email">
                 <input
-                  aria-describedby={
-                    errors.demoEmail ? "demoEmail-message" : undefined
-                  }
-                  aria-invalid={Boolean(errors.demoEmail)}
+                  aria-describedby={errors.email ? "email-message" : undefined}
+                  aria-invalid={Boolean(errors.email)}
                   autoComplete="email"
-                  id="demoEmail"
-                  name="demoEmail"
-                  onChange={(event) =>
-                    updateField("demoEmail", event.target.value)
-                  }
+                  id="email"
+                  name="email"
+                  onChange={(event) => updateField("email", event.target.value)}
                   placeholder="julia.lu@calpoly.edu"
                   type="email"
-                  value={form.demoEmail}
+                  value={form.email}
                 />
               </Field>
 
-              <button className="secondary-action" type="submit">
-                Use demo student
-                <ArrowRight aria-hidden="true" size={18} />
+              <Field
+                error={errors.password}
+                icon={<LockKeyhole aria-hidden="true" size={18} />}
+                id="password"
+                label="Password">
+                <input
+                  aria-describedby={
+                    errors.password ? "password-message" : undefined
+                  }
+                  aria-invalid={Boolean(errors.password)}
+                  autoComplete={
+                    authMode === "sign-up" ? "new-password" : "current-password"
+                  }
+                  id="password"
+                  name="password"
+                  onChange={(event) =>
+                    updateField("password", event.target.value)
+                  }
+                  placeholder="Enter your password"
+                  type="password"
+                  value={form.password}
+                />
+              </Field>
+
+              <button
+                className="primary-action"
+                disabled={
+                  !isSupabaseConfigured ||
+                  authStatus === "checking" ||
+                  isAuthSubmitting
+                }
+                type="submit">
+                {authStatus === "checking" || isAuthSubmitting ? (
+                  <>
+                    <Loader2 aria-hidden="true" className="spin-icon" size={19} />
+                    Processing
+                  </>
+                ) : (
+                  <>
+                    {submitLabel}
+                    <ArrowRight aria-hidden="true" size={19} />
+                  </>
+                )}
               </button>
             </form>
+
+            <button
+              className="secondary-action"
+              onClick={() =>
+                onAuthModeChange(authMode === "sign-up" ? "sign-in" : "sign-up")
+              }
+              type="button">
+              {authMode === "sign-up"
+                ? "Already have an account?"
+                : "Need an account?"}
+            </button>
           </section>
 
           <aside className="login-context" aria-label="HelpQ session preview">
-            <p className="eyebrow">Next session</p>
-            <h2>{session.title}</h2>
+            <p className="eyebrow">How it works</p>
+            <h2>Join live office-hours queues</h2>
             <dl className="login-summary">
               <div>
-                <dt>Time</dt>
-                <dd>{session.time}</dd>
+                <dt>Step 1</dt>
+                <dd>Sign in with your student account.</dd>
               </div>
               <div>
-                <dt>Queue</dt>
-                <dd>{queueEntries.length} active requests</dd>
+                <dt>Step 2</dt>
+                <dd>Enter the host session code.</dd>
               </div>
               <div>
-                <dt>Session code</dt>
-                <dd>{session.code}</dd>
+                <dt>Step 3</dt>
+                <dd>Submit your question and track the live queue.</dd>
               </div>
             </dl>
           </aside>
@@ -338,51 +392,116 @@ function SessionPage({ onLogout, student }) {
   const [form, setForm] = useState(() => createInitialJoinForm());
   const [errors, setErrors] = useState({});
   const [submittedEntry, setSubmittedEntry] = useState(null);
+  const [sessionData, setSessionData] = useState(null);
+  const [queueEntries, setQueueEntries] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [lookupError, setLookupError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
 
-  const waitingAhead = queueEntries.filter(
-    (entry) => entry.status === "waiting"
-  ).length;
+  useEffect(() => {
+    const sessionCode = form.sessionCode.trim().toUpperCase();
 
-  const currentPosition = submittedEntry
-    ? submittedEntry.position
-    : waitingAhead + 1;
+    if (!sessionCode) {
+      return undefined;
+    }
+
+    async function loadSessionPreview() {
+      setIsLoadingSession(true);
+      setLookupError("");
+
+      try {
+        const nextSession = await apiFetch(`/api/sessions/join/${sessionCode}`);
+        setSessionData(nextSession);
+
+        const [nextQueue, nextStats] = await Promise.all([
+          apiFetch(`/api/sessions/${nextSession.id}/queue`),
+          apiFetch(`/api/sessions/${nextSession.id}/stats`)
+        ]);
+
+        setQueueEntries(nextQueue);
+        setStats(nextStats);
+
+        if (submittedEntry?.id) {
+          const updatedPosition = findQueuePosition(nextQueue, submittedEntry.id);
+
+          if (updatedPosition) {
+            setSubmittedEntry((currentEntry) =>
+              currentEntry
+                ? {
+                    ...currentEntry,
+                    position: updatedPosition
+                  }
+                : currentEntry
+            );
+          }
+        }
+      } catch (error) {
+        setSessionData(null);
+        setQueueEntries([]);
+        setStats(null);
+        setLookupError(
+          error.status === 404
+            ? `No open session found for ${sessionCode}.`
+            : error.message || "Could not load session."
+        );
+      } finally {
+        setIsLoadingSession(false);
+      }
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void loadSessionPreview();
+    }, 250);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [form.sessionCode, submittedEntry?.id]);
+
+  const waitingAhead = stats?.waiting ?? queueEntries.length;
+  const currentPosition = submittedEntry?.position || waitingAhead + 1;
 
   const waitEstimate = useMemo(() => {
-    const lowEstimate = currentPosition * session.averageHelpMinutes;
+    const minutesPerStudent = 8;
+    const lowEstimate = currentPosition * minutesPerStudent;
     return `${lowEstimate}-${lowEstimate + 5} min`;
   }, [currentPosition]);
 
-  const visibleQueue = useMemo(() => {
-    if (!submittedEntry) {
-      return queueEntries;
-    }
-
-    return [
-      ...queueEntries,
-      {
-        id: submittedEntry.id,
-        name: submittedEntry.studentName,
-        question: submittedEntry.question,
-        status: "waiting",
-        isCurrentStudent: true
-      }
-    ];
-  }, [submittedEntry]);
+  const visibleQueue = useMemo(
+    () =>
+      queueEntries.map((entry) => ({
+        id: entry.id,
+        name: entry.student_name,
+        question: entry.question,
+        status: entry.status.replace("_", "-"),
+        isCurrentStudent: entry.id === submittedEntry?.id
+      })),
+    [queueEntries, submittedEntry]
+  );
 
   function updateField(field, value) {
+    if (field === "sessionCode" && !value.trim()) {
+      setSessionData(null);
+      setQueueEntries([]);
+      setStats(null);
+      setLookupError("");
+      setSubmittedEntry(null);
+    }
+
     setForm((currentForm) => ({ ...currentForm, [field]: value }));
     setErrors((currentErrors) => ({ ...currentErrors, [field]: "" }));
+    setSubmitError("");
   }
 
   function validateForm() {
     const nextErrors = {};
-    const sessionCode = form.sessionCode.trim().toUpperCase();
 
-    if (!sessionCode) {
+    if (!form.sessionCode.trim()) {
       nextErrors.sessionCode = "Enter the session code from your host.";
-    } else if (sessionCode !== session.code) {
-      nextErrors.sessionCode = `No open session found for ${sessionCode}.`;
+    } else if (!sessionData) {
+      nextErrors.sessionCode = "Enter a valid open session code.";
     }
 
     if (form.question.trim().length < 8) {
@@ -392,39 +511,64 @@ function SessionPage({ onLogout, student }) {
     return nextErrors;
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = validateForm();
     setErrors(nextErrors);
 
-    if (Object.keys(nextErrors).length > 0) {
+    if (Object.keys(nextErrors).length > 0 || !sessionData) {
       return;
     }
 
     setIsSubmitting(true);
+    setSubmitError("");
 
-    window.setTimeout(() => {
+    try {
+      const entry = await apiFetch(`/api/sessions/${sessionData.id}/queue`, {
+        method: "POST",
+        body: JSON.stringify({
+          studentName: student.name,
+          question: form.question.trim()
+        })
+      });
+
+      const [nextQueue, nextStats] = await Promise.all([
+        apiFetch(`/api/sessions/${sessionData.id}/queue`),
+        apiFetch(`/api/sessions/${sessionData.id}/stats`)
+      ]);
+
+      setQueueEntries(nextQueue);
+      setStats(nextStats);
+
+      const position = findQueuePosition(nextQueue, entry.id) || nextStats?.waiting;
+
       setSubmittedEntry({
-        id: createEntryId(),
-        details: form.details.trim(),
-        question: form.question.trim(),
-        sessionCode: form.sessionCode.trim().toUpperCase(),
-        studentName: student.name,
-        position: waitingAhead + 1,
-        status: "waiting",
+        id: entry.id,
+        question: entry.question,
+        position: position || 1,
         submittedAt: new Intl.DateTimeFormat("en", {
           hour: "numeric",
           minute: "2-digit"
-        }).format(new Date())
+        }).format(new Date(entry.created_at || Date.now()))
       });
+    } catch (error) {
+      if (error.status === 401) {
+        setSubmitError("You must be signed in to join the queue.");
+      } else if (error.status === 403) {
+        setSubmitError("Only student accounts can submit queue questions.");
+      } else {
+        setSubmitError(error.message || "Could not join the queue.");
+      }
+    } finally {
       setIsSubmitting(false);
-    }, 400);
+    }
   }
 
   function resetEntry() {
     setForm(createInitialJoinForm(form.sessionCode));
     setErrors({});
     setSubmittedEntry(null);
+    setSubmitError("");
   }
 
   return (
@@ -437,7 +581,7 @@ function SessionPage({ onLogout, student }) {
             </span>
             <div>
               <p className="brand-name">HelpQ</p>
-              <h1 id="page-title">{session.title}</h1>
+              <h1 id="page-title">{sessionData?.title || "Join a session"}</h1>
             </div>
           </div>
           <div className="session-actions">
@@ -457,26 +601,26 @@ function SessionPage({ onLogout, student }) {
             <div className="session-heading">
               <div>
                 <p className="eyebrow">Session</p>
-                <h2 id="session-title">{session.title}</h2>
+                <h2 id="session-title">{sessionData?.title || "Waiting for code"}</h2>
               </div>
               <span className="session-code">
                 <Hash aria-hidden="true" size={18} />
-                {session.code}
+                {sessionData?.join_code || form.sessionCode || "----"}
               </span>
             </div>
 
             <dl className="session-details">
               <div>
-                <dt>Host</dt>
-                <dd>{session.host}</dd>
+                <dt>Status</dt>
+                <dd>{sessionData?.status || "Enter a code"}</dd>
               </div>
               <div>
-                <dt>Time</dt>
-                <dd>{session.time}</dd>
+                <dt>Notes</dt>
+                <dd>{sessionData?.description || "No session notes provided."}</dd>
               </div>
               <div>
-                <dt>Location</dt>
-                <dd>{session.location}</dd>
+                <dt>Queue</dt>
+                <dd>{stats ? `${stats.waiting} waiting` : "No queue data yet"}</dd>
               </div>
             </dl>
 
@@ -484,7 +628,7 @@ function SessionPage({ onLogout, student }) {
               <Metric
                 icon={<UsersRound aria-hidden="true" size={20} />}
                 label="Waiting"
-                value={submittedEntry ? waitingAhead + 1 : waitingAhead}
+                value={stats?.waiting ?? 0}
               />
               <Metric
                 icon={<Clock3 aria-hidden="true" size={20} />}
@@ -518,15 +662,36 @@ function SessionPage({ onLogout, student }) {
                   </div>
                 </div>
 
+                {lookupError ? (
+                  <div className="auth-alert" role="alert">
+                    <AlertCircle aria-hidden="true" size={20} />
+                    <p>{lookupError}</p>
+                  </div>
+                ) : null}
+
+                {submitError ? (
+                  <div className="auth-alert" role="alert">
+                    <AlertCircle aria-hidden="true" size={20} />
+                    <p>{submitError}</p>
+                  </div>
+                ) : null}
+
                 <form className="join-form" noValidate onSubmit={handleSubmit}>
                   <Field
                     error={errors.sessionCode}
+                    helper={
+                      isLoadingSession
+                        ? "Checking session code..."
+                        : sessionData
+                          ? "Session found."
+                          : ""
+                    }
                     icon={<Hash aria-hidden="true" size={18} />}
                     id="sessionCode"
                     label="Session code">
                     <input
                       aria-describedby={
-                        errors.sessionCode ? "sessionCode-message" : undefined
+                        errors.sessionCode ? "sessionCode-message" : "sessionCode-helper"
                       }
                       aria-invalid={Boolean(errors.sessionCode)}
                       autoComplete="off"
@@ -568,7 +733,7 @@ function SessionPage({ onLogout, student }) {
                   </Field>
 
                   <Field
-                    helper="Optional"
+                    helper="Optional for now. Backend does not store this field yet."
                     icon={<MessageSquareText aria-hidden="true" size={18} />}
                     id="details"
                     label="Extra details">
@@ -586,7 +751,7 @@ function SessionPage({ onLogout, student }) {
 
                   <button
                     className="primary-action"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isLoadingSession || !sessionData}
                     type="submit">
                     {isSubmitting ? (
                       <>
@@ -721,17 +886,9 @@ function createInitialJoinForm(sessionCode = getInitialSessionCode()) {
   };
 }
 
-function createEntryId() {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-
-  return `entry-${Date.now()}`;
-}
-
 function getInitialSessionCode() {
   const params = new URLSearchParams(window.location.search);
-  return (params.get("code") || session.code).toUpperCase();
+  return (params.get("code") || "").toUpperCase();
 }
 
 function getStudentName(email) {
@@ -744,6 +901,11 @@ function getStudentName(email) {
   return namePieces
     .map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1))
     .join(" ");
+}
+
+function findQueuePosition(queueEntries, entryId) {
+  const position = queueEntries.findIndex((entry) => entry.id === entryId);
+  return position === -1 ? null : position + 1;
 }
 
 async function syncSupabaseStudent(user, handlers) {
@@ -769,9 +931,11 @@ async function syncSupabaseStudent(user, handlers) {
     handlers.onStudent(student);
     handlers.onError("");
     handlers.onStatus("signed-in");
-  } catch {
+  } catch (error) {
     handlers.onStudent(null);
-    handlers.onError("Your account profile is not ready for student access.");
+    handlers.onError(
+      error.message || "Your account profile is not ready for student access."
+    );
     handlers.onStatus("signed-out");
   }
 }
