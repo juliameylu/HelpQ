@@ -16,7 +16,20 @@ npm run dev:frontend
 The queue page currently uses local browser state and demo session data while
 the backend queue API is still being built.
 
-CI trigger for assignment makeup
+CI trigger for assignment makeup Open http://127.0.0.1:5173/ for the home
+dashboard. Sessions and queues use the Supabase API
+(`npm run start --workspace=@helpq/express-backend` on port 3001).
+
+```bash
+# Terminal 1 — API (requires Supabase env in packages/express-backend/.env)
+npm run start --workspace=@helpq/express-backend
+
+# Terminal 2 — frontend (proxies /api → :3001)
+npm run dev:frontend
+```
+
+Log in as an instructor account to create office hours, or as a student account
+to join queues. Share the session join code from the instructor view.
 
 ## TE5 Access Control
 
@@ -55,6 +68,10 @@ your sign-up and sign-in flow.
 Because of that design, you do not need custom Express `/signup` or `/signin`
 endpoints unless your team explicitly wants auth to go through your backend
 instead of Supabase directly.
+
+**Email on sign-up:** **confirm email ON**, **custom SMTP OFF** (Supabase default
+mailer). Configure URLs in the dashboard — see
+[docs/SUPABASE_EMAIL_AUTH.md](docs/SUPABASE_EMAIL_AUTH.md).
 
 ### What is still missing
 

@@ -49,3 +49,23 @@ export const requireStudent = async (req, res, next) => {
     return internalServerError(res, "Failed to load user profile");
   }
 };
+
+export const requireProfessor = async (req, res, next) => {
+  try {
+    const profile = await db.getProfileById(req.user.id);
+
+    if (!profile) {
+      return unauthorizedError(res, "User profile not found");
+    }
+
+    if (profile.role !== "professor") {
+      return forbiddenError(res, "Professor access required");
+    }
+
+    req.profile = profile;
+    next();
+  } catch (error) {
+    console.error("Error loading professor profile:", error);
+    return internalServerError(res, "Failed to load user profile");
+  }
+};
