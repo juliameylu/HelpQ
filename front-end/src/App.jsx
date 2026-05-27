@@ -263,7 +263,10 @@ function LoginPage({
               </div>
             ) : null}
 
-            <form className="join-form demo-login-form" noValidate onSubmit={handleSubmit}>
+            <form
+              className="join-form demo-login-form"
+              noValidate
+              onSubmit={handleSubmit}>
               {authMode === "sign-up" ? (
                 <Field
                   error={errors.fullName}
@@ -340,7 +343,11 @@ function LoginPage({
                 type="submit">
                 {authStatus === "checking" || isAuthSubmitting ? (
                   <>
-                    <Loader2 aria-hidden="true" className="spin-icon" size={19} />
+                    <Loader2
+                      aria-hidden="true"
+                      className="spin-icon"
+                      size={19}
+                    />
                     Processing
                   </>
                 ) : (
@@ -424,7 +431,10 @@ function SessionPage({ onLogout, student }) {
         setStats(nextStats);
 
         if (submittedEntry?.id) {
-          const updatedPosition = findQueuePosition(nextQueue, submittedEntry.id);
+          const updatedPosition = findQueuePosition(
+            nextQueue,
+            submittedEntry.id
+          );
 
           if (updatedPosition) {
             setSubmittedEntry((currentEntry) =>
@@ -540,7 +550,8 @@ function SessionPage({ onLogout, student }) {
       setQueueEntries(nextQueue);
       setStats(nextStats);
 
-      const position = findQueuePosition(nextQueue, entry.id) || nextStats?.waiting;
+      const position =
+        findQueuePosition(nextQueue, entry.id) || nextStats?.waiting;
 
       setSubmittedEntry({
         id: entry.id,
@@ -601,7 +612,9 @@ function SessionPage({ onLogout, student }) {
             <div className="session-heading">
               <div>
                 <p className="eyebrow">Session</p>
-                <h2 id="session-title">{sessionData?.title || "Waiting for code"}</h2>
+                <h2 id="session-title">
+                  {sessionData?.title || "Waiting for code"}
+                </h2>
               </div>
               <span className="session-code">
                 <Hash aria-hidden="true" size={18} />
@@ -616,11 +629,15 @@ function SessionPage({ onLogout, student }) {
               </div>
               <div>
                 <dt>Notes</dt>
-                <dd>{sessionData?.description || "No session notes provided."}</dd>
+                <dd>
+                  {sessionData?.description || "No session notes provided."}
+                </dd>
               </div>
               <div>
                 <dt>Queue</dt>
-                <dd>{stats ? `${stats.waiting} waiting` : "No queue data yet"}</dd>
+                <dd>
+                  {stats ? `${stats.waiting} waiting` : "No queue data yet"}
+                </dd>
               </div>
             </dl>
 
@@ -691,7 +708,9 @@ function SessionPage({ onLogout, student }) {
                     label="Session code">
                     <input
                       aria-describedby={
-                        errors.sessionCode ? "sessionCode-message" : "sessionCode-helper"
+                        errors.sessionCode
+                          ? "sessionCode-message"
+                          : "sessionCode-helper"
                       }
                       aria-invalid={Boolean(errors.sessionCode)}
                       autoComplete="off"
