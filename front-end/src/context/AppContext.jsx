@@ -41,6 +41,7 @@ export function AppProvider({ children }) {
   const [classes, setClasses] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionsHydrated, setSessionsHydrated] = useState(false);
   const [sessionsError, setSessionsError] = useState(null);
   const [notifications, setNotifications] = useState(
     persisted?.notifications ?? []
@@ -147,6 +148,7 @@ export function AppProvider({ children }) {
     async ({ silent = false } = {}) => {
       if (!user) {
         setSessions([]);
+        setSessionsHydrated(false);
         return;
       }
 
@@ -184,6 +186,7 @@ export function AppProvider({ children }) {
           err.message || "Could not load sessions. Is the API server running?"
         );
       } finally {
+        setSessionsHydrated(true);
         if (!silent) {
           setSessionsLoading(false);
         }
@@ -194,7 +197,7 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     const id = window.setTimeout(() => {
-      refreshSessions();
+      refreshSessions({ silent: true });
     }, 0);
     return () => window.clearTimeout(id);
   }, [refreshSessions]);
@@ -203,7 +206,7 @@ export function AppProvider({ children }) {
     if (!user) return undefined;
 
     const intervalId = window.setInterval(() => {
-      void refreshSessions();
+      void refreshSessions({ silent: true });
     }, 60_000);
 
     return () => window.clearInterval(intervalId);
@@ -517,6 +520,7 @@ export function AppProvider({ children }) {
     liveSessions,
     sessions,
     sessionsLoading,
+    sessionsHydrated,
     sessionsError,
     classesLoading,
     classesError,
