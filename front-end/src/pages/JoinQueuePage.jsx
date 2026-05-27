@@ -75,12 +75,16 @@ export default function JoinQueuePage() {
     };
   });
 
-  // Once user loads (async), backfill name if the field is still empty
+  // Once user loads (async), backfill name if the field is still empty.
+  // Deferred via setTimeout so it doesn't synchronously setState in an effect.
   useEffect(() => {
     if (!user?.name) return;
-    setForm((prev) =>
-      prev.studentName ? prev : { ...prev, studentName: user.name }
-    );
+    const id = window.setTimeout(() => {
+      setForm((prev) =>
+        prev.studentName ? prev : { ...prev, studentName: user.name }
+      );
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [user?.name]);
   const [errors, setErrors] = useState({});
   const [submittedEntry, setSubmittedEntry] = useState(() => {

@@ -980,8 +980,9 @@ textarea:focus {
   margin: 0 0 8px;
   font-size: 1.875rem;
   font-weight: 700;
-  color: #0f172b;
-  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: #18352f;
+  letter-spacing: 0;
 }
 
 .home-header p {
