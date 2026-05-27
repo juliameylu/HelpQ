@@ -6,9 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "LOAD_ENV_LOCAL=true node --watch-path=src src/index.js",
-    "dev:queue": "nodemon src/server.js",
     "start": "node src/index.js",
-    "start:queue": "node src/server.js",
     "lint": "eslint .",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "tdd": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch"
