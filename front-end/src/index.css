@@ -863,13 +863,13 @@ textarea:focus {
 }
 
 .sidebar-brand-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  background: linear-gradient(90deg, #154734, #23563f);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #154734;
+  text-rendering: optimizeLegibility;
 }
 
 .sidebar-profile {
@@ -976,19 +976,28 @@ textarea:focus {
   max-width: 900px;
 }
 
-.home-header h1 {
+.home-title {
   margin: 0 0 8px;
-  font-size: 1.875rem;
-  font-weight: 700;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 30px;
+  font-weight: 800;
   line-height: 1.2;
   color: #18352f;
   letter-spacing: 0;
+  text-rendering: optimizeLegibility;
 }
 
-.home-header p {
+.home-subtitle {
+  font-family: Arial, Helvetica, sans-serif;
   margin: 0 0 32px;
-  font-size: 1rem;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
   color: #45556c;
+  letter-spacing: 0;
+  font-kerning: normal;
+  font-variant-ligatures: none;
+  text-rendering: optimizeLegibility;
 }
 
 .home-section {
@@ -1003,11 +1012,33 @@ textarea:focus {
   margin-bottom: 16px;
 }
 
+.home-section-heading .page-header-actions {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
 .home-section-heading h2 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
   color: #0f172b;
+}
+
+.home-section-title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-rendering: optimizeLegibility;
+}
+
+.home-empty-message {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-rendering: optimizeLegibility;
 }
 
 .badge {

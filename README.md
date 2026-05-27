@@ -75,12 +75,6 @@ default mailer). Configure URLs in the dashboard — see
 
 ### What is still missing
 
-- The frontend must actually send the Supabase bearer token when it calls
-  protected Express routes.
-- The frontend must replace demo-only queue/session actions with real `/api/...`
-  requests.
-- If sign-up and sign-in UI live only in another branch, they still need to be
-  merged into the branch you submit.
 - There are still no auth-specific automated tests in this branch.
 
 ## Sequence Diagrams
@@ -165,19 +159,10 @@ sequenceDiagram
 
 ## Frontend To-Do For TE5
 
-- Use Supabase email/password sign-up if you need first-time account creation in
-  the submitted branch.
-- Use Supabase email/password sign-in in the submitted branch.
-- After sign-in, call protected Express routes with
-  `Authorization: Bearer <access_token>`.
-- Replace mock queue submit logic with a real
-  `POST /api/sessions/:sessionId/queue` request.
 - Handle backend `401` and `403` responses in the UI.
 
 ## Backend To-Do For TE5
 
 - Student queue submission is now protected.
 - Host-only moderation routes are already protected.
-- If you want stricter access control, decide whether queue reads and stats
-  should also require auth.
 - Add auth/access-control tests when you have time.
