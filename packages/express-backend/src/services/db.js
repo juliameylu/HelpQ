@@ -425,12 +425,20 @@ export const createSession = async (
   return data[0];
 };
 
-export const getSessionByJoinCode = async (joinCode) => {
-  const { data, error } = await supabaseAdmin
+export const getSessionByJoinCode = async (
+  joinCode,
+  { activeOnly = false } = {}
+) => {
+  let query = supabaseAdmin
     .from("sessions")
     .select("*")
-    .eq("join_code", joinCode)
-    .single();
+    .eq("join_code", joinCode);
+
+  if (activeOnly) {
+    query = query.eq("status", "active");
+  }
+
+  const { data, error } = await query.single();
 
   if (error && error.code !== "PGRST116") throw error;
   return data;
