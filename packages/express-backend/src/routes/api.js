@@ -22,6 +22,7 @@ import {
   validationError
 } from "../utils/validation.js";
 import {
+  badRequestError,
   forbiddenError,
   internalServerError,
   notFoundError
@@ -500,7 +501,9 @@ router.get("/sessions/join/:joinCode", requireAuth, async (req, res) => {
       });
     }
 
-    const session = await db.getSessionByJoinCode(joinCode);
+    const session = await db.getSessionByJoinCode(joinCode, {
+      activeOnly: true
+    });
 
     if (!session) {
       return notFoundError(res, "Session");
@@ -668,6 +671,19 @@ router.post(
 
       if (Object.keys(details).length > 0) {
         return validationError(res, details);
+      }
+
+      const session = await db.getSessionById(req.params.sessionId);
+
+      if (!session) {
+        return notFoundError(res, "Session");
+      }
+
+      if (session.status !== "active") {
+        return badRequestError(
+          res,
+          "Session is closed. Ask your host for an active session."
+        );
       }
 
       const entry = await db.addQueueEntry(
