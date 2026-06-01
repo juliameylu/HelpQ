@@ -5,7 +5,8 @@ import request from "supertest";
 const mockGetUser = jest.fn();
 const mockDb = {
   addQueueEntry: jest.fn(),
-  getProfileById: jest.fn()
+  getProfileById: jest.fn(),
+  getSessionById: jest.fn()
 };
 
 // focused on role checks only
@@ -83,6 +84,10 @@ test("POST /api/sessions/:sessionId/queue creates an entry for a student account
     full_name: "Student User",
     role: "student"
   });
+  mockDb.getSessionById.mockResolvedValue({
+    id: sessionId,
+    status: "active"
+  });
   mockDb.addQueueEntry.mockResolvedValue({
     id: randomUUID(),
     session_id: sessionId,
@@ -105,6 +110,55 @@ test("POST /api/sessions/:sessionId/queue creates an entry for a student account
     "Student User",
     "Help"
   );
+});
+
+test("POST /api/sessions/:sessionId/queue returns 404 when the session does not exist", async () => {
+  signInAs(studentUser);
+  mockDb.getProfileById.mockResolvedValue({
+    id: studentUser.id,
+    email: "student@helpq.test",
+    full_name: "Student User",
+    role: "student"
+  });
+  mockDb.getSessionById.mockResolvedValue(null);
+
+  const response = await request(app)
+    .post(`/api/sessions/${sessionId}/queue`)
+    .set("Authorization", "Bearer student-token")
+    .send({
+      question: "Help"
+    });
+
+  expect(response.status).toBe(404);
+  expect(response.body.error.message).toBe("Session not found");
+  expect(mockDb.addQueueEntry).not.toHaveBeenCalled();
+});
+
+test("POST /api/sessions/:sessionId/queue returns 400 when the session is closed", async () => {
+  signInAs(studentUser);
+  mockDb.getProfileById.mockResolvedValue({
+    id: studentUser.id,
+    email: "student@helpq.test",
+    full_name: "Student User",
+    role: "student"
+  });
+  mockDb.getSessionById.mockResolvedValue({
+    id: sessionId,
+    status: "closed"
+  });
+
+  const response = await request(app)
+    .post(`/api/sessions/${sessionId}/queue`)
+    .set("Authorization", "Bearer student-token")
+    .send({
+      question: "Help"
+    });
+
+  expect(response.status).toBe(400);
+  expect(response.body.error.message).toBe(
+    "Session is closed. Ask your host for an active session."
+  );
+  expect(mockDb.addQueueEntry).not.toHaveBeenCalled();
 });
 
 test("POST /api/sessions/:sessionId/queue returns 401 when the profile is missing", async () => {
