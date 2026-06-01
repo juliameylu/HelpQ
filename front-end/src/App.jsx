@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage.jsx";
 import JoinClassPage from "./pages/JoinClassPage.jsx";
 import JoinQueuePage from "./pages/JoinQueuePage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import GuestJoinPage from "./pages/GuestJoinPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import NotificationsPage from "./pages/NotificationsPage.jsx";
@@ -21,8 +22,13 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        {/* Public student join — no auth required */}
+        <Route path="/join" element={<GuestJoinPage />} />
+        <Route path="/student/join" element={<GuestJoinPage />} />
+
+        {/* Auth'd join (from inside dashboard) */}
         <Route
-          path="/join"
+          path="/dashboard/join"
           element={
             <ProtectedRoute>
               <JoinQueuePage />
