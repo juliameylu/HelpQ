@@ -8,15 +8,20 @@ const app = express();
 
 // In production, restrict CORS to the deployed frontend origin(s).
 // Set CORS_ORIGIN="https://helpq.netlify.app" (or comma-separated list) in env.
-// In development / tests, allow all origins.
-const corsOrigins = process.env.CORS_ORIGIN
+// In development / tests, default to local frontend origins when CORS_ORIGIN is unset.
+const configuredCorsOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean)
-  : "*";
+  : [];
+const corsOrigins = configuredCorsOrigins.length
+  ? configuredCorsOrigins
+  : process.env.NODE_ENV === "production"
+    ? []
+    : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
 app.use(
   cors({
-    origin: corsOrigins === "*" ? "*" : (origin, cb) => {
-      // Allow server-to-server calls (no origin header) and listed origins
+    origin: (origin, cb) => {
+      // Allow server-to-server calls (no origin header) and listed origins.
       if (!origin || corsOrigins.includes(origin)) return cb(null, true);
       cb(new Error(`CORS: origin ${origin} not allowed`));
     },

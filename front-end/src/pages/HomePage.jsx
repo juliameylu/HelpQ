@@ -107,6 +107,12 @@ export default function HomePage() {
                 {liveSessions.length} Active
               </span>
             ) : null}
+            {isInstructor ? (
+              <Link className="btn btn-gold btn-compact" to="/sessions/new">
+                <Plus aria-hidden="true" size={16} />
+                Quick start
+              </Link>
+            ) : null}
           </div>
 
           {sessionsError ? (
