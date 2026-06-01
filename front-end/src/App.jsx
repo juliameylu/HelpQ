@@ -8,11 +8,19 @@ import HomePage from "./pages/HomePage.jsx";
 import JoinClassPage from "./pages/JoinClassPage.jsx";
 import JoinQueuePage from "./pages/JoinQueuePage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import NotificationsPage from "./pages/NotificationsPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import ViewQueuePage from "./pages/ViewQueuePage.jsx";
+import QuickStartSessionPage from "./pages/QuickStartSessionPage.jsx";
+import { useApp } from "./context/useApp.js";
+
+function HomeOrLanding() {
+  const { user } = useApp();
+  return user ? <HomePage /> : <LandingPage />;
+}
 
 export default function App() {
   return (
@@ -30,14 +38,7 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<HomeOrLanding />} />
         <Route
           path="/notifications"
           element={
@@ -59,6 +60,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <JoinClassPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Quick session creation — professor creates a session without a class */}
+        <Route
+          path="/sessions/new"
+          element={
+            <ProtectedRoute>
+              <QuickStartSessionPage />
             </ProtectedRoute>
           }
         />
