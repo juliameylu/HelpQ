@@ -8,6 +8,7 @@ const mockDb = {
   createSession: jest.fn(),
   getQueueEntryById: jest.fn(),
   getSessionById: jest.fn(),
+  getSessionByJoinCode: jest.fn(),
   getSessionByIdForHost: jest.fn(),
   removeQueueEntry: jest.fn(),
   updateQueueEntryStatus: jest.fn()
@@ -113,6 +114,21 @@ test("POST /api/sessions creates a session with a valid bearer token", async () 
     "Help",
     null
   );
+});
+
+test("GET /api/sessions/join/:joinCode returns 404 when no active session exists", async () => {
+  authenticateAs(ownerUser);
+  mockDb.getSessionByJoinCode.mockResolvedValue(null);
+
+  const response = await request(app)
+    .get("/api/sessions/join/CLOSED1")
+    .set("Authorization", "Bearer real-token");
+
+  expect(response.status).toBe(404);
+  expect(response.body.error.message).toBe("Session not found");
+  expect(mockDb.getSessionByJoinCode).toHaveBeenCalledWith("CLOSED1", {
+    activeOnly: true
+  });
 });
 
 test("PATCH /api/queue/:entryId/status returns 401 when no bearer token is provided", async () => {
