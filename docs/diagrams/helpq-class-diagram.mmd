@@ -1,0 +1,132 @@
+---
+title: HelpQ Domain Model (Class Diagram)
+---
+classDiagram
+  direction TB
+
+  %% ── Persisted in Supabase ────────────────────────────────────────────────
+
+  class Profile {
+    +UUID id
+    +String email
+    +String fullName
+    +String role
+    +DateTime createdAt
+    role: "student" | "professor"
+  }
+
+  class Class {
+    +UUID id
+    +String title
+    +String code
+    +String description
+    +String joinCode
+    +UUID createdBy
+    +DateTime createdAt
+  }
+
+  class ClassEnrollment {
+    +UUID classId
+    +UUID userId
+    +DateTime enrolledAt
+  }
+
+  class OfficeHoursSchedule {
+    +UUID id
+    +UUID classId
+    +UUID hostId
+    +String title
+    +String description
+    +DateTime createdAt
+    slots: ScheduleSlot[]
+  }
+
+  class ScheduleSlot {
+    +UUID id
+    +UUID scheduleId
+    +Int dayOfWeek
+    +Time startTime
+    +Time endTime
+    dayOfWeek: 0=Sun .. 6=Sat
+  }
+
+  class Session {
+    +UUID id
+    +String hostId
+    +UUID classId
+    +String joinCode
+    +String title
+    +String description
+    +String status
+    +DateTime createdAt
+    +DateTime hostEndedAt
+    status: "active" | "closed"
+  }
+
+  class QueueEntry {
+    +UUID id
+    +UUID sessionId
+    +String studentName
+    +String question
+    +String status
+    +DateTime createdAt
+    status: "waiting" | "in_progress" | "completed"
+  }
+
+  %% ── Relationships ────────────────────────────────────────────────────────
+
+  Profile "1" --> "0..*" Session : hosts
+  Profile "1" --> "0..*" Class : creates
+  Profile "0..*" --> "0..*" Class : enrolled in\n(via ClassEnrollment)
+  Class "1" --> "0..*" ClassEnrollment : has
+  Profile "1" --> "0..*" ClassEnrollment : has
+  Class "1" --> "0..*" OfficeHoursSchedule : has
+  OfficeHoursSchedule "1" --> "1..*" ScheduleSlot : has
+  Session "1" --> "0..*" QueueEntry : contains
+  Class "1" --> "0..*" Session : classId (optional)
+
+  %% ── Service modules (backend) ────────────────────────────────────────────
+
+  class DbService {
+    <<service>>
+    +getProfileById(id) Profile
+    +createSession(hostId, ...) Session
+    +getSessionByJoinCode(code) Session
+    +getSessionById(id) Session
+    +getSessionByIdForHost(id, hostId) Session
+    +addQueueEntry(sessionId, name, q) QueueEntry
+    +getQueueBySessionId(id) QueueEntry[]
+    +getQueueEntryById(id) QueueEntry
+    +updateQueueEntryStatus(id, status) QueueEntry
+    +removeQueueEntry(id) void
+    +getQueueStats(sessionId) Stats
+  }
+
+  %% ── Frontend-only state ─────────────────────────────────────────────────
+
+  class GuestSessionState {
+    <<localStorage>>
+    +String entryId
+    +String sessionId
+    +String sessionCode
+    +String studentName
+    +String question
+    +Int position
+    +String joinedAt
+    Note: stored in localStorage, cleared on done or leave
+  }
+
+  class AppContext {
+    <<React Context>>
+    +User user
+    +Boolean isInstructor
+    +Session[] liveSessions
+    +Class[] enrolledClasses
+    +login(email, password) Result
+    +signup(email, password, ...) Result
+    +endLiveSession(id) Session
+  }
+
+  GuestSessionState ..> QueueEntry : maps to\n(by entryId)
+  AppContext ..> Profile : wraps
+  AppContext ..> Session : caches
