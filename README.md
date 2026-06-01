@@ -1,26 +1,5 @@
 # HelpQ — Office Hours Queue App
 
-## Resume Bullets
-
-> Truthful bullets supported by the actual codebase — use these on a resume:
-
-- **Built a full-stack office-hours queue app** using React 19, Express 5, and
-  Supabase/PostgreSQL — public student join flow (no account needed), professor
-  session management, role-based access control, and a real-time-polling queue
-  dashboard.
-- **Designed a guest-join architecture** where students enter a session code and
-  question, receive a UUID entry token stored in localStorage, and watch their
-  queue position update via 5-second polling — without creating an account.
-- **Wrote 94 Jest + Supertest tests** across 7 suites covering session
-  create/close, queue ordering with 12 students, all status transitions (waiting
-  → in_progress → completed), guest flow (join/view/leave), auth 401/403, role
-  enforcement, validation, and 404s — with `validation.js` at 100% coverage.
-- **Documented architecture, API contracts, security model, UML diagrams, and
-  deployment path** for a production-style monorepo with Netlify frontend,
-  Render backend, and Supabase cloud database.
-
----
-
 ## Project Blurb
 
 HelpQ is a live office-hours queue management app for university courses.
