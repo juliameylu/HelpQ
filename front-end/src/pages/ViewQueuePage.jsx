@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Loader2, RefreshCw, UserRound } from "lucide-react";
+import { ClipboardCopy, Loader2, RefreshCw, UserRound } from "lucide-react";
 import BackLink from "../components/BackLink.jsx";
 import DashboardLayout from "../components/DashboardLayout.jsx";
 import { useApp } from "../context/useApp.js";
@@ -35,6 +35,8 @@ export default function ViewQueuePage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
   const [endingSession, setEndingSession] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [copied, setCopied] = useState(false);
   const endingRef = useRef(false);
 
   const load = useCallback(async () => {
@@ -49,6 +51,7 @@ export default function ViewQueuePage() {
       if (endingRef.current) return;
       setSession(s);
       setQueue(rows ?? []);
+      setLastUpdated(new Date());
     } catch (err) {
       setError(
         err?.status === 401 || err?.status === 403
@@ -70,6 +73,17 @@ export default function ViewQueuePage() {
       window.clearInterval(id);
     };
   }, [load]);
+
+  async function handleCopyJoinLink() {
+    const joinUrl = `${window.location.origin}/join?code=${code}`;
+    try {
+      await navigator.clipboard.writeText(joinUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback: browser blocked clipboard — silently ignore
+    }
+  }
 
   async function setStatus(entryId, status) {
     setBusyId(entryId);
@@ -138,9 +152,22 @@ export default function ViewQueuePage() {
             <h1>Manage Queue</h1>
             <p>
               Session code: <strong className="mono">{code}</strong>
+              {lastUpdated ? (
+                <span className="field-message" style={{ display: "inline", marginLeft: 12 }}>
+                  Updated {lastUpdated.toLocaleTimeString("en", { hour: "numeric", minute: "2-digit", second: "2-digit" })}
+                </span>
+              ) : null}
             </p>
           </div>
           <div className="page-header-actions">
+            <button
+              className="btn btn-secondary btn-compact"
+              onClick={handleCopyJoinLink}
+              title={`Copy /join?code=${code} to clipboard`}
+              type="button">
+              <ClipboardCopy size={16} aria-hidden="true" />
+              {copied ? "Copied!" : "Copy join link"}
+            </button>
             <button
               className="btn btn-secondary btn-compact"
               disabled={endingSession || !session}
