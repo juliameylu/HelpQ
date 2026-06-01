@@ -30,7 +30,7 @@ export default function LandingPage() {
       {/* ── Hero ────────────────────────────────────────────────── */}
       <section className="landing-hero">
         <div className="landing-hero-inner">
-          <p className="eyebrow">Cal Poly SWE 307</p>
+          <p className="eyebrow">Cal Poly CSC 307</p>
           <h1 className="landing-headline">
             Office hours,
             <br />
