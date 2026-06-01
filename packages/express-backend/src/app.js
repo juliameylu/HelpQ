@@ -10,7 +10,9 @@ const app = express();
 // Set CORS_ORIGIN="https://helpq.netlify.app" (or comma-separated list) in env.
 // In development / tests, default to local frontend origins when CORS_ORIGIN is unset.
 const configuredCorsOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean)
+  ? process.env.CORS_ORIGIN.split(",")
+      .map((o) => o.trim())
+      .filter(Boolean)
   : [];
 const corsOrigins = configuredCorsOrigins.length
   ? configuredCorsOrigins

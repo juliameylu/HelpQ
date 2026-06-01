@@ -32,13 +32,14 @@ export default function LandingPage() {
         <div className="landing-hero-inner">
           <p className="eyebrow">Cal Poly SWE 307</p>
           <h1 className="landing-headline">
-            Office hours,<br />
+            Office hours,
+            <br />
             <span className="landing-headline-accent">organized.</span>
           </h1>
           <p className="landing-subtitle">
             HelpQ is a live office-hours queue for students, TAs, and
-            professors. Students join with a code, see their position in
-            real time, and get helped in order — no more crowding the hallway.
+            professors. Students join with a code, see their position in real
+            time, and get helped in order — no more crowding the hallway.
           </p>
           <div className="landing-cta-row">
             <Link className="btn btn-gold landing-cta-btn" to="/join">
@@ -87,11 +88,22 @@ export default function LandingPage() {
       <section className="landing-demo">
         <div className="landing-demo-inner">
           <h2 className="landing-section-title">Try the live demo</h2>
-          <p style={{ color: "#4a6358", marginBottom: 20, textAlign: "center" }}>
-            The demo session <strong>DEMO01</strong> is pre-loaded with 12 students.
+          <p
+            style={{ color: "#4a6358", marginBottom: 20, textAlign: "center" }}>
+            The demo session <strong>DEMO01</strong> is pre-loaded with 12
+            students.
           </p>
-          <div style={{ display: "flex", gap: 10, justifyContent: "center", marginBottom: 28, flexWrap: "wrap" }}>
-            <Link className="btn btn-gold landing-cta-btn" to="/join?code=DEMO01">
+          <div
+            style={{
+              display: "flex",
+              gap: 10,
+              justifyContent: "center",
+              marginBottom: 28,
+              flexWrap: "wrap"
+            }}>
+            <Link
+              className="btn btn-gold landing-cta-btn"
+              to="/join?code=DEMO01">
               Join as student (DEMO01)
             </Link>
             <Link className="btn btn-secondary landing-cta-btn" to="/login">
@@ -102,7 +114,9 @@ export default function LandingPage() {
             <li>
               <span className="landing-step-num">1</span>
               <div>
-                <strong>Student:</strong> Click &ldquo;Join as student (DEMO01)&rdquo; above — enter your name and question. No account needed.
+                <strong>Student:</strong> Click &ldquo;Join as student
+                (DEMO01)&rdquo; above — enter your name and question. No account
+                needed.
               </div>
             </li>
             <li>
@@ -115,13 +129,15 @@ export default function LandingPage() {
             <li>
               <span className="landing-step-num">3</span>
               <div>
-                <strong>Professor:</strong> Click &ldquo;Start helping&rdquo; — watch the student&apos;s page update live.
+                <strong>Professor:</strong> Click &ldquo;Start helping&rdquo; —
+                watch the student&apos;s page update live.
               </div>
             </li>
             <li>
               <span className="landing-step-num">4</span>
               <div>
-                <strong>Professor:</strong> Click &ldquo;Mark done&rdquo; — student sees &ldquo;You&apos;re all set.&rdquo;
+                <strong>Professor:</strong> Click &ldquo;Mark done&rdquo; —
+                student sees &ldquo;You&apos;re all set.&rdquo;
               </div>
             </li>
           </ol>

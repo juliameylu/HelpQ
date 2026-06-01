@@ -10,8 +10,8 @@ import { jest } from "@jest/globals";
 import request from "supertest";
 
 const SESSION_ID = randomUUID();
-const ENTRY_ID   = randomUUID();
-const JOIN_CODE  = "DEMO01";
+const ENTRY_ID = randomUUID();
+const JOIN_CODE = "DEMO01";
 
 // Mock Supabase config (required by app bootstrap)
 jest.unstable_mockModule("../config/supabase.js", () => ({
@@ -211,7 +211,9 @@ describe("GET /api/guest/sessions/:id/queue", () => {
     mockDb.getSessionById.mockResolvedValue(activeSession);
     mockDb.getQueueBySessionId.mockResolvedValue(entries);
 
-    const res = await request(app).get(`/api/guest/sessions/${SESSION_ID}/queue`);
+    const res = await request(app).get(
+      `/api/guest/sessions/${SESSION_ID}/queue`
+    );
 
     expect(res.status).toBe(200);
     expect(res.body.entries).toHaveLength(2);
@@ -224,7 +226,9 @@ describe("GET /api/guest/sessions/:id/queue", () => {
     mockDb.getSessionById.mockResolvedValue(activeSession);
     mockDb.getQueueBySessionId.mockResolvedValue([]);
 
-    const res = await request(app).get(`/api/guest/sessions/${SESSION_ID}/queue`);
+    const res = await request(app).get(
+      `/api/guest/sessions/${SESSION_ID}/queue`
+    );
 
     expect(res.status).toBe(200);
     expect(res.body.entries).toHaveLength(0);
@@ -233,7 +237,9 @@ describe("GET /api/guest/sessions/:id/queue", () => {
   test("returns 404 when session does not exist", async () => {
     mockDb.getSessionById.mockResolvedValue(null);
 
-    const res = await request(app).get(`/api/guest/sessions/${SESSION_ID}/queue`);
+    const res = await request(app).get(
+      `/api/guest/sessions/${SESSION_ID}/queue`
+    );
 
     expect(res.status).toBe(404);
   });
@@ -318,7 +324,9 @@ describe("Multi-student queue ordering", () => {
     mockDb.getSessionById.mockResolvedValue(activeSession);
     mockDb.getQueueBySessionId.mockResolvedValue(entries);
 
-    const res = await request(app).get(`/api/guest/sessions/${SESSION_ID}/queue`);
+    const res = await request(app).get(
+      `/api/guest/sessions/${SESSION_ID}/queue`
+    );
 
     expect(res.status).toBe(200);
     expect(res.body.entries).toHaveLength(12);

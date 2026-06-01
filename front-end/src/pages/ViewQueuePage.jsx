@@ -153,8 +153,15 @@ export default function ViewQueuePage() {
             <p>
               Session code: <strong className="mono">{code}</strong>
               {lastUpdated ? (
-                <span className="field-message" style={{ display: "inline", marginLeft: 12 }}>
-                  Updated {lastUpdated.toLocaleTimeString("en", { hour: "numeric", minute: "2-digit", second: "2-digit" })}
+                <span
+                  className="field-message"
+                  style={{ display: "inline", marginLeft: 12 }}>
+                  Updated{" "}
+                  {lastUpdated.toLocaleTimeString("en", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    second: "2-digit"
+                  })}
                 </span>
               ) : null}
             </p>

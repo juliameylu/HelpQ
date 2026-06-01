@@ -28,7 +28,9 @@ const STORAGE_KEY = "helpq-guest-session-v1";
 function saveGuestSession(data) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {}
+  } catch {
+    // localStorage may be unavailable (private mode, quota)
+  }
 }
 
 function loadGuestSession() {
@@ -43,7 +45,9 @@ function loadGuestSession() {
 function clearGuestSession() {
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch {}
+  } catch {
+    // localStorage may be unavailable
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -89,15 +93,13 @@ export default function GuestJoinPage() {
   // ── Session lookup ────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (codeFromUrl) setCode(codeFromUrl);
-  }, [codeFromUrl]);
-
-  useEffect(() => {
     const trimmed = code.trim().toUpperCase();
     if (trimmed.length < 4) {
-      setSessionInfo(null);
-      setSessionState("idle");
-      return;
+      const resetId = window.setTimeout(() => {
+        setSessionInfo(null);
+        setSessionState("idle");
+      }, 0);
+      return () => window.clearTimeout(resetId);
     }
 
     const ac = new AbortController();
@@ -123,18 +125,19 @@ export default function GuestJoinPage() {
   // ── Queue polling ─────────────────────────────────────────────────────────
 
   const poll = useCallback(async () => {
-    if (!submittedEntry?.sessionId) return;
+    const sessionId = submittedEntry?.sessionId;
+    if (!sessionId) return;
     try {
-      const { entries, sessionStatus } = await guestGetQueue(submittedEntry.sessionId);
+      const { entries, sessionStatus } = await guestGetQueue(sessionId);
       setQueueEntries(entries ?? []);
       setQueueError(null);
       if (sessionStatus === "closed") {
-        setSessionInfo((prev) => prev ? { ...prev, status: "ended" } : prev);
+        setSessionInfo((prev) => (prev ? { ...prev, status: "ended" } : prev));
       }
-    } catch (err) {
+    } catch {
       setQueueError("Couldn't refresh the queue. The page will retry shortly.");
     }
-  }, [submittedEntry?.sessionId]);
+  }, [submittedEntry]);
 
   useEffect(() => {
     if (!submittedEntry?.sessionId || leftQueue) {
@@ -144,9 +147,13 @@ export default function GuestJoinPage() {
       }
       return;
     }
-    poll();
-    pollRef.current = setInterval(poll, 5000);
+    const runPoll = () => {
+      void poll();
+    };
+    const initialId = window.setTimeout(runPoll, 0);
+    pollRef.current = setInterval(runPoll, 5000);
     return () => {
+      window.clearTimeout(initialId);
       if (pollRef.current) {
         clearInterval(pollRef.current);
         pollRef.current = null;
@@ -162,7 +169,9 @@ export default function GuestJoinPage() {
     if (codeFromUrl && codeFromUrl !== saved.sessionCode) return;
     // Re-hydrate session info if we have a saved entry
     if (!sessionInfo && saved.sessionId) {
-      guestGetSession(saved.sessionCode).then(setSessionInfo).catch(() => {});
+      guestGetSession(saved.sessionCode)
+        .then(setSessionInfo)
+        .catch(() => {});
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -171,7 +180,7 @@ export default function GuestJoinPage() {
   const myEntry = useMemo(() => {
     if (!submittedEntry?.entryId) return null;
     return queueEntries.find((e) => e.id === submittedEntry.entryId) ?? null;
-  }, [queueEntries, submittedEntry?.entryId]);
+  }, [queueEntries, submittedEntry]);
 
   const myStatus = useMemo(() => {
     if (leftQueue) return "left";
@@ -182,7 +191,9 @@ export default function GuestJoinPage() {
   }, [submittedEntry, myEntry, sessionInfo?.status, leftQueue]);
 
   const myPosition = myEntry?.position ?? submittedEntry?.position ?? null;
-  const waitingCount = queueEntries.filter((e) => e.status === "waiting").length;
+  const waitingCount = queueEntries.filter(
+    (e) => e.status === "waiting"
+  ).length;
 
   // ── Persist updated state ─────────────────────────────────────────────────
 
@@ -213,7 +224,8 @@ export default function GuestJoinPage() {
       errors.code = "This session has ended.";
     }
     if (question.trim().length < 4) {
-      errors.question = "Describe what you need help with (at least 4 characters).";
+      errors.question =
+        "Describe what you need help with (at least 4 characters).";
     }
     return errors;
   }
@@ -226,10 +238,10 @@ export default function GuestJoinPage() {
 
     setIsSubmitting(true);
     try {
-      const { entry, position } = await guestJoinQueue(
-        sessionInfo.id,
-        { studentName: studentName.trim(), question: question.trim() }
-      );
+      const { entry, position } = await guestJoinQueue(sessionInfo.id, {
+        studentName: studentName.trim(),
+        question: question.trim()
+      });
       const saved = {
         entryId: entry.id,
         sessionId: sessionInfo.id,
@@ -237,7 +249,10 @@ export default function GuestJoinPage() {
         studentName: entry.studentName,
         question: entry.question,
         position,
-        joinedAt: new Date().toLocaleTimeString("en", { hour: "numeric", minute: "2-digit" })
+        joinedAt: new Date().toLocaleTimeString("en", {
+          hour: "numeric",
+          minute: "2-digit"
+        })
       };
       setSubmittedEntry(saved);
       saveGuestSession(saved);
@@ -294,7 +309,6 @@ export default function GuestJoinPage() {
   return (
     <main className="app-shell">
       <section className="session-page" aria-labelledby="page-title">
-
         {/* Top bar */}
         <header className="topbar">
           <div className="brand-lockup">
@@ -307,17 +321,22 @@ export default function GuestJoinPage() {
             </div>
           </div>
           <div className="topbar-actions">
-            <Link className="home-back-link" to="/">← Home</Link>
+            <Link className="home-back-link" to="/">
+              ← Home
+            </Link>
             {sessionEnded ? (
-              <span className="ended-badge"><CircleOff size={15} aria-hidden="true" /> Ended</span>
+              <span className="ended-badge">
+                <CircleOff size={15} aria-hidden="true" /> Ended
+              </span>
             ) : isLive ? (
-              <span className="live-badge"><Radio size={15} aria-hidden="true" /> Open</span>
+              <span className="live-badge">
+                <Radio size={15} aria-hidden="true" /> Open
+              </span>
             ) : null}
           </div>
         </header>
 
         <div className="page-grid">
-
           {/* Left panel — session info + queue preview */}
           <section className="session-panel" aria-labelledby="session-title">
             <div className="session-heading">
@@ -325,9 +344,11 @@ export default function GuestJoinPage() {
                 <p className="eyebrow">Session</p>
                 <h2 id="session-title">
                   {sessionInfo?.title ??
-                    (sessionState === "loading" ? "Looking up…" :
-                     sessionState === "notfound" ? "Session not found" :
-                     "Enter a session code")}
+                    (sessionState === "loading"
+                      ? "Looking up…"
+                      : sessionState === "notfound"
+                        ? "Session not found"
+                        : "Enter a session code")}
                 </h2>
               </div>
               <span className="session-code">
@@ -341,25 +362,43 @@ export default function GuestJoinPage() {
             ) : null}
 
             {sessionEnded ? (
-              <p className="session-ended-banner">This session has ended. No more students can join.</p>
+              <p className="session-ended-banner">
+                This session has ended. No more students can join.
+              </p>
             ) : null}
 
             {queueError ? (
-              <p className="field-message error" role="alert">{queueError}</p>
+              <p className="field-message error" role="alert">
+                {queueError}
+              </p>
             ) : null}
 
             <div className="metrics-row">
-              <Metric icon={<UsersRound size={18} aria-hidden="true" />} label="Waiting" value={waitingCount} />
+              <Metric
+                icon={<UsersRound size={18} aria-hidden="true" />}
+                label="Waiting"
+                value={waitingCount}
+              />
               {myStatus === "waiting" && myPosition ? (
-                <Metric icon={<Clock3 size={18} aria-hidden="true" />} label="Your position" value={`#${myPosition}`} />
+                <Metric
+                  icon={<Clock3 size={18} aria-hidden="true" />}
+                  label="Your position"
+                  value={`#${myPosition}`}
+                />
               ) : null}
             </div>
 
             {/* Queue preview */}
-            <section className="queue-preview" aria-labelledby="queue-preview-title">
+            <section
+              className="queue-preview"
+              aria-labelledby="queue-preview-title">
               <div className="queue-title-row">
-                <h3 id="queue-preview-title">{sessionEnded ? "Queue (closed)" : "Live queue"}</h3>
-                <span>{sessionEnded ? "Closed" : `${queueEntries.length} active`}</span>
+                <h3 id="queue-preview-title">
+                  {sessionEnded ? "Queue (closed)" : "Live queue"}
+                </h3>
+                <span>
+                  {sessionEnded ? "Closed" : `${queueEntries.length} active`}
+                </span>
               </div>
               {!submittedEntry && queueEntries.length === 0 ? (
                 <p className="field-message">
@@ -373,14 +412,20 @@ export default function GuestJoinPage() {
                     const isMe = entry.id === submittedEntry?.entryId;
                     const uiStatus = mapStatus(entry.status);
                     return (
-                      <li className={isMe ? "queue-row current" : "queue-row"} key={entry.id}>
+                      <li
+                        className={isMe ? "queue-row current" : "queue-row"}
+                        key={entry.id}>
                         <span className="queue-position">{entry.position}</span>
                         <div className="queue-copy">
                           <strong>{isMe ? "You" : entry.studentName}</strong>
                           <span>{entry.question}</span>
                         </div>
                         <span className={`status-pill ${uiStatus}`}>
-                          {uiStatus === "helping" ? "In progress" : uiStatus === "done" ? "Done" : "Waiting"}
+                          {uiStatus === "helping"
+                            ? "In progress"
+                            : uiStatus === "done"
+                              ? "Done"
+                              : "Waiting"}
                         </span>
                       </li>
                     );
@@ -392,7 +437,6 @@ export default function GuestJoinPage() {
 
           {/* Right panel — form or status */}
           <section className="join-panel" aria-labelledby="join-heading">
-
             {leftQueue ? (
               <LeftStatus onReset={resetForm} />
             ) : myStatus === "session-ended" ? (
@@ -416,7 +460,8 @@ export default function GuestJoinPage() {
                   <p className="eyebrow">No account needed</p>
                   <h2 id="join-heading">Join the queue</h2>
                   <p className="landing-feature-body" style={{ marginTop: 4 }}>
-                    Enter the session code from your professor or TA, your name, and your question.
+                    Enter the session code from your professor or TA, your name,
+                    and your question.
                   </p>
                 </div>
 
@@ -427,9 +472,11 @@ export default function GuestJoinPage() {
                     icon={<Hash size={16} aria-hidden="true" />}
                     error={formErrors.code}
                     helper={
-                      sessionState === "loading" ? "Checking…" :
-                      sessionState === "ok" && !sessionEnded ? `Found: ${sessionInfo.title}` :
-                      "Ask your professor or TA for the code"
+                      sessionState === "loading"
+                        ? "Checking…"
+                        : sessionState === "ok" && !sessionEnded
+                          ? `Found: ${sessionInfo.title}`
+                          : "Ask your professor or TA for the code"
                     }>
                     <input
                       autoComplete="off"
@@ -483,11 +530,23 @@ export default function GuestJoinPage() {
                     />
                   </FormField>
 
-                  <button className="primary-action" disabled={isSubmitting} type="submit">
+                  <button
+                    className="primary-action"
+                    disabled={isSubmitting}
+                    type="submit">
                     {isSubmitting ? (
-                      <><Loader2 className="spin-icon" size={18} aria-hidden="true" /> Joining…</>
+                      <>
+                        <Loader2
+                          className="spin-icon"
+                          size={18}
+                          aria-hidden="true"
+                        />{" "}
+                        Joining…
+                      </>
                     ) : (
-                      <>Join queue <ArrowRight size={18} aria-hidden="true" /></>
+                      <>
+                        Join queue <ArrowRight size={18} aria-hidden="true" />
+                      </>
                     )}
                   </button>
                 </form>
@@ -522,7 +581,10 @@ function Metric({ icon, label, value }) {
   return (
     <div className="metric">
       <span className="metric-icon">{icon}</span>
-      <div><p>{label}</p><strong>{value}</strong></div>
+      <div>
+        <p>{label}</p>
+        <strong>{value}</strong>
+      </div>
     </div>
   );
 }
@@ -531,19 +593,32 @@ function WaitingStatus({ entry, position, onLeave, isLeaving, onRefresh }) {
   return (
     <div className="status-view">
       <CheckCircle2 className="status-icon" size={40} aria-hidden="true" />
-      <p className="eyebrow">You're in line</p>
+      <p className="eyebrow">You&apos;re in line</p>
       <h2 id="join-heading">
         {position ? `You're #${position} in line.` : "You're in the queue."}
       </h2>
       <p className="status-note">
-        Hold tight — the host will start helping you when it's your turn. You can
-        leave this page and come back; your spot is saved.
+        Hold tight — the host will start helping you when it&apos;s your turn.
+        You can leave this page and come back; your spot is saved.
       </p>
 
       <dl className="status-details">
-        {position ? <div><dt>Position</dt><dd>#{position}</dd></div> : null}
-        <div><dt>Question</dt><dd>{entry?.question}</dd></div>
-        {entry?.joinedAt ? <div><dt>Joined at</dt><dd>{entry.joinedAt}</dd></div> : null}
+        {position ? (
+          <div>
+            <dt>Position</dt>
+            <dd>#{position}</dd>
+          </div>
+        ) : null}
+        <div>
+          <dt>Question</dt>
+          <dd>{entry?.question}</dd>
+        </div>
+        {entry?.joinedAt ? (
+          <div>
+            <dt>Joined at</dt>
+            <dd>{entry.joinedAt}</dd>
+          </div>
+        ) : null}
       </dl>
 
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -567,15 +642,21 @@ function HelpingStatus({ entry }) {
   return (
     <div className="status-view">
       <CheckCircle2 className="status-icon" size={40} aria-hidden="true" />
-      <p className="eyebrow">You're up!</p>
+      <p className="eyebrow">You&apos;re up!</p>
       <h2 id="join-heading">The host is ready for you.</h2>
       <p className="status-note">
-        Head over — a host is working with you now. When they mark you done, this
-        page will update.
+        Head over — a host is working with you now. When they mark you done,
+        this page will update.
       </p>
       <dl className="status-details">
-        <div><dt>Status</dt><dd>In progress</dd></div>
-        <div><dt>Question</dt><dd>{entry?.question}</dd></div>
+        <div>
+          <dt>Status</dt>
+          <dd>In progress</dd>
+        </div>
+        <div>
+          <dt>Question</dt>
+          <dd>{entry?.question}</dd>
+        </div>
       </dl>
     </div>
   );
@@ -586,13 +667,21 @@ function CompletedStatus({ entry, onReset }) {
     <div className="status-view">
       <CheckCircle2 className="status-icon" size={40} aria-hidden="true" />
       <p className="eyebrow">All done</p>
-      <h2 id="join-heading">You're all set.</h2>
+      <h2 id="join-heading">You&apos;re all set.</h2>
       <p className="status-note">
         Your question was marked done by the host. Hope that helped!
       </p>
       <dl className="status-details">
-        <div><dt>Question</dt><dd>{entry?.question}</dd></div>
-        {entry?.joinedAt ? <div><dt>Joined at</dt><dd>{entry.joinedAt}</dd></div> : null}
+        <div>
+          <dt>Question</dt>
+          <dd>{entry?.question}</dd>
+        </div>
+        {entry?.joinedAt ? (
+          <div>
+            <dt>Joined at</dt>
+            <dd>{entry.joinedAt}</dd>
+          </div>
+        ) : null}
       </dl>
       <button className="secondary-action" onClick={onReset} type="button">
         Join another session
@@ -608,8 +697,8 @@ function LeftStatus({ onReset }) {
       <p className="eyebrow">Queue left</p>
       <h2 id="join-heading">You left the queue.</h2>
       <p className="status-note">
-        You've been removed from the queue. Join again any time with the same
-        session code.
+        You&apos;ve been removed from the queue. Join again any time with the
+        same session code.
       </p>
       <button className="secondary-action" onClick={onReset} type="button">
         Join again
@@ -630,7 +719,10 @@ function SessionEndedStatus({ entry, onReset }) {
       </p>
       {entry?.question ? (
         <dl className="status-details">
-          <div><dt>Your question</dt><dd>{entry.question}</dd></div>
+          <div>
+            <dt>Your question</dt>
+            <dd>{entry.question}</dd>
+          </div>
         </dl>
       ) : null}
       <button className="secondary-action" onClick={onReset} type="button">

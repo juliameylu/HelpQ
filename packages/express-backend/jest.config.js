@@ -8,9 +8,6 @@ export default {
     "src/routes/api.js",
     "src/middleware/auth.js"
   ],
-  coveragePathIgnorePatterns: [
-    "/node_modules/",
-    "/src/__tests__/"
-  ],
+  coveragePathIgnorePatterns: ["/node_modules/", "/src/__tests__/"],
   coverageReporters: ["text", "text-summary", "lcov"]
 };

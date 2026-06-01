@@ -81,7 +81,10 @@ describe("POST /api/sessions — session creation", () => {
     const res = await request(app)
       .post("/api/sessions")
       .set("Authorization", "Bearer host-token")
-      .send({ title: "CSC 307 Office Hours", description: "Help with React and Express." });
+      .send({
+        title: "CSC 307 Office Hours",
+        description: "Help with React and Express."
+      });
 
     expect(res.status).toBe(201);
     expect(res.body.title).toBe("CSC 307 Office Hours");
@@ -159,7 +162,10 @@ describe("PATCH /api/sessions/:id/status — closing a session", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe("closed");
-    expect(mockDb.closeSessionByHost).toHaveBeenCalledWith(SESSION_ID, expect.any(Object));
+    expect(mockDb.closeSessionByHost).toHaveBeenCalledWith(
+      SESSION_ID,
+      expect.any(Object)
+    );
   });
 
   test("returns 403 when another user tries to close the session", async () => {
@@ -217,7 +223,10 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
   test("returns entries in creation order (ascending joined_at)", async () => {
     signInAs(HOST);
     const entries = [makeEntry(1), makeEntry(2), makeEntry(3)];
-    mockDb.getSessionById.mockResolvedValue({ id: SESSION_ID, class_id_uuid: null });
+    mockDb.getSessionById.mockResolvedValue({
+      id: SESSION_ID,
+      class_id_uuid: null
+    });
     mockDb.getQueueBySessionId.mockResolvedValue(entries);
 
     const res = await request(app)
@@ -233,7 +242,10 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
 
   test("returns empty array when queue is empty", async () => {
     signInAs(HOST);
-    mockDb.getSessionById.mockResolvedValue({ id: SESSION_ID, class_id_uuid: null });
+    mockDb.getSessionById.mockResolvedValue({
+      id: SESSION_ID,
+      class_id_uuid: null
+    });
     mockDb.getQueueBySessionId.mockResolvedValue([]);
 
     const res = await request(app)
@@ -247,7 +259,10 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
   test("returns 12 students preserving insertion order", async () => {
     signInAs(HOST);
     const entries = Array.from({ length: 12 }, (_, i) => makeEntry(i + 1));
-    mockDb.getSessionById.mockResolvedValue({ id: SESSION_ID, class_id_uuid: null });
+    mockDb.getSessionById.mockResolvedValue({
+      id: SESSION_ID,
+      class_id_uuid: null
+    });
     mockDb.getQueueBySessionId.mockResolvedValue(entries);
 
     const res = await request(app)
@@ -302,12 +317,18 @@ describe("PATCH /api/queue/:entryId/status — status transitions", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.status).toBe("in_progress");
-    expect(mockDb.updateQueueEntryStatus).toHaveBeenCalledWith(ENTRY_ID, "in_progress");
+    expect(mockDb.updateQueueEntryStatus).toHaveBeenCalledWith(
+      ENTRY_ID,
+      "in_progress"
+    );
   });
 
   test("host moves entry from in_progress → completed", async () => {
     signInAs(HOST);
-    mockDb.getQueueEntryById.mockResolvedValue({ ...waitingEntry(), status: "in_progress" });
+    mockDb.getQueueEntryById.mockResolvedValue({
+      ...waitingEntry(),
+      status: "in_progress"
+    });
     mockDb.getSessionByIdForHost.mockResolvedValue(ownedSession());
     mockDb.updateQueueEntryStatus.mockResolvedValue({
       ...waitingEntry(),
@@ -332,7 +353,9 @@ describe("PATCH /api/queue/:entryId/status — status transitions", () => {
       .send({ status: "helping" });
 
     expect(res.status).toBe(400);
-    expect(res.body.error.details.status).toMatch(/waiting, in_progress, completed/);
+    expect(res.body.error.details.status).toMatch(
+      /waiting, in_progress, completed/
+    );
     expect(mockDb.updateQueueEntryStatus).not.toHaveBeenCalled();
   });
 

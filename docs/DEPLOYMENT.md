@@ -22,19 +22,22 @@ Supabase (PostgreSQL + Auth)
 1. Create a project at [supabase.com](https://supabase.com).
 
 2. Run migrations from your local Supabase CLI:
+
    ```bash
    supabase link --project-ref <your-project-ref>
    supabase db push
    ```
+
    This applies all files in `supabase/migrations/`.
 
 3. (Optional) Seed demo data after creating demo accounts:
+
    ```bash
    supabase db seed
    ```
 
-4. **Disable email confirmation** for demo ease:
-   Supabase Dashboard → Authentication → Providers → Email → **Disable "Confirm email"**
+4. **Disable email confirmation** for demo ease: Supabase Dashboard →
+   Authentication → Providers → Email → **Disable "Confirm email"**
 
 5. In **Supabase Dashboard → Authentication → URL Configuration**, set:
    - **Site URL:** `https://your-netlify-domain.netlify.app`
@@ -59,15 +62,15 @@ Supabase (PostgreSQL + Auth)
 
 3. Set Environment Variables in Render dashboard:
 
-   | Key | Value |
-   |-----|-------|
-   | `NODE_ENV` | `production` |
-   | `PORT` | `3001` |
-   | `SUPABASE_URL` | Your Supabase project URL |
-   | `SUPABASE_ANON_KEY` | Your Supabase anon key |
-   | `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key |
-   | `CORS_ORIGIN` | Your Netlify URL (e.g. `https://helpq.netlify.app`) |
-   | `SCHEDULE_TIMEZONE` | `America/Los_Angeles` |
+   | Key                         | Value                                               |
+   | --------------------------- | --------------------------------------------------- |
+   | `NODE_ENV`                  | `production`                                        |
+   | `PORT`                      | `3001`                                              |
+   | `SUPABASE_URL`              | Your Supabase project URL                           |
+   | `SUPABASE_ANON_KEY`         | Your Supabase anon key                              |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service role key                      |
+   | `CORS_ORIGIN`               | Your Netlify URL (e.g. `https://helpq.netlify.app`) |
+   | `SCHEDULE_TIMEZONE`         | `America/Los_Angeles`                               |
 
 4. Verify the backend is live: `https://helpq-backend.onrender.com/health`
    Should return `{ "status": "ok" }`.
@@ -86,14 +89,15 @@ Supabase (PostgreSQL + Auth)
 
 3. Set Environment Variables in Netlify dashboard:
 
-   | Key | Value |
-   |-----|-------|
-   | `VITE_SUPABASE_URL` | Your Supabase project URL |
-   | `VITE_SUPABASE_ANON_KEY` | Your Supabase anon key |
-   | `VITE_SITE_URL` | Your Netlify URL (e.g. `https://helpq.netlify.app`) |
-   | `VITE_API_URL` | Your Render backend URL (e.g. `https://helpq-backend.onrender.com`) |
+   | Key                      | Value                                                               |
+   | ------------------------ | ------------------------------------------------------------------- |
+   | `VITE_SUPABASE_URL`      | Your Supabase project URL                                           |
+   | `VITE_SUPABASE_ANON_KEY` | Your Supabase anon key                                              |
+   | `VITE_SITE_URL`          | Your Netlify URL (e.g. `https://helpq.netlify.app`)                 |
+   | `VITE_API_URL`           | Your Render backend URL (e.g. `https://helpq-backend.onrender.com`) |
 
-4. Trigger a deploy. Netlify handles the React SPA routing via the `[[redirects]]` rule in `netlify.toml`.
+4. Trigger a deploy. Netlify handles the React SPA routing via the
+   `[[redirects]]` rule in `netlify.toml`.
 
 ---
 
@@ -101,10 +105,10 @@ Supabase (PostgreSQL + Auth)
 
 Via the HelpQ sign-up page or Supabase Dashboard → Authentication → Users:
 
-| Role | Suggested Email |
-|------|----------------|
-| Professor | professor@yourschool.edu |
-| Student (for demo) | student@yourschool.edu |
+| Role               | Suggested Email          |
+| ------------------ | ------------------------ |
+| Professor          | professor@yourschool.edu |
+| Student (for demo) | student@yourschool.edu   |
 
 ---
 
@@ -135,8 +139,10 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-Frontend env: copy `front-end/.env.example` → `front-end/.env.local` and fill in Supabase credentials.  
-Backend env: copy `packages/express-backend/.env.example` → `packages/express-backend/.env` and fill in values.
+Frontend env: copy `front-end/.env.example` → `front-end/.env.local` and fill in
+Supabase credentials.  
+Backend env: copy `packages/express-backend/.env.example` →
+`packages/express-backend/.env` and fill in values.
 
 ---
 
@@ -153,16 +159,17 @@ The backend exposes `GET /health`:
 }
 ```
 
-Render uses this path as a health check (`healthCheckPath: /health` in `render.yaml`).
+Render uses this path as a health check (`healthCheckPath: /health` in
+`render.yaml`).
 
 ---
 
 ## Troubleshooting
 
-| Symptom | Likely cause | Fix |
-|---------|-------------|-----|
-| 401 on all API calls | Wrong Supabase keys | Check `SUPABASE_URL` / `SUPABASE_ANON_KEY` in backend env |
-| CORS error in browser | `CORS_ORIGIN` mismatch | Set `CORS_ORIGIN` to the exact Netlify URL on Render |
-| Supabase 403 in db.js | Service role key missing | Set `SUPABASE_SERVICE_ROLE_KEY` on Render |
-| Auth emails go nowhere | Supabase URL config | Update Supabase Auth → URL configuration with deployed URL |
-| Blank page after deploy | SPA routing | Ensure `netlify.toml` `[[redirects]]` rule is present |
+| Symptom                 | Likely cause             | Fix                                                        |
+| ----------------------- | ------------------------ | ---------------------------------------------------------- |
+| 401 on all API calls    | Wrong Supabase keys      | Check `SUPABASE_URL` / `SUPABASE_ANON_KEY` in backend env  |
+| CORS error in browser   | `CORS_ORIGIN` mismatch   | Set `CORS_ORIGIN` to the exact Netlify URL on Render       |
+| Supabase 403 in db.js   | Service role key missing | Set `SUPABASE_SERVICE_ROLE_KEY` on Render                  |
+| Auth emails go nowhere  | Supabase URL config      | Update Supabase Auth → URL configuration with deployed URL |
+| Blank page after deploy | SPA routing              | Ensure `netlify.toml` `[[redirects]]` rule is present      |

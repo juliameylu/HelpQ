@@ -38,7 +38,11 @@ router.get("/sessions/join/:joinCode", async (req, res) => {
     const session = await db.getSessionByJoinCode(joinCode);
     if (!session) {
       return res.status(404).json({
-        error: { code: "not_found", message: "No session found for that code. Check the code and try again." }
+        error: {
+          code: "not_found",
+          message:
+            "No session found for that code. Check the code and try again."
+        }
       });
     }
 
@@ -71,10 +75,16 @@ router.post("/sessions/:sessionId/join", async (req, res) => {
     const sessionIdError = validateUuid(req.params.sessionId, "sessionId");
     if (sessionIdError) details.sessionId = sessionIdError;
 
-    const nameError = validateRequiredTrimmedString(studentName, "studentName", { maxLength: 255 });
+    const nameError = validateRequiredTrimmedString(
+      studentName,
+      "studentName",
+      { maxLength: 255 }
+    );
     if (nameError) details.studentName = nameError;
 
-    const questionError = validateRequiredTrimmedString(question, "question", { maxLength: 2000 });
+    const questionError = validateRequiredTrimmedString(question, "question", {
+      maxLength: 2000
+    });
     if (questionError) details.question = questionError;
 
     if (Object.keys(details).length > 0) {
@@ -88,7 +98,10 @@ router.post("/sessions/:sessionId/join", async (req, res) => {
 
     if (session.status === "closed") {
       return res.status(409).json({
-        error: { code: "session_closed", message: "This session has ended and is no longer accepting students." }
+        error: {
+          code: "session_closed",
+          message: "This session has ended and is no longer accepting students."
+        }
       });
     }
 

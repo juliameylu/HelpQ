@@ -1,11 +1,13 @@
 # HelpQ API Reference
 
-All endpoints return `application/json`. The backend runs on port 3001 locally and is proxied via Vite in development.
+All endpoints return `application/json`. The backend runs on port 3001 locally
+and is proxied via Vite in development.
 
 **Base URL (dev):** `http://127.0.0.1:3001`  
 **Base URL (prod):** your Render deployment URL
 
 **Error shape** (all errors):
+
 ```json
 {
   "error": {
@@ -16,7 +18,8 @@ All endpoints return `application/json`. The backend runs on port 3001 locally a
 }
 ```
 
-**Error codes:** `bad_request` · `validation_failed` · `unauthorized` · `forbidden` · `not_found` · `internal_error` · `session_closed`
+**Error codes:** `bad_request` · `validation_failed` · `unauthorized` ·
+`forbidden` · `not_found` · `internal_error` · `session_closed`
 
 ---
 
@@ -27,6 +30,7 @@ All endpoints return `application/json`. The backend runs on port 3001 locally a
 Liveness check. No auth required.
 
 **Response 200:**
+
 ```json
 {
   "status": "ok",
@@ -40,7 +44,8 @@ Liveness check. No auth required.
 
 ## Guest Endpoints (no auth)
 
-These endpoints allow unauthenticated students to join and leave a session queue.
+These endpoints allow unauthenticated students to join and leave a session
+queue.
 
 ### `GET /api/sessions/join/:joinCode`
 
@@ -49,6 +54,7 @@ Look up an active session by its join code. No auth required.
 **Params:** `:joinCode` — the 6-character session code (case-insensitive)
 
 **Response 200:**
+
 ```json
 {
   "id": "uuid",
@@ -65,7 +71,8 @@ Look up an active session by its join code. No auth required.
 
 ### `GET /api/guest/sessions/join/:joinCode`
 
-Alias for the public session lookup (identical behaviour, served from guest router).
+Alias for the public session lookup (identical behaviour, served from guest
+router).
 
 ---
 
@@ -76,6 +83,7 @@ Add a student to a session queue without creating an account.
 **Params:** `:sessionId` — UUID
 
 **Request body:**
+
 ```json
 {
   "studentName": "Alex R.",
@@ -84,6 +92,7 @@ Add a student to a session queue without creating an account.
 ```
 
 **Response 201:**
+
 ```json
 {
   "entry": {
@@ -98,7 +107,8 @@ Add a student to a session queue without creating an account.
 }
 ```
 
-**Errors:** `400` missing name/question · `400` invalid sessionId · `404` session not found · `409` session closed
+**Errors:** `400` missing name/question · `400` invalid sessionId · `404`
+session not found · `409` session closed
 
 ---
 
@@ -109,6 +119,7 @@ Get the live queue for a session without auth.
 **Params:** `:sessionId` — UUID
 
 **Response 200:**
+
 ```json
 {
   "sessionId": "uuid",
@@ -133,7 +144,8 @@ Get the live queue for a session without auth.
 }
 ```
 
-Only returns `waiting` and `in_progress` entries; `completed` entries are excluded.
+Only returns `waiting` and `in_progress` entries; `completed` entries are
+excluded.
 
 **Errors:** `400` invalid sessionId · `404` session not found
 
@@ -144,6 +156,7 @@ Only returns `waiting` and `in_progress` entries; `completed` entries are exclud
 Get the status of a single queue entry by ID.
 
 **Response 200:**
+
 ```json
 {
   "id": "uuid",
@@ -158,9 +171,11 @@ Get the status of a single queue entry by ID.
 
 ### `DELETE /api/guest/queue/:entryId`
 
-Student leaves the queue. The entry ID returned at join time serves as a capability token.
+Student leaves the queue. The entry ID returned at join time serves as a
+capability token.
 
 **Response 200:**
+
 ```json
 { "success": true, "message": "You left the queue." }
 ```
@@ -172,6 +187,7 @@ Student leaves the queue. The entry ID returned at join time serves as a capabil
 ## Authenticated Endpoints
 
 All routes below require a Supabase JWT as a Bearer token:
+
 ```
 Authorization: Bearer <supabase_access_token>
 ```
@@ -187,6 +203,7 @@ Create a new office-hours session.
 **Auth:** any authenticated user
 
 **Request body:**
+
 ```json
 {
   "title": "CSC 307 Office Hours",
@@ -196,6 +213,7 @@ Create a new office-hours session.
 ```
 
 **Response 201:**
+
 ```json
 {
   "id": "uuid",
@@ -241,6 +259,7 @@ Update session status (e.g., close a session).
 **Auth:** host only (ownership check)
 
 **Request body:**
+
 ```json
 { "status": "closed" }
 ```
@@ -259,6 +278,7 @@ Add an authenticated student to a session queue.
 **Auth:** student role required
 
 **Request body:**
+
 ```json
 {
   "studentName": "Alex R.",
@@ -267,7 +287,8 @@ Add an authenticated student to a session queue.
 ```
 
 **Response 201:** queue entry object  
-**Errors:** `400` missing question · `401` unauthenticated · `403` professor role
+**Errors:** `400` missing question · `401` unauthenticated · `403` professor
+role
 
 ---
 
@@ -275,7 +296,8 @@ Add an authenticated student to a session queue.
 
 Get queue entries for a session.
 
-**Auth:** any authenticated user (class enrollment checked if session has classId)
+**Auth:** any authenticated user (class enrollment checked if session has
+classId)
 
 **Response 200:** array of queue entry objects ordered by `created_at`
 
@@ -288,6 +310,7 @@ Update a queue entry status (host action).
 **Auth:** must be session host
 
 **Request body:**
+
 ```json
 { "status": "in_progress" }
 ```
@@ -317,6 +340,7 @@ Get queue statistics for a session.
 **Auth:** any authenticated user
 
 **Response 200:**
+
 ```json
 { "waiting": 8, "inProgress": 1, "completed": 3 }
 ```
@@ -380,13 +404,12 @@ Create or replace an office-hours schedule for a class.
 **Auth:** professor, must be class creator
 
 **Request body:**
+
 ```json
 {
   "title": "Weekly OH",
   "description": "Help with assignments.",
-  "slots": [
-    { "dayOfWeek": 2, "startTime": "14:00", "endTime": "16:00" }
-  ]
+  "slots": [{ "dayOfWeek": 2, "startTime": "14:00", "endTime": "16:00" }]
 }
 ```
 
@@ -410,13 +433,13 @@ Delete a schedule slot.
 
 ## Status Codes Summary
 
-| Code | Meaning |
-|------|---------|
-| 200 | OK |
-| 201 | Created |
-| 400 | Bad request / validation error |
-| 401 | Missing or invalid bearer token |
-| 403 | Forbidden — insufficient role or ownership |
-| 404 | Resource not found |
-| 409 | Conflict (e.g., session already closed) |
-| 500 | Internal server error |
+| Code | Meaning                                    |
+| ---- | ------------------------------------------ |
+| 200  | OK                                         |
+| 201  | Created                                    |
+| 400  | Bad request / validation error             |
+| 401  | Missing or invalid bearer token            |
+| 403  | Forbidden — insufficient role or ownership |
+| 404  | Resource not found                         |
+| 409  | Conflict (e.g., session already closed)    |
+| 500  | Internal server error                      |

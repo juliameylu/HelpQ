@@ -11,16 +11,16 @@ const mockDb = {
   getSessionById: jest.fn(),
   getSessionByIdForHost: jest.fn(),
   removeQueueEntry: jest.fn(),
-  updateQueueEntryStatus: jest.fn(),
+  updateQueueEntryStatus: jest.fn()
 };
 
 jest.unstable_mockModule("../config/supabase.js", () => ({
   supabase: { auth: { getUser: mockGetUser } },
-  supabaseAdmin: {},
+  supabaseAdmin: {}
 }));
 jest.unstable_mockModule("../services/db.js", () => mockDb);
 jest.unstable_mockModule("../services/scheduleSync.js", () => ({
-  syncScheduledSessionsForClass: jest.fn(),
+  syncScheduledSessionsForClass: jest.fn()
 }));
 
 const { default: app } = await import("../app.js");
@@ -88,7 +88,7 @@ test("POST /api/sessions/:id/queue returns 400 when question field is absent", a
     id: user.id,
     email: "student@helpq.test",
     full_name: "Student",
-    role: "student",
+    role: "student"
   });
 
   const response = await request(app)

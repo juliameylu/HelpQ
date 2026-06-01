@@ -7,24 +7,29 @@ Two-tab demo: **Tab A = Professor**, **Tab B = Student (no login needed)**
 ## Before the Demo (5-min prep)
 
 ### 1. Seed demo data
+
 ```bash
 npm run demo:seed
 ```
+
 Creates session **DEMO01** with 12 students (waiting / active / done).  
 Output shows both URLs — bookmark them:
+
 - Student join: `/join?code=DEMO01`
 - Host manage: `/sessions/DEMO01/manage`
 
 ### 2. Open two windows / tabs
 
-| Window | Who | URL |
-|--------|-----|-----|
-| Tab A (Professor) | Signed-in professor account | `https://<your-domain>/login` |
-| Tab B (Student) | Anyone — no account needed | `https://<your-domain>/join?code=DEMO01` |
+| Window            | Who                         | URL                                      |
+| ----------------- | --------------------------- | ---------------------------------------- |
+| Tab A (Professor) | Signed-in professor account | `https://<your-domain>/login`            |
+| Tab B (Student)   | Anyone — no account needed  | `https://<your-domain>/join?code=DEMO01` |
 
 ### 3. Pre-create a professor account
-Sign up at `/login`, choose **Professor** role. Disable email confirmation in Supabase
-dashboard for friction-free demo (Auth → Providers → Email → disable "Confirm email").
+
+Sign up at `/login`, choose **Professor** role. Disable email confirmation in
+Supabase dashboard for friction-free demo (Auth → Providers → Email → disable
+"Confirm email").
 
 ---
 
@@ -36,9 +41,11 @@ dashboard for friction-free demo (Auth → Providers → Email → disable "Conf
 Navigate to `https://<your-domain>/`
 
 > "This is HelpQ. New visitors — students who just got a session code from their
-> professor — land here. No login required. The top button takes them straight to the queue."
+> professor — land here. No login required. The top button takes them straight
+> to the queue."
 
 Point out:
+
 - "Join a session" button (prominent, yellow)
 - "No account needed" note in the hero
 - 3-step how-it-works section
@@ -52,11 +59,12 @@ URL becomes `/join`. The session code field is blank.
 
 Type **DEMO01** in the session code field.
 
-> "As soon as the code is entered, HelpQ validates it against the backend —
-> the session title appears automatically. The student never leaves this page
-> to look anything up."
+> "As soon as the code is entered, HelpQ validates it against the backend — the
+> session title appears automatically. The student never leaves this page to
+> look anything up."
 
 Fill in:
+
 - Name: **Demo Student**
 - Question: **How do I fix a CORS error in my Express server?**
 
@@ -66,6 +74,7 @@ Click **Join queue**.
 > wait, and the live queue — all without creating an account."
 
 **What to show:**
+
 - Position badge: "You're #11 in line."
 - Live queue list on the left (10 students ahead)
 - Refresh button
@@ -79,6 +88,7 @@ Click **Join queue**.
 Sign in at `/login` with your professor account.
 
 Home page shows:
+
 - Live session card for DEMO01
 - "Manage Queue" button
 
@@ -88,6 +98,7 @@ Click **Manage Queue** (or navigate to `/sessions/DEMO01/manage`).
 > and current status. No refresh needed — the page polls automatically."
 
 Show:
+
 - Maya C. in "in-progress" (already being helped from seed)
 - 10 students waiting
 - Demo Student at the bottom (just joined)
@@ -105,11 +116,11 @@ Show:
 Alex moves to "in-progress."
 
 **Switch to Tab B.**  
-The queue list has updated — Alex is now shown as "In progress" and Demo
-Student moved up one position.
+The queue list has updated — Alex is now shown as "In progress" and Demo Student
+moved up one position.
 
-> "Both views update in real time through polling. The student watching Tab B sees
-> their position change without pressing anything."
+> "Both views update in real time through polling. The student watching Tab B
+> sees their position change without pressing anything."
 
 ---
 
@@ -119,6 +130,7 @@ Student moved up one position.
 
 **Tab B — watch the status update:**  
 The right panel changes from "You're #N in line" to:
+
 > **"The host is ready for you."**
 
 > "This is the key moment in a real office hours — the student knows it's their
@@ -127,6 +139,7 @@ The right panel changes from "You're #N in line" to:
 **Tab A — click "Mark done" for Demo Student.**
 
 **Tab B — status updates to:**
+
 > **"You're all set."**
 
 ---
@@ -138,14 +151,15 @@ Click **"Join again"** in Tab B to reset, then join with code DEMO01 again.
 After joining, click **"Leave queue"**.  
 Confirm in the dialog.
 
-**Tab B shows:**  
+**Tab B shows:**
+
 > "You left the queue."
 
 **Switch to Tab A:**  
 Refresh — Demo Student is gone from the queue.
 
-> "Students can remove themselves if they figure out their problem or leave early.
-> The host's list updates immediately."
+> "Students can remove themselves if they figure out their problem or leave
+> early. The host's list updates immediately."
 
 ---
 
@@ -153,11 +167,12 @@ Refresh — Demo Student is gone from the queue.
 
 **Tab B — click "Join again", then type `BADCODE` in the session code field.**
 
-> "If a student types a code that doesn't exist, we show a clear message —
-> not a 404 page or raw JSON."
+> "If a student types a code that doesn't exist, we show a clear message — not a
+> 404 page or raw JSON."
 
 The helper text under the field shows:
-> *"We couldn't find that session code. Check and try again."*
+
+> _"We couldn't find that session code. Check and try again."_
 
 **Try submitting with an empty name:**  
 Clear the name field, click Join → inline error appears.
@@ -170,11 +185,13 @@ Same — inline validation error, no network request made.
 ### Step 8 — Backend tests (30 s)
 
 In the terminal:
+
 ```bash
 npm test
 ```
 
 Show output:
+
 ```
 Test Suites: 5 passed, 5 total
 Tests:       43 passed, 43 total
@@ -187,22 +204,22 @@ Tests:       43 passed, 43 total
 
 ## Demo URLs (fill in your domain)
 
-| Purpose | URL |
-|---------|-----|
-| Public landing | `https://<domain>/` |
-| Student join (no login) | `https://<domain>/join?code=DEMO01` |
-| Student join (manual) | `https://<domain>/join` |
-| Host manage queue | `https://<domain>/sessions/DEMO01/manage` |
-| Sign in / up | `https://<domain>/login` |
+| Purpose                 | URL                                       |
+| ----------------------- | ----------------------------------------- |
+| Public landing          | `https://<domain>/`                       |
+| Student join (no login) | `https://<domain>/join?code=DEMO01`       |
+| Student join (manual)   | `https://<domain>/join`                   |
+| Host manage queue       | `https://<domain>/sessions/DEMO01/manage` |
+| Sign in / up            | `https://<domain>/login`                  |
 
 ---
 
 ## Demo Accounts
 
-| Role | Suggested Email | Password |
-|------|----------------|----------|
-| Professor | professor@demo.calpoly.edu | `helpq2026` |
-| (Students have no accounts) | — | — |
+| Role                        | Suggested Email            | Password    |
+| --------------------------- | -------------------------- | ----------- |
+| Professor                   | professor@demo.calpoly.edu | `helpq2026` |
+| (Students have no accounts) | —                          | —           |
 
 Create the professor account via the sign-up page or Supabase dashboard.
 
@@ -210,11 +227,11 @@ Create the professor account via the sign-up page or Supabase dashboard.
 
 ## If Something Goes Wrong
 
-| Problem | Fix |
-|---------|-----|
-| "We couldn't find that session code" in student tab | Run `npm run demo:seed` again |
-| Professor's manage page shows 403 | Sign in as the professor who ran the seed |
-| Queue not updating in student tab | Click the Refresh button manually |
-| Backend CORS error | Add the frontend URL to `CORS_ORIGIN` env var on Render |
-| Can't sign in | Check `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in frontend env |
-| Build fails | Run `npm install` from repo root first |
+| Problem                                             | Fix                                                                  |
+| --------------------------------------------------- | -------------------------------------------------------------------- |
+| "We couldn't find that session code" in student tab | Run `npm run demo:seed` again                                        |
+| Professor's manage page shows 403                   | Sign in as the professor who ran the seed                            |
+| Queue not updating in student tab                   | Click the Refresh button manually                                    |
+| Backend CORS error                                  | Add the frontend URL to `CORS_ORIGIN` env var on Render              |
+| Can't sign in                                       | Check `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in frontend env |
+| Build fails                                         | Run `npm install` from repo root first                               |
