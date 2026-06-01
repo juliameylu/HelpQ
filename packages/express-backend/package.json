@@ -9,6 +9,7 @@
     "start": "node src/index.js",
     "lint": "eslint .",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
+    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests --coverage",
     "tdd": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
   "dependencies": {

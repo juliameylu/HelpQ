@@ -490,7 +490,7 @@ router.get("/sessions", requireAuth, async (req, res) => {
 });
 
 // Get session by join code
-router.get("/sessions/join/:joinCode", requireAuth, async (req, res) => {
+router.get("/sessions/join/:joinCode", async (req, res) => {
   try {
     const joinCode = getTrimmedString(req.params.joinCode);
 

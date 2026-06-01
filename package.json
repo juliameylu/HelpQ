@@ -16,6 +16,8 @@
     "preview:frontend": "npm --prefix front-end run preview",
     "lint": "npm run lint:frontend && npm -w @helpq/express-backend run lint && prettier --check './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
     "test": "npm -w @helpq/express-backend test",
+    "test:coverage": "npm -w @helpq/express-backend run test:coverage",
+    "demo:seed": "node scripts/demo-seed.mjs",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc"
   },
   "devDependencies": {
