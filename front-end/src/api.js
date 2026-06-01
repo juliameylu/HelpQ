@@ -353,3 +353,97 @@ export async function deleteQueueEntry(entryId, { signal } = {}) {
 export async function checkApiHealth({ signal } = {}) {
   return jsonFetch(`${apiBase()}/health`, { signal });
 }
+
+// ── Guest (no-auth) API — for public student queue flow ───────────────────────
+
+function guestFetch(url, options = {}) {
+  const { headers, ...rest } = options;
+  return fetch(url, {
+    ...rest,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      ...headers
+    }
+  }).then(async (res) => {
+    let body = {};
+    const text = await res.text();
+    if (text) {
+      try { body = JSON.parse(text); } catch { body = {}; }
+    }
+    if (!res.ok) {
+      const msg =
+        typeof body.error === "string"
+          ? body.error
+          : body.error?.message ?? res.statusText ?? "Request failed";
+      const err = new Error(msg);
+      err.status = res.status;
+      err.body = body;
+      throw err;
+    }
+    return body;
+  });
+}
+
+function guestPath(path) {
+  return `${apiBase()}/api/guest${path}`;
+}
+
+function normalizeGuestEntry(entry, position) {
+  return {
+    id: entry.id,
+    sessionId: entry.sessionId ?? entry.session_id,
+    studentName: entry.studentName ?? entry.student_name,
+    question: entry.question,
+    status: fromApiQueueStatus(entry.status),
+    joinedAt: entry.joinedAt ?? entry.joined_at,
+    position: position ?? entry.position
+  };
+}
+
+/** Look up a session by join code without auth. */
+export async function guestGetSession(joinCode, { signal } = {}) {
+  const code = (joinCode || "").trim().toUpperCase();
+  const data = await guestFetch(
+    guestPath(`/sessions/join/${encodeURIComponent(code)}`),
+    { signal }
+  );
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description ?? "",
+    sessionCode: (data.joinCode ?? data.join_code ?? code).toUpperCase(),
+    status: data.status === "active" ? "live" : data.status === "closed" ? "ended" : data.status
+  };
+}
+
+/** Join a session queue without auth. Returns { entry, position }. */
+export async function guestJoinQueue(sessionId, { studentName, question }, { signal } = {}) {
+  const data = await guestFetch(guestPath(`/sessions/${sessionId}/join`), {
+    method: "POST",
+    body: JSON.stringify({ studentName, question }),
+    signal
+  });
+  return {
+    entry: normalizeGuestEntry(data.entry, data.position),
+    position: data.position
+  };
+}
+
+/** Get the live queue for a session without auth. Returns array with position field. */
+export async function guestGetQueue(sessionId, { signal } = {}) {
+  const data = await guestFetch(guestPath(`/sessions/${sessionId}/queue`), { signal });
+  const entries = (data.entries ?? []).map((e) => normalizeGuestEntry(e, e.position));
+  return { entries, sessionStatus: data.sessionStatus };
+}
+
+/** Get a single queue entry status without auth. */
+export async function guestGetEntry(entryId, { signal } = {}) {
+  const data = await guestFetch(guestPath(`/queue/${entryId}`), { signal });
+  return { id: data.id, sessionId: data.sessionId, status: fromApiQueueStatus(data.status) };
+}
+
+/** Leave the queue (student removes their own entry by known ID). */
+export async function guestLeaveQueue(entryId, { signal } = {}) {
+  return guestFetch(guestPath(`/queue/${entryId}`), { method: "DELETE", signal });
+}
