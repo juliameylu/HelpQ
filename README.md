@@ -31,7 +31,7 @@ TODO: Add UI prototype link and last-updated date before submission.
 | [docs/UML.md](docs/UML.md)                                                     | Class, ER, sequence, component, and use-case diagrams        |
 | [docs/API.md](docs/API.md)                                                     | REST API endpoint reference                                  |
 | [docs/DEMO.md](docs/DEMO.md)                                                   | Step-by-step final presentation script (professor + student) |
-| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)                                       | Netlify + Render + Supabase deployment guide                 |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)                                       | Azure + Supabase deployment guide                            |
 | [docs/TESTING.md](docs/TESTING.md)                                             | Testing approach, coverage, and rubric option                |
 | [docs/SECURITY.md](docs/SECURITY.md)                                           | Auth model, secrets, CORS, RLS, input validation             |
 | [docs/SUPABASE_EMAIL_AUTH.md](docs/SUPABASE_EMAIL_AUTH.md)                     | Supabase email auth configuration                            |
@@ -75,8 +75,8 @@ TODO: Add UI prototype link and last-updated date before submission.
 | Database   | Supabase (PostgreSQL), schema migrations, RLS policies    |
 | Auth       | Supabase email/password auth, JWT Bearer tokens           |
 | Testing    | Jest 30, Supertest (74 tests, 6 suites)                   |
-| Deployment | Netlify (frontend), Render (backend), Supabase cloud (DB) |
-| CI         | GitHub Actions (`ci-testing.yml`)                         |
+| Deployment | Azure Static Web Apps (frontend), Azure Web App (backend), Supabase cloud (DB) |
+| CI/CD      | GitHub Actions (`ci-testing.yml`, Azure deploy workflows) |
 
 ---
 
