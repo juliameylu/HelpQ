@@ -320,6 +320,10 @@ export default function JoinQueuePage() {
     setErrors((currentErrors) => ({ ...currentErrors, [field]: "" }));
   }
 
+  function triggerSubmit() {
+    void handleSubmit({ preventDefault() {} });
+  }
+
   function validateForm() {
     const nextErrors = {};
     const sessionCode = form.sessionCode.trim().toUpperCase();
@@ -645,7 +649,8 @@ export default function JoinQueuePage() {
                   <button
                     className="primary-action"
                     disabled={isSubmitting}
-                    type="submit">
+                    onClick={triggerSubmit}
+                    type="button">
                     {isSubmitting ? (
                       <>
                         <Loader2

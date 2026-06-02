@@ -230,6 +230,10 @@ export default function GuestJoinPage() {
     return errors;
   }
 
+  function triggerSubmit() {
+    void handleSubmit({ preventDefault() {} });
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const errors = validate();
@@ -533,7 +537,8 @@ export default function GuestJoinPage() {
                   <button
                     className="primary-action"
                     disabled={isSubmitting}
-                    type="submit">
+                    onClick={triggerSubmit}
+                    type="button">
                     {isSubmitting ? (
                       <>
                         <Loader2
