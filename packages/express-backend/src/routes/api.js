@@ -475,8 +475,10 @@ router.get("/sessions", requireAuth, async (req, res) => {
     if (hostId) {
       const hostIdError = validateUuid(String(hostId), "hostId");
       if (hostIdError) return validationError(res, { hostId: hostIdError });
-      if (!ownsHostId(req, hostId)) return forbiddenError(res);
-      const sessions = await db.getSessionsByHostId(String(hostId), {
+      const effectiveHostId = ownsHostId(req, hostId)
+        ? String(hostId)
+        : req.user.id;
+      const sessions = await db.getSessionsByHostId(effectiveHostId, {
         activeOnly: true
       });
       return res.json(sessions);
