@@ -39,35 +39,38 @@ export default function ViewQueuePage() {
   const [copied, setCopied] = useState(false);
   const endingRef = useRef(false);
 
-  const load = useCallback(async ({ silent = false } = {}) => {
-    if (!code || endingRef.current) return;
-    if (!silent) {
-      setLoading(true);
-    }
-    setError(null);
-    try {
-      const [{ session: s }, { queue: rows }] = await Promise.all([
-        getSession(code),
-        getQueue(code)
-      ]);
-      if (endingRef.current) return;
-      setSession(s);
-      setQueue(rows ?? []);
-      setLastUpdated(new Date());
-    } catch (err) {
-      setError(
-        err?.status === 401 || err?.status === 403
-          ? authErrorText(err.status)
-          : err.message || "Could not load queue"
-      );
-      setSession(null);
-      setQueue([]);
-    } finally {
+  const load = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!code || endingRef.current) return;
       if (!silent) {
-        setLoading(false);
+        setLoading(true);
       }
-    }
-  }, [code]);
+      setError(null);
+      try {
+        const [{ session: s }, { queue: rows }] = await Promise.all([
+          getSession(code),
+          getQueue(code)
+        ]);
+        if (endingRef.current) return;
+        setSession(s);
+        setQueue(rows ?? []);
+        setLastUpdated(new Date());
+      } catch (err) {
+        setError(
+          err?.status === 401 || err?.status === 403
+            ? authErrorText(err.status)
+            : err.message || "Could not load queue"
+        );
+        setSession(null);
+        setQueue([]);
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [code]
+  );
 
   useEffect(() => {
     const bootId = window.setTimeout(() => load(), 0);
