@@ -12,12 +12,16 @@ export const getProfileById = async (userId) => {
 };
 
 async function attachInstructorMetadata(rows) {
-  const list = Array.isArray(rows) ? rows.filter(Boolean) : [rows].filter(Boolean);
+  const list = Array.isArray(rows)
+    ? rows.filter(Boolean)
+    : [rows].filter(Boolean);
   if (list.length === 0) {
     return Array.isArray(rows) ? [] : null;
   }
 
-  const creatorIds = [...new Set(list.map((row) => row.created_by).filter(Boolean))];
+  const creatorIds = [
+    ...new Set(list.map((row) => row.created_by).filter(Boolean))
+  ];
   let profileById = new Map();
 
   if (creatorIds.length > 0) {
@@ -27,7 +31,9 @@ async function attachInstructorMetadata(rows) {
       .in("id", creatorIds);
 
     if (error) throw error;
-    profileById = new Map((profiles || []).map((profile) => [profile.id, profile]));
+    profileById = new Map(
+      (profiles || []).map((profile) => [profile.id, profile])
+    );
   }
 
   const enriched = list.map((row) => {

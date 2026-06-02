@@ -68,15 +68,15 @@ TODO: Add UI prototype link and last-updated date before submission.
 
 ## Tech Stack
 
-| Layer      | Technologies                                              |
-| ---------- | --------------------------------------------------------- |
-| Frontend   | React 19, Vite 7, Tailwind CSS, React Router v7           |
-| Backend    | Node.js 20, Express 5                                     |
-| Database   | Supabase (PostgreSQL), schema migrations, RLS policies    |
-| Auth       | Supabase email/password auth, JWT Bearer tokens           |
-| Testing    | Jest 30, Supertest (74 tests, 6 suites)                   |
+| Layer      | Technologies                                                                   |
+| ---------- | ------------------------------------------------------------------------------ |
+| Frontend   | React 19, Vite 7, Tailwind CSS, React Router v7                                |
+| Backend    | Node.js 20, Express 5                                                          |
+| Database   | Supabase (PostgreSQL), schema migrations, RLS policies                         |
+| Auth       | Supabase email/password auth, JWT Bearer tokens                                |
+| Testing    | Jest 30, Supertest (74 tests, 6 suites)                                        |
 | Deployment | Azure Static Web Apps (frontend), Azure Web App (backend), Supabase cloud (DB) |
-| CI/CD      | GitHub Actions (`ci-testing.yml`, Azure deploy workflows) |
+| CI/CD      | GitHub Actions (`ci-testing.yml`, Azure deploy workflows)                      |
 
 ---
 
