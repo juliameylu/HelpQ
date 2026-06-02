@@ -40,6 +40,16 @@ beforeEach(() => {
 
 // ── Health endpoint ───────────────────────────────────────────────────────────
 
+test("GET / returns 200 with API status", async () => {
+  const response = await request(app).get("/");
+  expect(response.status).toBe(200);
+  expect(response.body).toEqual({
+    name: "HelpQ API",
+    status: "ok",
+    health: "/health"
+  });
+});
+
 test("GET /health returns 200 with status ok", async () => {
   const response = await request(app).get("/health");
   expect(response.status).toBe(200);

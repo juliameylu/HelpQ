@@ -33,6 +33,14 @@ app.use(
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    name: "HelpQ API",
+    status: "ok",
+    health: "/health"
+  });
+});
+
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "ok",
