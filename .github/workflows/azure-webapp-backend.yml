@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  AZURE_WEBAPP_NAME: helpq-b3cqcxbsdse7avbm
+  AZURE_WEBAPP_NAME: HelpQ
   NODE_VERSION: "20.x"
 
 jobs:
