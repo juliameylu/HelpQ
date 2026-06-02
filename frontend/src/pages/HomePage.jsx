@@ -220,7 +220,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {classesError ? (
+          {classesError && enrolledClasses.length > 0 ? (
             <p className="field-message error" role="alert">
               {classesError}
             </p>
@@ -228,7 +228,7 @@ export default function HomePage() {
           {classesLoading ? (
             <p className="field-message">Loading classes…</p>
           ) : null}
-          {!classesLoading && !classesError && enrolledClasses.length === 0 ? (
+          {!classesLoading && enrolledClasses.length === 0 ? (
             <p className="field-message">
               {isInstructor
                 ? "No classes yet. Create one or join with a class code."
