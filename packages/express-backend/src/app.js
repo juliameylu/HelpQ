@@ -7,7 +7,7 @@ import guestRoutes from "./routes/guest.js";
 const app = express();
 
 // In production, restrict CORS to the deployed frontend origin(s).
-// Set CORS_ORIGIN="https://helpq.netlify.app" (or comma-separated list) in env.
+// Set CORS_ORIGIN to your Azure Static Web App URL (or comma-separated list).
 // In development / tests, default to local frontend origins when CORS_ORIGIN is unset.
 const configuredCorsOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",")

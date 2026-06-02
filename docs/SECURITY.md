@@ -108,20 +108,23 @@ and must be run locally by an admin. It must never be exposed in the frontend.
 
 The backend uses the `cors` npm package. Behavior:
 
-- **Development / CI / tests:** `CORS_ORIGIN` is not set → all origins allowed
-  (`*`)
-- **Production:** Set `CORS_ORIGIN=https://your-netlify-domain.netlify.app`
+- **Development / CI / tests:** `CORS_ORIGIN` is not set → local Vite origins
+  such as `http://127.0.0.1:5173` / `:5174` are allowed
+- **Production:** Set
+  `CORS_ORIGIN=https://your-static-web-app-domain.azurestaticapps.net`
   (comma-separated for multiple) → only listed origins are allowed
 
 ```javascript
 // packages/express-backend/src/app.js
-const corsOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
-  : "*";
+const configuredCorsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",")
+      .map((o) => o.trim())
+      .filter(Boolean)
+  : [];
 ```
 
-**Action required before production:** Always set `CORS_ORIGIN` on your Render
-deployment to your exact Netlify URL.
+**Action required before production:** Always set `CORS_ORIGIN` on your Azure
+Web App deployment to your exact Static Web App URL.
 
 ---
 
@@ -188,5 +191,5 @@ traces or internal details are exposed in HTTP responses. Production builds have
 | No rate limiting on guest endpoints                                       | Medium             | Add `express-rate-limit`                        |
 | No CAPTCHA on queue join                                                  | Low                | Add reCAPTCHA on guest join form                |
 | Email confirmation disabled for demo ease                                 | Low                | Re-enable for production                        |
-| `CORS_ORIGIN=*` in dev/CI                                                 | Acceptable for dev | Always set in production Render deployment      |
+| Local-only default CORS origins in dev/CI                                 | Acceptable for dev | Always set explicit production Azure origins    |
 | No refresh token rotation handling in frontend                            | Low                | Supabase JS client manages this automatically   |

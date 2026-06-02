@@ -126,7 +126,8 @@ After accounts are created, run the seed script:
 npm run demo:seed
 ```
 
-This creates session `DEMO01` with 12 students in various queue states.
+This seeds the demo class, recurring schedule, and session `DEMO01` with 12
+students in various queue states.
 
 ---
 

@@ -4,7 +4,7 @@ All endpoints return `application/json`. The backend runs on port 3001 locally
 and is proxied via Vite in development.
 
 **Base URL (dev):** `http://127.0.0.1:3001`  
-**Base URL (prod):** your Render deployment URL
+**Base URL (prod):** your Azure Web App backend URL
 
 **Error shape** (all errors):
 
