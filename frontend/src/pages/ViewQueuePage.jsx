@@ -39,9 +39,11 @@ export default function ViewQueuePage() {
   const [copied, setCopied] = useState(false);
   const endingRef = useRef(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async ({ silent = false } = {}) => {
     if (!code || endingRef.current) return;
-    setLoading(true);
+    if (!silent) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const [{ session: s }, { queue: rows }] = await Promise.all([
@@ -61,13 +63,15 @@ export default function ViewQueuePage() {
       setSession(null);
       setQueue([]);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [code]);
 
   useEffect(() => {
     const bootId = window.setTimeout(() => load(), 0);
-    const id = window.setInterval(load, 5000);
+    const id = window.setInterval(() => load({ silent: true }), 5000);
     return () => {
       window.clearTimeout(bootId);
       window.clearInterval(id);
@@ -89,7 +93,7 @@ export default function ViewQueuePage() {
     setBusyId(entryId);
     try {
       await updateQueueEntry(entryId, status);
-      await load();
+      await load({ silent: true });
     } catch (err) {
       setError(
         err?.status === 401 || err?.status === 403
@@ -105,7 +109,7 @@ export default function ViewQueuePage() {
     setBusyId(entryId);
     try {
       await deleteQueueEntry(entryId);
-      await load();
+      await load({ silent: true });
     } catch (err) {
       setError(
         err?.status === 401 || err?.status === 403
