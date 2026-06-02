@@ -14,22 +14,26 @@ const configuredCorsOrigins = process.env.CORS_ORIGIN
       .map((o) => o.trim())
       .filter(Boolean)
   : [];
+const allowAnyLocalDevOrigin =
+  configuredCorsOrigins.length === 0 && process.env.NODE_ENV !== "production";
+const localDevOriginPattern = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/;
 const corsOrigins = configuredCorsOrigins.length
   ? configuredCorsOrigins
   : process.env.NODE_ENV === "production"
     ? []
-    : [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174"
-      ];
+    : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
 app.use(
   cors({
     origin: (origin, cb) => {
       // Allow server-to-server calls (no origin header) and listed origins.
-      if (!origin || corsOrigins.includes(origin)) return cb(null, true);
+      if (
+        !origin ||
+        corsOrigins.includes(origin) ||
+        (allowAnyLocalDevOrigin && localDevOriginPattern.test(origin))
+      ) {
+        return cb(null, true);
+      }
       cb(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true

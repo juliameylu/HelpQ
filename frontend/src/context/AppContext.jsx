@@ -37,7 +37,8 @@ function saveState(state) {
 export function AppProvider({ children }) {
   const persisted = loadState();
 
-  const [user, setUser] = useState(persisted?.user ?? null);
+  const [user, setUser] = useState(null);
+  const [authHydrated, setAuthHydrated] = useState(!isSupabaseConfigured);
   const [classes, setClasses] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
@@ -53,11 +54,10 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     saveState({
-      user,
       notifications,
       settings
     });
-  }, [user, notifications, settings]);
+  }, [notifications, settings]);
 
   useEffect(() => {
     if (!isSupabaseConfigured || !supabase) {
@@ -72,6 +72,7 @@ export function AppProvider({ children }) {
 
       if (!data.session?.user) {
         setUser(null);
+        setAuthHydrated(true);
         return;
       }
 
@@ -84,6 +85,7 @@ export function AppProvider({ children }) {
 
         if (!profile) {
           setUser(null);
+          setAuthHydrated(true);
           return;
         }
 
@@ -94,8 +96,10 @@ export function AppProvider({ children }) {
           role: profile.role,
           avatarUrl: profile.avatar_url || ""
         });
+        setAuthHydrated(true);
       } catch {
         setUser(null);
+        setAuthHydrated(true);
       }
     }
 
@@ -106,8 +110,10 @@ export function AppProvider({ children }) {
     } = supabase.auth.onAuthStateChange((_event, sessionData) => {
       if (!sessionData?.user) {
         setUser(null);
+        setAuthHydrated(true);
         return;
       }
+      setAuthHydrated(false);
       loadCurrentSession();
     });
 
@@ -118,6 +124,10 @@ export function AppProvider({ children }) {
   }, []);
 
   const refreshClasses = useCallback(async () => {
+    if (!authHydrated) {
+      return;
+    }
+
     if (!user) {
       setClasses([]);
       return;
@@ -135,7 +145,7 @@ export function AppProvider({ children }) {
     } finally {
       setClassesLoading(false);
     }
-  }, [user]);
+  }, [authHydrated, user]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -146,6 +156,10 @@ export function AppProvider({ children }) {
 
   const refreshSessions = useCallback(
     async ({ silent = false } = {}) => {
+      if (!authHydrated) {
+        return;
+      }
+
       if (!user) {
         setSessions([]);
         setSessionsHydrated(false);
@@ -192,7 +206,7 @@ export function AppProvider({ children }) {
         }
       }
     },
-    [user, classes]
+    [authHydrated, user, classes]
   );
 
   useEffect(() => {

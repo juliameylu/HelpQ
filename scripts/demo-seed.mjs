@@ -48,6 +48,9 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 const JOIN_CODE = (process.env.DEMO_JOIN_CODE || "DEMO01").toUpperCase();
 const SESSION_TITLE =
   process.env.DEMO_SESSION_TITLE || "CSC 307 Office Hours — Demo";
+const DEMO_PROFESSOR_EMAIL = process.env.DEMO_PROFESSOR_EMAIL
+  ?.trim()
+  .toLowerCase();
 const CLASS_JOIN_CODE = (process.env.DEMO_CLASS_JOIN_CODE || "CSC307").toUpperCase();
 const CLASS_CODE = process.env.DEMO_CLASS_CODE || "CSC 307";
 const CLASS_TITLE =
@@ -58,8 +61,13 @@ const SCHEDULE_DESCRIPTION =
   process.env.DEMO_SCHEDULE_DESCRIPTION ||
   "Seeded demo schedule for the HelpQ final presentation.";
 const DEMO_SLOTS = [
-  { day_of_week: 2, start_time: "13:10", end_time: "14:00" },
-  { day_of_week: 4, start_time: "13:10", end_time: "14:00" }
+  { day_of_week: 0, start_time: "00:00", end_time: "23:59" },
+  { day_of_week: 1, start_time: "00:00", end_time: "23:59" },
+  { day_of_week: 2, start_time: "00:00", end_time: "23:59" },
+  { day_of_week: 3, start_time: "00:00", end_time: "23:59" },
+  { day_of_week: 4, start_time: "00:00", end_time: "23:59" },
+  { day_of_week: 5, start_time: "00:00", end_time: "23:59" },
+  { day_of_week: 6, start_time: "00:00", end_time: "23:59" }
 ];
 
 // Realistic student questions for a software-engineering office hours
@@ -82,12 +90,17 @@ async function run() {
   console.log("🌱  HelpQ demo seed starting…\n");
 
   // ── 1. Find a professor to host ──────────────────────────────────────────
-  const { data: professors, error: profErr } = await supabase
+  let professorQuery = supabase
     .from("profiles")
     .select("id, full_name")
     .eq("role", "professor")
-    .order("created_at", { ascending: true })
-    .limit(1);
+    .order("created_at", { ascending: true });
+
+  if (DEMO_PROFESSOR_EMAIL) {
+    professorQuery = professorQuery.eq("email", DEMO_PROFESSOR_EMAIL);
+  }
+
+  const { data: professors, error: profErr } = await professorQuery.limit(1);
 
   if (profErr) {
     console.error("❌  Could not query profiles:", profErr.message);
@@ -97,6 +110,9 @@ async function run() {
   if (!professors || professors.length === 0) {
     console.error(
       "❌  No professor profile found.\n" +
+      (DEMO_PROFESSOR_EMAIL
+        ? `    No professor matched DEMO_PROFESSOR_EMAIL=${DEMO_PROFESSOR_EMAIL}.\n`
+        : "") +
       "    Sign up at your deployed HelpQ URL and choose the 'Professor' role first."
     );
     process.exit(1);
