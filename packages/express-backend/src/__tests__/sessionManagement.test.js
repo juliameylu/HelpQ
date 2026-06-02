@@ -135,6 +135,32 @@ describe("POST /api/sessions — session creation", () => {
   });
 });
 
+describe("GET /api/sessions?hostId=... — host session list", () => {
+  test("returns sessions when hostId belongs to the authenticated user", async () => {
+    signInAs(HOST);
+    mockDb.getSessionsByHostId.mockResolvedValue([
+      {
+        id: SESSION_ID,
+        host_id: HOST_USER_ID,
+        join_code: "ABC123",
+        title: "CSC 307 Office Hours",
+        status: "active"
+      }
+    ]);
+
+    const res = await request(app)
+      .get(`/api/sessions?hostId=${HOST_USER_ID}`)
+      .set("Authorization", "Bearer host-token");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0].host_id).toBe(HOST_USER_ID);
+    expect(mockDb.getSessionsByHostId).toHaveBeenCalledWith(HOST_USER_ID, {
+      activeOnly: true
+    });
+  });
+});
+
 // ── Session close ─────────────────────────────────────────────────────────────
 
 describe("PATCH /api/sessions/:id/status — closing a session", () => {
