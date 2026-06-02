@@ -11,6 +11,37 @@ export const getProfileById = async (userId) => {
   return data;
 };
 
+async function attachInstructorMetadata(rows) {
+  const list = Array.isArray(rows) ? rows.filter(Boolean) : [rows].filter(Boolean);
+  if (list.length === 0) {
+    return Array.isArray(rows) ? [] : null;
+  }
+
+  const creatorIds = [...new Set(list.map((row) => row.created_by).filter(Boolean))];
+  let profileById = new Map();
+
+  if (creatorIds.length > 0) {
+    const { data: profiles, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", creatorIds);
+
+    if (error) throw error;
+    profileById = new Map((profiles || []).map((profile) => [profile.id, profile]));
+  }
+
+  const enriched = list.map((row) => {
+    const profile = profileById.get(row.created_by);
+    return {
+      ...row,
+      instructor_name: profile?.full_name || profile?.email || "",
+      instructor_email: profile?.email || ""
+    };
+  });
+
+  return Array.isArray(rows) ? enriched : enriched[0];
+}
+
 // CLASSES
 
 export const getClassById = async (classId) => {
@@ -21,7 +52,7 @@ export const getClassById = async (classId) => {
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return attachInstructorMetadata(data);
 };
 
 export const getClassByJoinCode = async (joinCode) => {
@@ -32,7 +63,7 @@ export const getClassByJoinCode = async (joinCode) => {
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return attachInstructorMetadata(data);
 };
 
 export const createClass = async ({
@@ -57,7 +88,7 @@ export const createClass = async ({
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return attachInstructorMetadata(data);
 };
 
 export const enrollUserInClass = async ({ classId, userId }) => {
@@ -101,7 +132,7 @@ export const getClassesForUser = async (userId) => {
     .order("created_at", { ascending: false });
 
   if (classError) throw classError;
-  return data || [];
+  return attachInstructorMetadata(data || []);
 };
 
 export const getClassesCreatedBy = async (userId) => {
@@ -112,7 +143,7 @@ export const getClassesCreatedBy = async (userId) => {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  return attachInstructorMetadata(data || []);
 };
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];

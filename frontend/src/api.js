@@ -100,6 +100,12 @@ export function normalizeClass(row) {
     code: row.code,
     description: row.description ?? "",
     joinCode: (row.join_code ?? row.joinCode ?? "").toUpperCase(),
+    instructor:
+      row.instructor ??
+      row.instructor_name ??
+      row.instructorName ??
+      row.instructor_email ??
+      "",
     createdBy: row.created_by ?? row.createdBy,
     createdAt: row.created_at ?? row.createdAt
   };

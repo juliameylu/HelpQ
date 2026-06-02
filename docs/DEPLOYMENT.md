@@ -30,7 +30,7 @@ Deployments are automated via GitHub Actions:
 | --- | --- | --- |
 | `ci-testing.yml` | Push/PR to `main` | Lint, build, test |
 | `azure-webapp-backend.yml` | CI passes on `main` | Deploy Express to Azure Web App |
-| `azure-static-web-apps-green-plant-0e134ca0f.yml` | Push to `main` | Build and deploy React to Azure Static Web Apps |
+| `azure-static-web-apps-green-plant-0e134ca0f.yml` | CI passes on `main` | Build and deploy React to Azure Static Web Apps |
 
 ---
 
@@ -88,7 +88,7 @@ Should return `{ "status": "ok" }`.
 
 ## Step 3 — Deploy Frontend (Azure Static Web Apps)
 
-The frontend is automatically built and deployed via GitHub Actions on every push to `main`.
+The frontend is automatically built and deployed via GitHub Actions after CI succeeds on `main`.
 
 Environment variables are set in the Azure portal under **HelpQ Static Web App → Configuration → Environment variables** (Production):
 

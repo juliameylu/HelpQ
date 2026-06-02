@@ -48,6 +48,19 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 const JOIN_CODE = (process.env.DEMO_JOIN_CODE || "DEMO01").toUpperCase();
 const SESSION_TITLE =
   process.env.DEMO_SESSION_TITLE || "CSC 307 Office Hours — Demo";
+const CLASS_JOIN_CODE = (process.env.DEMO_CLASS_JOIN_CODE || "CSC307").toUpperCase();
+const CLASS_CODE = process.env.DEMO_CLASS_CODE || "CSC 307";
+const CLASS_TITLE =
+  process.env.DEMO_CLASS_TITLE || "Introduction to Software Engineering";
+const SCHEDULE_TITLE =
+  process.env.DEMO_SCHEDULE_TITLE || "Demo Weekly Office Hours";
+const SCHEDULE_DESCRIPTION =
+  process.env.DEMO_SCHEDULE_DESCRIPTION ||
+  "Seeded demo schedule for the HelpQ final presentation.";
+const DEMO_SLOTS = [
+  { day_of_week: 2, start_time: "13:10", end_time: "14:00" },
+  { day_of_week: 4, start_time: "13:10", end_time: "14:00" }
+];
 
 // Realistic student questions for a software-engineering office hours
 const DEMO_STUDENTS = [
@@ -92,7 +105,142 @@ async function run() {
   const host = professors[0];
   console.log(`✅  Using professor: ${host.full_name ?? host.id}`);
 
-  // ── 2. Upsert demo session ───────────────────────────────────────────────
+  // ── 2. Upsert demo class ────────────────────────────────────────────────
+  const { data: existingClass } = await supabase
+    .from("classes")
+    .select("id, join_code")
+    .eq("join_code", CLASS_JOIN_CODE)
+    .maybeSingle();
+
+  let demoClass = existingClass;
+  if (!demoClass) {
+    const { data: newClass, error: classErr } = await supabase
+      .from("classes")
+      .insert({
+        title: CLASS_TITLE,
+        code: CLASS_CODE,
+        description: "Seeded demo class for the HelpQ presentation flow.",
+        join_code: CLASS_JOIN_CODE,
+        created_by: host.id
+      })
+      .select()
+      .maybeSingle();
+
+    if (classErr) {
+      console.error("❌  Could not create demo class:", classErr.message);
+      process.exit(1);
+    }
+
+    demoClass = newClass;
+    console.log(`✅  Created class    join_code=${CLASS_JOIN_CODE}`);
+  } else {
+    await supabase
+      .from("classes")
+      .update({
+        title: CLASS_TITLE,
+        code: CLASS_CODE,
+        description: "Seeded demo class for the HelpQ presentation flow.",
+        created_by: host.id
+      })
+      .eq("id", demoClass.id);
+    console.log(`✅  Reusing class    join_code=${CLASS_JOIN_CODE}`);
+  }
+
+  const { data: hostEnrollment } = await supabase
+    .from("class_enrollments")
+    .select("class_id")
+    .eq("class_id", demoClass.id)
+    .eq("user_id", host.id)
+    .maybeSingle();
+
+  if (!hostEnrollment) {
+    const { error: enrollErr } = await supabase.from("class_enrollments").insert({
+      class_id: demoClass.id,
+      user_id: host.id
+    });
+
+    if (enrollErr) {
+      console.error("❌  Could not enroll professor in demo class:", enrollErr.message);
+      process.exit(1);
+    }
+  }
+
+  // ── 3. Upsert demo weekly schedule ──────────────────────────────────────
+  const { data: existingScheduleRows, error: scheduleListErr } = await supabase
+    .from("office_hours_schedules")
+    .select("id")
+    .eq("class_id", demoClass.id)
+    .eq("host_id", host.id)
+    .order("created_at", { ascending: true });
+
+  if (scheduleListErr) {
+    console.error("❌  Could not query schedules:", scheduleListErr.message);
+    process.exit(1);
+  }
+
+  let scheduleId = existingScheduleRows?.[0]?.id ?? null;
+
+  if (existingScheduleRows && existingScheduleRows.length > 1) {
+    const duplicateIds = existingScheduleRows.slice(1).map((row) => row.id);
+    await supabase.from("office_hours_schedules").delete().in("id", duplicateIds);
+  }
+
+  if (scheduleId) {
+    const { error: scheduleUpdateErr } = await supabase
+      .from("office_hours_schedules")
+      .update({
+        title: SCHEDULE_TITLE,
+        description: SCHEDULE_DESCRIPTION,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", scheduleId);
+
+    if (scheduleUpdateErr) {
+      console.error("❌  Could not update demo schedule:", scheduleUpdateErr.message);
+      process.exit(1);
+    }
+
+    const { error: clearSlotsErr } = await supabase
+      .from("office_hours_schedule_slots")
+      .delete()
+      .eq("schedule_id", scheduleId);
+
+    if (clearSlotsErr) {
+      console.error("❌  Could not clear demo schedule slots:", clearSlotsErr.message);
+      process.exit(1);
+    }
+  } else {
+    const { data: newSchedule, error: scheduleCreateErr } = await supabase
+      .from("office_hours_schedules")
+      .insert({
+        class_id: demoClass.id,
+        host_id: host.id,
+        title: SCHEDULE_TITLE,
+        description: SCHEDULE_DESCRIPTION
+      })
+      .select()
+      .maybeSingle();
+
+    if (scheduleCreateErr) {
+      console.error("❌  Could not create demo schedule:", scheduleCreateErr.message);
+      process.exit(1);
+    }
+
+    scheduleId = newSchedule.id;
+  }
+
+  const { error: slotInsertErr } = await supabase
+    .from("office_hours_schedule_slots")
+    .insert(DEMO_SLOTS.map((slot) => ({ ...slot, schedule_id: scheduleId })));
+
+  if (slotInsertErr) {
+    console.error("❌  Could not insert demo schedule slots:", slotInsertErr.message);
+    process.exit(1);
+  }
+
+  console.log(`✅  Seeded schedule for class ${CLASS_JOIN_CODE}`);
+
+  // ── 4. Upsert demo session ───────────────────────────────────────────────
   const { data: existingSession } = await supabase
     .from("sessions")
     .select("id, join_code")
@@ -105,6 +253,7 @@ async function run() {
       .from("sessions")
       .insert({
         host_id: host.id,
+        class_id_uuid: demoClass.id,
         join_code: JOIN_CODE,
         title: SESSION_TITLE,
         description: "Demo session — students are already in the queue.",
@@ -123,16 +272,22 @@ async function run() {
     // Make sure existing session is active
     await supabase
       .from("sessions")
-      .update({ status: "active", title: SESSION_TITLE })
+      .update({
+        host_id: host.id,
+        class_id_uuid: demoClass.id,
+        status: "active",
+        title: SESSION_TITLE,
+        description: "Demo session — students are already in the queue."
+      })
       .eq("id", session.id);
     console.log(`✅  Reusing session  join_code=${JOIN_CODE}`);
   }
 
-  // ── 3. Clear old demo queue entries ─────────────────────────────────────
+  // ── 5. Clear old demo queue entries ─────────────────────────────────────
   await supabase.from("queue_entries").delete().eq("session_id", session.id);
   console.log("🧹  Cleared previous queue entries");
 
-  // ── 4. Insert demo students ──────────────────────────────────────────────
+  // ── 6. Insert demo students ──────────────────────────────────────────────
   const rows = DEMO_STUDENTS.map(({ name, question, status }) => ({
     session_id: session.id,
     student_name: name,
@@ -151,12 +306,15 @@ async function run() {
 
   console.log(`✅  Inserted ${rows.length} students into queue\n`);
 
-  // ── 5. Summary ──────────────────────────────────────────────────────────
+  // ── 7. Summary ──────────────────────────────────────────────────────────
   const waiting = rows.filter((r) => r.status === "waiting").length;
   const active = rows.filter((r) => r.status === "in_progress").length;
   const done = rows.filter((r) => r.status === "completed").length;
 
   console.log("─────────────────────────────────────────────────");
+  console.log(`  Class title:    ${CLASS_TITLE}`);
+  console.log(`  Class code:     ${CLASS_CODE}`);
+  console.log(`  Class join:     ${CLASS_JOIN_CODE}`);
   console.log(`  Session title:  ${SESSION_TITLE}`);
   console.log(`  Join code:      ${JOIN_CODE}`);
   console.log(`  Queue:          ${waiting} waiting · ${active} active · ${done} done`);
