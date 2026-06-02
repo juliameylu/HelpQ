@@ -65,7 +65,9 @@ export default function QuickStartSessionPage() {
     return (
       <DashboardLayout>
         <div className="page-stack standalone-page">
-          <div className="card" style={{ maxWidth: 560, margin: "0 auto" }}>
+          <div
+            className="card"
+            style={{ maxWidth: 600, margin: "0 auto", padding: 32 }}>
             <div
               style={{
                 display: "flex",
@@ -156,7 +158,9 @@ export default function QuickStartSessionPage() {
   return (
     <DashboardLayout>
       <div className="page-stack standalone-page">
-        <div className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
+        <div
+          className="card"
+          style={{ maxWidth: 600, margin: "0 auto", padding: 32 }}>
           <div
             style={{
               display: "flex",

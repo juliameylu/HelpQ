@@ -30,7 +30,8 @@ import {
 
 const router = express.Router();
 
-const ownsHostId = (req) => req.params.hostId === req.user.id;
+const ownsHostId = (req, hostId = req.params.hostId) =>
+  String(hostId) === req.user.id;
 
 function generateJoinCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -474,7 +475,7 @@ router.get("/sessions", requireAuth, async (req, res) => {
     if (hostId) {
       const hostIdError = validateUuid(String(hostId), "hostId");
       if (hostIdError) return validationError(res, { hostId: hostIdError });
-      if (!ownsHostId(req)) return forbiddenError(res);
+      if (!ownsHostId(req, hostId)) return forbiddenError(res);
       const sessions = await db.getSessionsByHostId(String(hostId), {
         activeOnly: true
       });
