@@ -82,9 +82,9 @@ Supabase (PostgreSQL + Auth)
 1. In Netlify, connect your GitHub repo.
 
 2. Configure the build:
-   - **Base directory:** `front-end`
+   - **Base directory:** `frontend`
    - **Build command:** `npm run build`
-   - **Publish directory:** `front-end/dist`
+   - **Publish directory:** `frontend/dist`
    - Or the `netlify.toml` at the repo root handles this automatically.
 
 3. Set Environment Variables in Netlify dashboard:
@@ -139,7 +139,7 @@ npm run dev:backend
 npm run dev:frontend
 ```
 
-Frontend env: copy `front-end/.env.example` → `front-end/.env.local` and fill in
+Frontend env: copy `frontend/.env.example` → `frontend/.env.local` and fill in
 Supabase credentials.  
 Backend env: copy `packages/express-backend/.env.example` →
 `packages/express-backend/.env` and fill in values.

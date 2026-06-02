@@ -94,7 +94,7 @@ TODO: Add UI prototype link and last-updated date before submission.
 
 ```
 helpq/
-├── front-end/          React + Vite frontend (port 5173)
+├── frontend/          React + Vite frontend (port 5173)
 ├── packages/
 │   └── express-backend/ Express API (port 3001)
 ├── supabase/            DB schema migrations + seed data
@@ -107,7 +107,7 @@ helpq/
 ```bash
 git clone <repo-url>
 cd helpq
-npm install          # installs all workspaces (front-end + express-backend)
+npm install          # installs all workspaces (frontend + express-backend)
 ```
 
 ### 2. Set Up Supabase
@@ -131,10 +131,10 @@ npm install          # installs all workspaces (front-end + express-backend)
 **Frontend:**
 
 ```bash
-cp front-end/.env.example front-end/.env.local
+cp frontend/.env.example frontend/.env.local
 ```
 
-Edit `front-end/.env.local`:
+Edit `frontend/.env.local`:
 
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -234,7 +234,7 @@ coverage summary.
 ## Building for Production
 
 ```bash
-npm run build          # builds frontend to front-end/dist/
+npm run build          # builds frontend to frontend/dist/
 ```
 
 ---

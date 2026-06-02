@@ -90,9 +90,9 @@ signed short-lived token or session-scoped token.
 
 | Variable                    | Where                           | Purpose                                   |
 | --------------------------- | ------------------------------- | ----------------------------------------- |
-| `VITE_SUPABASE_URL`         | `front-end/.env.local`          | Supabase project URL                      |
-| `VITE_SUPABASE_ANON_KEY`    | `front-end/.env.local`          | Supabase anonymous key (public by design) |
-| `VITE_API_URL`              | `front-end/.env.local`          | Backend URL in production                 |
+| `VITE_SUPABASE_URL`         | `frontend/.env.local`           | Supabase project URL                      |
+| `VITE_SUPABASE_ANON_KEY`    | `frontend/.env.local`           | Supabase anonymous key (public by design) |
+| `VITE_API_URL`              | `frontend/.env.local`           | Backend URL in production                 |
 | `SUPABASE_URL`              | `packages/express-backend/.env` | Supabase project URL                      |
 | `SUPABASE_ANON_KEY`         | `packages/express-backend/.env` | Supabase anon key                         |
 | `SUPABASE_SERVICE_ROLE_KEY` | `packages/express-backend/.env` | Admin key — backend only                  |

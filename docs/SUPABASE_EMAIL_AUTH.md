@@ -38,7 +38,7 @@ http://localhost:5173/login
 http://localhost:5173/reset-password
 ```
 
-In `front-end/.env`:
+In `frontend/.env`:
 
 ```env
 VITE_SITE_URL=http://127.0.0.1:5173

@@ -8,7 +8,7 @@
 
 ```
 helpq/                          ← root monorepo (npm workspaces)
-├── front-end/                  ← React/Vite frontend workspace
+├── frontend/                  ← React/Vite frontend workspace
 │   ├── src/
 │   │   ├── pages/              ← React page components (one per route)
 │   │   ├── components/         ← Shared UI components
@@ -70,7 +70,7 @@ HelpQ follows a **layered MVC architecture**:
 
 | Layer               | Technology                        | Files                                                   |
 | ------------------- | --------------------------------- | ------------------------------------------------------- |
-| **View**            | React 19 pages and components     | `front-end/src/pages/`, `front-end/src/components/`     |
+| **View**            | React 19 pages and components     | `frontend/src/pages/`, `frontend/src/components/`       |
 | **Controller**      | Express route handlers            | `packages/express-backend/src/routes/`                  |
 | **Model / Service** | Supabase query layer + validation | `packages/express-backend/src/services/db.js`, `utils/` |
 | **Data**            | Supabase PostgreSQL + RLS         | `supabase/migrations/`                                  |
@@ -120,7 +120,7 @@ styling.
 - `BackLink` — consistent back navigation
 - Form components — field groups with validation error display
 
-### API Client Layer (`front-end/src/api.js`)
+### API Client Layer (`frontend/src/api.js`)
 
 Two families of functions:
 

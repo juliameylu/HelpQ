@@ -9,7 +9,7 @@ lookup, queue reads, stats, and protected queue submission.
 From the repository root:
 
 ```bash
-npm install --prefix front-end
+npm install --prefix frontend
 npm run dev:frontend
 ```
 
@@ -25,7 +25,7 @@ backend queue API is not merged into this branch yet.
 
 ## Supabase Login
 
-Create `front-end/.env.local` with your project values:
+Create `frontend/.env.local` with your project values:
 
 ```bash
 VITE_SUPABASE_URL=https://your-project.supabase.co

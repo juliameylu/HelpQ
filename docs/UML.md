@@ -204,7 +204,7 @@ sequenceDiagram
   actor Student
   participant LP as LandingPage
   participant GJP as GuestJoinPage
-  participant API as front-end/api.js
+  participant API as frontend/api.js
   participant BE as Express /api/guest
   participant DB as Supabase DB
 
@@ -246,7 +246,7 @@ sequenceDiagram
 sequenceDiagram
   actor Host
   participant VQP as ViewQueuePage
-  participant API as front-end/api.js
+  participant API as frontend/api.js
   participant BE as Express /api
   participant SB as Supabase Auth
   participant DB as Supabase DB
@@ -295,7 +295,7 @@ flowchart TB
     GuestJoin["GuestJoinPage\n/join"]
     Dashboard["HomePage + ViewQueuePage\n(auth'd professor flow)"]
     Auth["LoginPage / Supabase Auth"]
-    API["front-end/src/api.js\nguest + auth'd API clients"]
+    API["frontend/src/api.js\nguest + auth'd API clients"]
     Ctx["AppContext + localStorage\nuser, sessions, classes"]
   end
 

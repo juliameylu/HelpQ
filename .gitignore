@@ -11,5 +11,7 @@ coverage/
 
 *.log
 npm-debug.log*
+*.PublishSettings
+*.publishsettings
 
 .cursor/
