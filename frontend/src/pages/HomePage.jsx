@@ -98,15 +98,17 @@ export default function HomePage() {
 
         <section className="home-section" aria-labelledby="live-oh-title">
           <div className="home-section-heading">
-            <h2 className="home-section-title" id="live-oh-title">
-              Live Office Hours
-            </h2>
-            {liveSessions.length > 0 ? (
-              <span className="badge badge-active-pill">
-                <span className="badge-dot" aria-hidden="true" />
-                {liveSessions.length} Active
-              </span>
-            ) : null}
+            <div className="home-section-title-row">
+              <h2 className="home-section-title" id="live-oh-title">
+                Live Office Hours
+              </h2>
+              {liveSessions.length > 0 ? (
+                <span className="badge badge-active-pill">
+                  <span className="badge-dot" aria-hidden="true" />
+                  {liveSessions.length} Active
+                </span>
+              ) : null}
+            </div>
             {isInstructor ? (
               <Link className="btn btn-gold btn-compact" to="/sessions/new">
                 <Plus aria-hidden="true" size={16} />
