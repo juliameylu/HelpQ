@@ -232,6 +232,6 @@ Create the professor account via the sign-up page or Supabase dashboard.
 | "We couldn't find that session code" in student tab | Run `npm run demo:seed` again                                        |
 | Professor's manage page shows 403                   | Sign in as the professor who ran the seed                            |
 | Queue not updating in student tab                   | Click the Refresh button manually                                    |
-| Backend CORS error                                  | Add the frontend URL to `CORS_ORIGIN` env var on Render              |
+| Backend CORS error                                  | Add the frontend URL to `CORS_ORIGIN` on the Azure backend           |
 | Can't sign in                                       | Check `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in frontend env |
 | Build fails                                         | Run `npm install` from repo root first                               |

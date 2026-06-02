@@ -61,22 +61,22 @@ TODO: Add UI prototype link and last-updated date before submission.
   sessions
 - **Tested backend** — 74 Jest + Supertest tests across 6 suites;
   `validation.js` at 100% coverage
-- **Demo seed** — `npm run demo:seed` creates session DEMO01 with 12 realistic
-  students
+- **Demo seed** — `npm run demo:seed` creates a demo class, weekly schedule, and
+  session `DEMO01` with 12 realistic students
 
 ---
 
 ## Tech Stack
 
-| Layer      | Technologies                                              |
-| ---------- | --------------------------------------------------------- |
-| Frontend   | React 19, Vite 7, Tailwind CSS, React Router v7           |
-| Backend    | Node.js 20, Express 5                                     |
-| Database   | Supabase (PostgreSQL), schema migrations, RLS policies    |
-| Auth       | Supabase email/password auth, JWT Bearer tokens           |
-| Testing    | Jest 30, Supertest (74 tests, 6 suites)                   |
+| Layer      | Technologies                                                                   |
+| ---------- | ------------------------------------------------------------------------------ |
+| Frontend   | React 19, Vite 7, Tailwind CSS, React Router v7                                |
+| Backend    | Node.js 20, Express 5                                                          |
+| Database   | Supabase (PostgreSQL), schema migrations, RLS policies                         |
+| Auth       | Supabase email/password auth, JWT Bearer tokens                                |
+| Testing    | Jest 30, Supertest (74 tests, 6 suites)                                        |
 | Deployment | Azure Static Web Apps (frontend), Azure Web App (backend), Supabase cloud (DB) |
-| CI/CD      | GitHub Actions (`ci-testing.yml`, Azure deploy workflows) |
+| CI/CD      | GitHub Actions (`ci-testing.yml`, Azure deploy workflows)                      |
 
 ---
 
@@ -203,7 +203,7 @@ Creates session **DEMO01** with 12 students in various queue states.
 | Frontend can't connect to API                          | Make sure backend is running (`npm run dev:backend`) and Vite proxy is configured       |
 | `npm run demo:seed` fails "No professor profile found" | Create a professor account via sign-up first                                            |
 | Email confirmation blocking sign-in                    | Disable in Supabase Dashboard → Auth → Providers → Email                                |
-| CORS error in production                               | Set `CORS_ORIGIN=https://your-netlify-url` on Render backend                            |
+| CORS error in production                               | Set `CORS_ORIGIN=https://your-static-web-app-url` on the Azure backend                  |
 
 ---
 
@@ -261,11 +261,11 @@ Short version:
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full instructions.
 
-| Component | Platform                          |
-| --------- | --------------------------------- |
-| Frontend  | Netlify (`netlify.toml` included) |
-| Backend   | Render (`render.yaml` included)   |
-| Database  | Supabase cloud                    |
+| Component | Platform              |
+| --------- | --------------------- |
+| Frontend  | Azure Static Web Apps |
+| Backend   | Azure Web App         |
+| Database  | Supabase cloud        |
 
 ---
 

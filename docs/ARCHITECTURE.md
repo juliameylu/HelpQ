@@ -57,9 +57,7 @@ helpq/                          ← root monorepo (npm workspaces)
 │   ├── diagrams/
 │   │   └── helpq-class-diagram.mmd  ← Mermaid class diagram source
 │   └── SUPABASE_EMAIL_AUTH.md  ← Email auth configuration
-├── render.yaml                 ← Render backend deployment
-├── netlify.toml                ← Netlify frontend deployment
-└── .github/workflows/ci-testing.yml ← CI pipeline
+└── .github/workflows/          ← CI + Azure deployment workflows
 ```
 
 ---
