@@ -314,7 +314,9 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
     expect(res.status).toBe(404);
   });
 
-  test("allows the host to view queue when the linked class row is missing", async () => {
+  test(
+    "allows the host to view queue when the linked class row is missing",
+    async () => {
     signInAs(HOST);
     const entries = [makeEntry(1), makeEntry(2)];
     mockDb.getSessionById.mockResolvedValue({
@@ -331,7 +333,8 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(2);
     expect(mockDb.getQueueBySessionId).toHaveBeenCalledWith(SESSION_ID);
-  });
+    }
+  );
 });
 
 // ── Status transitions ────────────────────────────────────────────────────────
