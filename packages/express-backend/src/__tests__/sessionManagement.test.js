@@ -230,6 +230,7 @@ describe("PATCH /api/sessions/:id/status — closing a session", () => {
 
     expect(res.status).toBe(404);
   });
+
 });
 
 // ── Queue ordering ────────────────────────────────────────────────────────────
@@ -311,6 +312,25 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
       .set("Authorization", "Bearer host-token");
 
     expect(res.status).toBe(404);
+  });
+
+  test("allows the host to view queue when the linked class row is missing", async () => {
+    signInAs(HOST);
+    const entries = [makeEntry(1), makeEntry(2)];
+    mockDb.getSessionById.mockResolvedValue({
+      id: SESSION_ID,
+      host_id: HOST_USER_ID,
+      class_id_uuid: randomUUID()
+    });
+    mockDb.getQueueBySessionId.mockResolvedValue(entries);
+
+    const res = await request(app)
+      .get(`/api/sessions/${SESSION_ID}/queue`)
+      .set("Authorization", "Bearer host-token");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+    expect(mockDb.getQueueBySessionId).toHaveBeenCalledWith(SESSION_ID);
   });
 });
 
