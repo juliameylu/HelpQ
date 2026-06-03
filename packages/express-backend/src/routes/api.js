@@ -195,6 +195,27 @@ async function assertClassAccess(req, res, classId) {
   return classRow;
 }
 
+async function assertSessionAccess(req, res, session) {
+  if (!session) {
+    notFoundError(res, "Session");
+    return false;
+  }
+
+  // Hosts should always be able to manage/view their own session queue,
+  // even if the linked class row was deleted or became inconsistent.
+  if (String(session.host_id) === String(req.user.id)) {
+    return true;
+  }
+
+  if (session.class_id_uuid) {
+    const classRow = await assertClassAccess(req, res, session.class_id_uuid);
+    return Boolean(classRow);
+  }
+
+  forbiddenError(res);
+  return false;
+}
+
 router.get("/classes/:classId/sessions", requireAuth, async (req, res) => {
   try {
     const classIdError = validateUuid(req.params.classId, "classId");
@@ -712,11 +733,8 @@ router.get("/sessions/:sessionId/queue", requireAuth, async (req, res) => {
     }
 
     const session = await db.getSessionById(req.params.sessionId);
-    if (!session) return notFoundError(res, "Session");
-    if (session.class_id_uuid) {
-      const classRow = await assertClassAccess(req, res, session.class_id_uuid);
-      if (!classRow) return;
-    }
+    const allowed = await assertSessionAccess(req, res, session);
+    if (!allowed) return;
 
     const queue = await db.getQueueBySessionId(req.params.sessionId);
     res.json(queue);
@@ -819,11 +837,8 @@ router.get("/sessions/:sessionId/stats", requireAuth, async (req, res) => {
     }
 
     const session = await db.getSessionById(req.params.sessionId);
-    if (!session) return notFoundError(res, "Session");
-    if (session.class_id_uuid) {
-      const classRow = await assertClassAccess(req, res, session.class_id_uuid);
-      if (!classRow) return;
-    }
+    const allowed = await assertSessionAccess(req, res, session);
+    if (!allowed) return;
 
     const stats = await db.getQueueStats(req.params.sessionId);
     res.json(stats);
