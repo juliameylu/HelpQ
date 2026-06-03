@@ -124,11 +124,12 @@ export default function GuestJoinPage() {
 
   // ── Queue polling ─────────────────────────────────────────────────────────
 
+  const activeSessionId = submittedEntry?.sessionId ?? sessionInfo?.id ?? null;
+
   const poll = useCallback(async () => {
-    const sessionId = submittedEntry?.sessionId;
-    if (!sessionId) return;
+    if (!activeSessionId) return;
     try {
-      const { entries, sessionStatus } = await guestGetQueue(sessionId);
+      const { entries, sessionStatus } = await guestGetQueue(activeSessionId);
       setQueueEntries(entries ?? []);
       setQueueError(null);
       if (sessionStatus === "closed") {
@@ -137,13 +138,16 @@ export default function GuestJoinPage() {
     } catch {
       setQueueError("Couldn't refresh the queue. The page will retry shortly.");
     }
-  }, [submittedEntry]);
+  }, [activeSessionId]);
 
   useEffect(() => {
-    if (!submittedEntry?.sessionId || leftQueue) {
+    if (!activeSessionId || leftQueue || sessionState !== "ok") {
       if (pollRef.current) {
         clearInterval(pollRef.current);
         pollRef.current = null;
+      }
+      if (!activeSessionId || sessionState !== "ok") {
+        setQueueEntries([]);
       }
       return;
     }
@@ -159,7 +163,7 @@ export default function GuestJoinPage() {
         pollRef.current = null;
       }
     };
-  }, [poll, submittedEntry?.sessionId, leftQueue]);
+  }, [poll, activeSessionId, leftQueue, sessionState]);
 
   // ── Restore saved session ─────────────────────────────────────────────────
 
@@ -404,7 +408,7 @@ export default function GuestJoinPage() {
                   {sessionEnded ? "Closed" : `${queueEntries.length} active`}
                 </span>
               </div>
-              {!submittedEntry && queueEntries.length === 0 ? (
+              {sessionState !== "ok" && queueEntries.length === 0 ? (
                 <p className="field-message">
                   Enter a session code to see the queue.
                 </p>
