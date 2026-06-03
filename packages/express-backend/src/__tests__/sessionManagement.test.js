@@ -230,7 +230,6 @@ describe("PATCH /api/sessions/:id/status — closing a session", () => {
 
     expect(res.status).toBe(404);
   });
-
 });
 
 // ── Queue ordering ────────────────────────────────────────────────────────────
