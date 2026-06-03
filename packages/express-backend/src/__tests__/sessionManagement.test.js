@@ -251,6 +251,7 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
     const entries = [makeEntry(1), makeEntry(2), makeEntry(3)];
     mockDb.getSessionById.mockResolvedValue({
       id: SESSION_ID,
+      host_id: HOST_USER_ID,
       class_id_uuid: null
     });
     mockDb.getQueueBySessionId.mockResolvedValue(entries);
@@ -270,6 +271,7 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
     signInAs(HOST);
     mockDb.getSessionById.mockResolvedValue({
       id: SESSION_ID,
+      host_id: HOST_USER_ID,
       class_id_uuid: null
     });
     mockDb.getQueueBySessionId.mockResolvedValue([]);
@@ -287,6 +289,7 @@ describe("GET /api/sessions/:id/queue — queue ordering", () => {
     const entries = Array.from({ length: 12 }, (_, i) => makeEntry(i + 1));
     mockDb.getSessionById.mockResolvedValue({
       id: SESSION_ID,
+      host_id: HOST_USER_ID,
       class_id_uuid: null
     });
     mockDb.getQueueBySessionId.mockResolvedValue(entries);
