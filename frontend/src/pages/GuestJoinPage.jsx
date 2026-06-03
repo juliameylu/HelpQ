@@ -106,11 +106,30 @@ export default function GuestJoinPage() {
     const ac = new AbortController();
     const timer = setTimeout(async () => {
       setSessionState("loading");
-      setQueueEntries([]);
       try {
         const session = await guestGetSession(trimmed, { signal: ac.signal });
+        if (ac.signal.aborted) return;
+
         setSessionInfo(session);
         setSessionState("ok");
+
+        try {
+          const { entries, sessionStatus } = await guestGetQueue(session.id, {
+            signal: ac.signal
+          });
+          if (ac.signal.aborted) return;
+          setQueueEntries(entries ?? []);
+          setQueueError(null);
+          if (sessionStatus === "closed") {
+            setSessionInfo((prev) =>
+              prev ? { ...prev, status: "ended" } : prev
+            );
+          }
+        } catch {
+          if (ac.signal.aborted) return;
+          setQueueEntries([]);
+          setQueueError("Couldn't load the queue. Try Refresh after joining.");
+        }
       } catch (err) {
         if (err.name === "AbortError") return;
         setSessionInfo(null);
