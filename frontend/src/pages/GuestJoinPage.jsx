@@ -98,6 +98,7 @@ export default function GuestJoinPage() {
       const resetId = window.setTimeout(() => {
         setSessionInfo(null);
         setSessionState("idle");
+        setQueueEntries([]);
       }, 0);
       return () => window.clearTimeout(resetId);
     }
@@ -105,6 +106,7 @@ export default function GuestJoinPage() {
     const ac = new AbortController();
     const timer = setTimeout(async () => {
       setSessionState("loading");
+      setQueueEntries([]);
       try {
         const session = await guestGetSession(trimmed, { signal: ac.signal });
         setSessionInfo(session);
@@ -113,6 +115,7 @@ export default function GuestJoinPage() {
         if (err.name === "AbortError") return;
         setSessionInfo(null);
         setSessionState(err.status === 404 ? "notfound" : "error");
+        setQueueEntries([]);
       }
     }, 400);
 
@@ -145,9 +148,6 @@ export default function GuestJoinPage() {
       if (pollRef.current) {
         clearInterval(pollRef.current);
         pollRef.current = null;
-      }
-      if (!activeSessionId || sessionState !== "ok") {
-        setQueueEntries([]);
       }
       return;
     }
@@ -195,7 +195,13 @@ export default function GuestJoinPage() {
   }, [submittedEntry, myEntry, sessionInfo?.status, leftQueue]);
 
   const myPosition = myEntry?.position ?? submittedEntry?.position ?? null;
-  const waitingCount = queueEntries.filter(
+
+  const displayQueueEntries = useMemo(() => {
+    if (sessionState !== "ok" || !activeSessionId) return [];
+    return queueEntries;
+  }, [sessionState, activeSessionId, queueEntries]);
+
+  const waitingCount = displayQueueEntries.filter(
     (e) => e.status === "waiting"
   ).length;
 
@@ -405,18 +411,20 @@ export default function GuestJoinPage() {
                   {sessionEnded ? "Queue (closed)" : "Live queue"}
                 </h3>
                 <span>
-                  {sessionEnded ? "Closed" : `${queueEntries.length} active`}
+                  {sessionEnded
+                    ? "Closed"
+                    : `${displayQueueEntries.length} active`}
                 </span>
               </div>
-              {sessionState !== "ok" && queueEntries.length === 0 ? (
+              {sessionState !== "ok" && displayQueueEntries.length === 0 ? (
                 <p className="field-message">
                   Enter a session code to see the queue.
                 </p>
-              ) : queueEntries.length === 0 ? (
+              ) : displayQueueEntries.length === 0 ? (
                 <p className="field-message">No students in the queue yet.</p>
               ) : (
                 <ol>
-                  {queueEntries.map((entry) => {
+                  {displayQueueEntries.map((entry) => {
                     const isMe = entry.id === submittedEntry?.entryId;
                     const uiStatus = mapStatus(entry.status);
                     return (
