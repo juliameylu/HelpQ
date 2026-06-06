@@ -15,11 +15,7 @@ shows the full queue lifecycle.
 
 ## UI Prototype
 
-TODO: Add UI prototype link and last-updated date before submission.
-
-> If a Figma or other prototype was created during the course, link it here with
-> the date it was last updated (e.g., "Figma prototype — last updated
-> 2026-04-15").
+[Figma UI prototype](https://www.figma.com/files/team/1635502406140551396/project/599167964?fuid=1630424386521040591) — last updated 2026-06-05
 
 ---
 
@@ -38,12 +34,6 @@ TODO: Add UI prototype link and last-updated date before submission.
 | [UML.md](UML.md)                                                               | Original SRD UML diagrams                                    |
 | [SRD.md](SRD.md)                                                               | Software Requirements Document                               |
 | [docs/diagrams/helpq-class-diagram.mmd](docs/diagrams/helpq-class-diagram.mmd) | Mermaid class diagram source                                 |
-
----
-
-## UI Prototype
-
-[Figma UI prototype](https://www.figma.com/files/team/1635502406140551396/project/599167964?fuid=1630424386521040591) — last updated 2026-06-05
 
 ---
 
