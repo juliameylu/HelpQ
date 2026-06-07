@@ -15,7 +15,8 @@ shows the full queue lifecycle.
 
 ## UI Prototype
 
-[Figma UI prototype](https://www.figma.com/files/team/1635502406140551396/project/599167964?fuid=1630424386521040591) — last updated 2026-06-05
+[Figma UI prototype](https://www.figma.com/files/team/1635502406140551396/project/599167964?fuid=1630424386521040591)
+— last updated 2026-06-05
 
 ---
 
